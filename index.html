@@ -283,6 +283,14 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 .rk-val{text-align:right;display:grid}.rk-val b{font-family:var(--display);font-size:17px}.rk-val span{font-size:11px}
 .rk-sess{padding:0 14px 10px 56px}
 @media (max-width:900px){.rk-head{grid-template-columns:22px 28px 1fr 78px;gap:8px}.rk-bar{grid-column:3 / 5;grid-row:2}.rk-sess{padding:0 8px 8px}}
+.cd-check{margin-bottom:16px;border:2px solid var(--line)}
+.cd-res{border-radius:16px;padding:12px 14px;display:grid;gap:4px;font-size:14px;animation:pop .3s cubic-bezier(.2,1.4,.4,1)}
+.cd-res.ok{background:#DDF3EC}.cd-res.warn{background:#FFF0C8}.cd-res.bad{background:#FBE0DF;border:2px solid var(--red)}
+.cd-big{font-family:var(--display);font-weight:800;font-size:20px;letter-spacing:.01em}
+.cd-res.bad .cd-big{color:#9B1F25}.cd-res.ok .cd-big{color:#155E51}
+.cd-hist{display:grid;gap:6px;margin-top:6px}.cd-hist>div{display:flex;gap:8px;align-items:center;font-size:13px}
+.cd-ic{border:0;padding:0;width:52px;height:36px;border-radius:8px;overflow:hidden;cursor:zoom-in;flex:none}.cd-ic img{width:100%;height:100%;object-fit:cover}
+.cd-sim{font-size:13px;margin-top:4px}
 .linkbtn{border:0;background:none;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:12px}
 .dropz{text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;display:grid;place-items:center;gap:6px;min-height:120px;transition:background .15s,border-color .15s}
 .dropz.over,.dropz:hover{background:#FFF0C8;border-color:var(--butter)}
@@ -1087,15 +1095,38 @@ function pukatWarn(rec,exceptId){
  const same=S.pukat.filter(p=>p.id!==exceptId&&(p.buyer||'').trim().toLowerCase()===nm&&p.item===rec.item);
  if(rec.item==='medkit'&&rec.qty>50)w.push(L('Medkit melebihi had 50 untuk 1 IC.','Medkit melebihi batas 50 untuk 1 IC.'));
  if(rec.item==='bandage'){
-  if(rec.cat==='rakyat'){const tot=rec.qty+same.filter(p=>p.cat==='rakyat'&&Math.abs(new Date(p.date+'T00:00:00').getTime()-t)<2*864e5).reduce((a,p)=>a+p.qty,0);if(tot>100)w.push(L(`Rakyat biasa: ${tot} bandage dalam 2 hari (had 100).`,`Warga biasa: ${tot} bandage dalam 2 hari (batas 100).`))}
-  else{const tot=rec.qty+same.filter(p=>p.cat!=='rakyat'&&Math.abs(new Date(p.date+'T00:00:00').getTime()-t)<7*864e5).reduce((a,p)=>a+p.qty,0);if(tot>500)w.push(L(`${tot} bandage dalam 1 minggu (had pukat 500).`,`${tot} bandage dalam 1 minggu (batas pukat 500).`))}
   if(rec.qty>200)w.push(L('Lebih 200 bandage perlu dealing dengan atasan KKB.','Lebih dari 200 bandage harus deal dengan atasan KKB.'));
  }
  return w;
 }
+/* ---------- Cooldown pembeli (semak nama) ---------- */
+const nkey=s=>String(s||'').toUpperCase().replace(/[^A-Z0-9]/g,'');
+function lev(a,b){if(a===b)return 0;const m=a.length,n=b.length;if(!m||!n)return m||n;let prev=Array.from({length:n+1},(_,i)=>i);for(let i=1;i<=m;i++){const cur=[i];for(let j=1;j<=n;j++)cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1));prev=cur}return prev[n]}
+function nameSimilar(a,b){const x=nkey(a),y=nkey(b);if(!x||!y||x===y)return false;if(Math.min(x.length,y.length)>=4&&(x.includes(y)||y.includes(x)))return true;return lev(x,y)<=(Math.max(x.length,y.length)>=8?2:1)}
+const CD_GROUP=c=>c==='rakyat'?'rakyat':'ht';
+const CD_RULE={rakyat:{limit:100,ms:48*36e5,lbl:['Rakyat biasa · 100 bandage / 2 hari','Warga biasa · 100 bandage / 2 hari']},ht:{limit:500,ms:7*864e5,lbl:['HT / Polis · 500 bandage / 7 hari','HT / Polisi · 500 bandage / 7 hari']}};
+function cooldownFor(name,cat,exceptId){const g=CD_GROUP(cat),r=CD_RULE[g],t=now();const k=nkey(name);
+ const inWin=S.pukat.filter(p=>p.id!==exceptId&&p.item==='bandage'&&CD_GROUP(p.cat)===g&&t-p.at<r.ms&&p.at<=t);
+ const recs=inWin.filter(p=>nkey(p.buyer)===k).sort((a,b)=>a.at-b.at);const used=recs.reduce((s,p)=>s+(+p.qty||0),0);
+ let until=0;if(used>=r.limit){let rem=used;for(const p of recs){rem-=p.qty;if(rem<r.limit){until=p.at+r.ms;break}}}
+ const sim=k?inWin.filter(p=>nameSimilar(p.buyer,name)):[];
+ return {g,rule:r,used,left:Math.max(0,r.limit-used),until,recs,sim,blocked:used>=r.limit}}
+function activeCooldowns(){const t=now();const seen={};const out=[];
+ for(const p of [...S.pukat].sort((a,b)=>b.at-a.at)){if(p.item!=='bandage')continue;const g=CD_GROUP(p.cat);const key=g+'|'+nkey(p.buyer);if(seen[key]||t-p.at>=CD_RULE[g].ms)continue;seen[key]=1;
+  const c=cooldownFor(p.buyer,p.cat);if(c.blocked)out.push({name:p.buyer,cat:p.cat,...c})}
+ return out.sort((a,b)=>a.until-b.until)}
+const untilTxt=u=>{const m=Math.max(0,(u-now())/6e4);return `${fmtDT(u)} (${L('lagi','lagi')} ${fmtH(m)})`};
+function cdVerdict(name,cat,qty){if(!nkey(name))return '';const c=cooldownFor(name,cat);const lbl=L(...c.rule.lbl);
+ const last=c.recs.length?c.recs[c.recs.length-1]:null;
+ const hist=c.recs.length?`<div class="cd-hist">${c.recs.map(p=>`<div>${p.ic?`<button type="button" class="cd-ic" data-ic="${esc(p.id)}"><img src="${esc(p.ic)}" alt=""></button>`:'🪪'}<span><b>${p.qty} bandage</b> · ${fmtDT(p.at)} · take over ${esc(p.takeOver||'-')}</span></div>`).join('')}</div>`:'';
+ const simTxt=c.sim.length?`<div class="cd-sim">⚠ ${L('Nama hampir sama dalam tempoh cooldown:','Nama mirip dalam masa cooldown:')} ${[...new Set(c.sim.map(p=>p.buyer))].map(n=>`<button type="button" class="linkbtn" data-cdpick="${esc(n)}">${esc(n)}</button>`).join(', ')}. ${L('Pastikan bukan orang yang sama.','Pastikan bukan orang yang sama.')}</div>`:'';
+ if(c.blocked)return `<div class="cd-res bad"><div class="cd-big">⛔ ${L('TOLAK · DALAM COOLDOWN','TOLAK · MASIH COOLDOWN')}</div><div>${esc(name.toUpperCase())} ${L('sudah beli','sudah beli')} <b>${c.used} bandage</b> (${esc(lbl)}).</div><div>${L('Boleh beli semula','Boleh beli lagi')}: <b>${untilTxt(c.until)}</b></div>${hist}${simTxt}</div>`;
+ const want=qty||0;const over=want>c.left;
+ return `<div class="cd-res ${over?'warn':'ok'}"><div class="cd-big">${over?'⚠ '+L('MELEBIHI BAKI','MELEBIHI SISA KUOTA'):'✅ '+L('BOLEH BELI','BOLEH BELI')}</div><div>${c.used?`${L('Sudah beli','Sudah beli')} <b>${c.used}</b> ${L('dalam tempoh ini','dalam periode ini')}. `:L('Tiada pembelian dalam tempoh cooldown. ','Tidak ada pembelian dalam masa cooldown. ')}${L('Baki boleh beli','Sisa kuota')}: <b>${c.left} bandage</b> <span class="muted">(${esc(lbl)})</span></div>${over?`<div>${L('Kuantiti diminta','Jumlah diminta')} ${want} > ${L('baki','sisa')} ${c.left}.</div>`:''}${hist}${simTxt}</div>`}
+
 const ddmmyyyy=s=>{if(!s)return '';const [y,m,d]=s.split('-');return `${d}/${m}/${y}`};
 function pukatDiscord(p){return cb(`NAMA : ${p.buyer}\nPEMBELIAN : ${p.qty} ${p.item}${p.free?` + ${p.free} free`:''}\nTeam BS : ${p.teamBS||''}\nTAKE OVER : ${p.takeOver||''}\nTARIKH : ${dMonY(p.date)}`)}
-let pasteHandler=null;
+let pasteHandler=null;let cdTick=null;setInterval(()=>{try{cdTick&&cdTick()}catch(e){}},30000);
 async function imgFromClipboardEvent(e){const cd=e.clipboardData;if(!cd)return null;
  const f=[...(cd.files||[])].find(x=>x.type.startsWith('image/'));if(f)return f;
  const it=[...(cd.items||[])].find(i=>i.kind==='file'&&i.type.startsWith('image/'));if(it){const g=it.getAsFile();if(g)return g}
@@ -1129,6 +1160,10 @@ R.pukat=el=>{
  const list=[...S.pukat].sort((a,b)=>b.at-a.at);const canDelP=p=>p.by===S.me.id||can('staff')||isDev();
  el.innerHTML=`<div class="page-h"><div class="grow"><h2>${L('Pembelian Pukat','Pembelian Pukat')} ${whChip('pukat')}</h2><p class="muted">${L('Rekod setiap jualan bandage / medkit. Wajib ambil gambar IC pembeli. Free dikira automatik.','Catat setiap penjualan bandage / medkit. Wajib foto IC pembeli. Bonus free dihitung otomatis.')}</p></div></div>
  <datalist id="nm2">${names.map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+ <datalist id="buyers">${[...new Set(S.pukat.map(p=>p.buyer))].map(n=>`<option value="${esc(n)}">`).join('')}</datalist>
+ <div class="card cd-check"><div class="card-h"><span style="font-size:24px">🔎</span><h3 class="grow">${L('Semak nama pembeli','Cek nama pembeli')}</h3><span class="muted" style="font-size:13px">${L('Semak dulu sebelum jual','Cek dulu sebelum menjual')}</span></div>
+ <div class="row" style="flex-wrap:nowrap"><input type="text" id="cdName" list="buyers" placeholder="${L('Taip nama pembeli…','Ketik nama pembeli…')}" autocomplete="off" style="flex:1"><select id="cdCat" style="width:auto">${Object.entries(PK_CAT).map(([k,v])=>`<option value="${k}">${L(v[0],v[1])}</option>`).join('')}</select></div>
+ <div id="cdOut" style="margin-top:10px"></div><div class="row" id="cdUse" style="margin-top:8px"></div></div>
  <div class="grid g2" style="align-items:start"><form class="card stack" id="pkf">
  <div class="field"><label for="pic">${L('Foto IC pembeli','Foto IC pembeli')}</label><label for="pic" id="icDrop" class="empty dropz" tabindex="0"><span style="font-size:30px">🪪</span><span>${L('Klik untuk pilih gambar IC, atau tekan Ctrl+V untuk tampal','Klik untuk pilih foto IC, atau tekan Ctrl+V untuk tempel')}</span></label><input type="file" id="pic" accept="image/*" class="hide"></div>
  <div class="field"><label for="pn1">NAMA</label><input type="text" id="pn1" required placeholder="${L('Nama pembeli','Nama pembeli')}"></div>
@@ -1137,9 +1172,12 @@ R.pukat=el=>{
  <div class="field"><label for="pq">${L('Kuantiti','Jumlah')}</label><input type="number" id="pq" min="1" value="100" required></div></div>
  <div class="grid g2"><div class="field"><label for="pbs">Team BS</label><input type="text" id="pbs" placeholder="${L('Kosongkan jika rakyat','Kosongkan jika warga')}"></div><div class="field"><label for="pto">TAKE OVER</label><input type="text" id="pto" list="nm2" value="${esc(S.me.name)}" required></div></div>
  <div class="field"><label for="pdt">TARIKH</label><input type="date" id="pdt" value="${tk}" required></div>
+ <div id="pkCd"></div>
  <div class="card butter" id="pkOut" style="padding:14px"></div>
- <button class="btn red">${L('Simpan pembelian','Simpan pembelian')}</button></form>
- <div class="stack"><div class="card flat"><h3>${L('Peraturan ringkas','Aturan singkat')}</h3><ul style="margin:8px 0 0;padding-left:18px;font-size:14px">
+ ${can('staff')||isDev()?`<label class="row hide" id="pkForceW" style="font-size:13px"><input type="checkbox" id="pkForce"> ${L('Paksa simpan (kebenaran atasan)','Paksa simpan (izin atasan)')}</label>`:''}
+ <button class="btn red" id="pkSave">${L('Simpan pembelian','Simpan pembelian')}</button></form>
+ <div class="stack"><div class="card"><div class="card-h"><span style="font-size:20px">⏳</span><h3 class="grow">${L('Pembeli dalam cooldown','Pembeli masih cooldown')}</h3><span class="chip red" id="cdCount"></span></div><div id="cdList"></div></div>
+ <div class="card flat"><h3>${L('Peraturan ringkas','Aturan singkat')}</h3><ul style="margin:8px 0 0;padding-left:18px;font-size:14px">
  <li>${L('Rakyat biasa: had 100 bandage setiap 2 hari (RM15K = 100 + 20 free).','Warga biasa: batas 100 bandage per 2 hari (RM15K = 100 + 20 free).')}</li>
  <li>${L('HT badside / goodside / polis: had 500 bandage seminggu secara pukat.','HT badside / goodside / polisi: batas 500 bandage seminggu secara pukat.')}</li>
  <li>${L('Medkit maksimum 50, 5 free untuk 1 IC.','Medkit maksimal 50, 5 free untuk 1 IC.')}</li>
@@ -1154,10 +1192,21 @@ R.pukat=el=>{
  const read=()=>({buyer:$('#pn1').value.trim(),cat:$('#pcat').value,item:$('#pit').value,qty:Math.max(0,+$('#pq').value||0),teamBS:$('#pbs').value.trim(),takeOver:$('#pto').value.trim(),date:$('#pdt').value});
  const out=()=>{const r=read();const f=pukatFree(r.cat,r.item,r.qty);const w=pukatWarn(r);
   $('#pkOut').innerHTML=`<div class="row" style="justify-content:space-between"><span>${L('Free','Free')}</span><b class="num">+${f} ${r.item}</b></div><div class="row" style="justify-content:space-between"><span>${L('Jumlah diserahkan kepada pembeli','Total diserahkan ke pembeli')}</span><b class="num">${r.qty+f} ${r.item}</b></div>${f?`<div class="muted" style="font-size:12px;margin-top:6px">${L(`Selepas serah ${r.qty+f}, ambil semula ${f} ${r.item} free di Storage.`,`Setelah menyerahkan ${r.qty+f}, ambil kembali ${f} ${r.item} free di Storage.`)}</div>`:''}${w.map(x=>`<div class="chip red" style="margin-top:8px;white-space:normal">⚠ ${esc(x)}</div>`).join('')}`};
- $$('#pkf input,#pkf select').forEach(i=>i.addEventListener('input',out));out();
- keepForm('#pkf','pkForm');out();photoField('#pic','#icDrop',v=>ic=v,'pkImg');
+ const cdForm=()=>{const r=read();const box=$('#pkCd');if(r.item!=='bandage'||!nkey(r.buyer)){box.innerHTML='';return {block:false}}
+  const c=cooldownFor(r.buyer,r.cat);const block=c.blocked||r.qty>c.left;box.innerHTML=cdVerdict(r.buyer,r.cat,r.qty);bindCdBits(box);return {block,c}};
+ const gate=()=>{const {block}=cdForm();const force=$('#pkForce')&&$('#pkForce').checked;$('#pkForceW')&&$('#pkForceW').classList.toggle('hide',!block);$('#pkSave').disabled=block&&!force;$('#pkSave').textContent=block&&!force?L('Ditolak · dalam cooldown','Ditolak · masih cooldown'):L('Simpan pembelian','Simpan pembelian')};
+ const bindCdBits=box=>{$$('[data-ic]',box).forEach(b=>b.onclick=()=>icView(S.pukat.find(p=>p.id===b.dataset.ic).ic));$$('[data-cdpick]',box).forEach(b=>b.onclick=()=>{$('#cdName').value=b.dataset.cdpick;check()})};
+ const check=()=>{const n=$('#cdName').value.trim(),cat=$('#cdCat').value;S.ui.cdName=n;S.ui.cdCat=cat;$('#cdOut').innerHTML=n?cdVerdict(n,cat,0):`<div class="muted" style="font-size:13px">${L('Taip nama untuk lihat sama ada pembeli masih dalam cooldown.','Ketik nama untuk melihat apakah pembeli masih cooldown.')}</div>`;bindCdBits($('#cdOut'));
+  const c=n?cooldownFor(n,cat):null;$('#cdUse').innerHTML=n&&c&&!c.blocked?`<button type="button" class="btn sm mint" id="cdGo">${L('Guna nama ini dalam borang','Pakai nama ini di formulir')} ↓</button>`:'';
+  $('#cdGo')&&($('#cdGo').onclick=()=>{$('#pn1').value=n;$('#pcat').value=cat;$('#pq').value=Math.min(+$('#pq').value||c.left,c.left)||c.left;$('#pn1').dispatchEvent(new Event('input'));$('#pcat').dispatchEvent(new Event('input'));$('#pq').dispatchEvent(new Event('input'));$('#pn1').scrollIntoView({behavior:'smooth',block:'center'});Snd.play('pop')})};
+ const drawList=()=>{const l=activeCooldowns();$('#cdCount').textContent=l.length;$('#cdList').innerHTML=l.length?`<div class="list">${l.map(x=>`<div class="li"><div class="grow"><b>${esc(x.name)}</b><div class="muted" style="font-size:12px">${x.used} bandage · ${esc(L(...x.rule.lbl))}</div></div><div style="text-align:right;font-size:12px"><b>${fmtH((x.until-now())/6e4)}</b><div class="muted">${fmtDT(x.until)}</div></div></div>`).join('')}</div>`:`<div class="empty" style="padding:14px">${L('Tiada pembeli dalam cooldown.','Tidak ada pembeli yang cooldown.')}</div>`};
+ $('#cdName').value=S.ui.cdName||'';$('#cdCat').value=S.ui.cdCat||'rakyat';$('#cdName').oninput=check;$('#cdCat').onchange=check;check();drawList();
+ cdTick=()=>{if(current()!=='pukat')return;drawList();check();gate()};
+ $$('#pkf input,#pkf select').forEach(i=>i.addEventListener('input',()=>{out();gate()}));out();
+ keepForm('#pkf','pkForm');out();gate();$('#pkForce')&&($('#pkForce').onchange=gate);photoField('#pic','#icDrop',v=>ic=v,'pkImg');
  $('#pkf').onsubmit=async e=>{e.preventDefault();if(!ic){toast(L('Sila masukkan foto IC pembeli.','Masukkan foto IC pembeli dulu.'),'err');Snd.play('err');return}
   const r=read();const free=pukatFree(r.cat,r.item,r.qty);
+  if(r.item==='bandage'){const c=cooldownFor(r.buyer,r.cat);if((c.blocked||r.qty>c.left)&&!($('#pkForce')&&$('#pkForce').checked)){toast(L('Pembeli ini masih dalam cooldown. Pembelian ditolak.','Pembeli ini masih cooldown. Pembelian ditolak.'),'err');Snd.play('err');return}}
   const pid=uid();if(await safe(Store.set('pukat/'+pid,{...r,free,ic,freeClaimed:false,by:S.me.id,at:now()}),L('Pembelian direkod','Pembelian tercatat'))){logAct('rekod pembelian pukat',`${r.buyer} · ${r.qty} ${r.item}`);S.ui.pkImg=null;S.ui.pkForm=null;rerender(true);trackSend('pukat',pid,'discordMsg',sendDiscord('pukat',pukatDiscord({...r,free}),dataURLtoBlob(ic)))}};
  $$('[data-ic]').forEach(b=>b.onclick=()=>icView(S.pukat.find(p=>p.id===b.dataset.ic).ic));
  $$('[data-pcp]').forEach(b=>b.onclick=()=>copy(pukatDiscord(S.pukat.find(p=>p.id===b.dataset.pcp)),L('Format disalin','Format disalin')));
