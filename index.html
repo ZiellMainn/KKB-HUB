@@ -295,6 +295,19 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 .cd-ic{border:0;padding:0;width:52px;height:36px;border-radius:8px;overflow:hidden;cursor:zoom-in;flex:none}.cd-ic img{width:100%;height:100%;object-fit:cover}
 .cd-sim{font-size:13px;margin-top:4px}
 .newver{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:90;border:0;background:var(--red);color:#fff;font-weight:800;border-radius:999px;padding:10px 18px;box-shadow:0 10px 24px -8px rgba(0,0,0,.5);cursor:pointer;animation:pop .4s}
+.snk-wrap{display:grid;grid-template-columns:minmax(0,440px) minmax(0,1fr);gap:20px;align-items:start}
+.snk-phone{background:linear-gradient(160deg,#6E1A20,#3E1014);border-radius:38px 38px 60px 60px;padding:18px 18px 26px;box-shadow:0 20px 40px -18px rgba(43,21,24,.7),inset 0 2px 0 rgba(255,255,255,.12)}
+.snk-top{display:flex;justify-content:space-between;align-items:center;color:#FBE9E3;font:700 13px var(--mono);letter-spacing:.14em;padding:2px 8px 10px}.snk-top b{color:var(--red)}
+#snkScore{background:#0F4F44;color:#CFEFE3;border-radius:8px;padding:3px 10px;font-size:15px}
+.snk-screen{position:relative;border-radius:16px;overflow:hidden;border:6px solid #2B1518;box-shadow:inset 0 0 0 2px rgba(255,255,255,.15)}
+#snk{display:block;width:100%;height:auto;aspect-ratio:1;touch-action:none;cursor:pointer;image-rendering:pixelated}
+.snk-over{position:absolute;inset:0;display:grid;place-content:center;gap:6px;text-align:center;background:rgba(15,79,68,.72);color:#CFEFE3;font-family:var(--mono);padding:16px}
+.snk-over b{font-family:var(--display);font-size:30px;color:#fff;letter-spacing:.04em}
+.snk-keys{display:grid;grid-template-columns:repeat(3,64px);grid-template-rows:repeat(3,52px);gap:6px;justify-content:center;margin-top:18px}
+.snk-keys button{border:0;border-radius:16px;background:#FBE9E3;color:var(--maroon);font-size:20px;cursor:pointer;box-shadow:inset 0 -4px 0 rgba(0,0,0,.18);transition:transform .08s}
+.snk-keys button:active{transform:translateY(3px);box-shadow:none}
+#snkMid{background:var(--red);color:#fff;border-radius:50%}
+@media (max-width:900px){.snk-wrap{grid-template-columns:1fr}.snk-phone{padding:14px 12px 20px}.snk-keys{grid-template-columns:repeat(3,72px);grid-template-rows:repeat(3,58px)}}
 .linkbtn{border:0;background:none;padding:0;color:inherit;text-decoration:underline;cursor:pointer;font-size:12px}
 .dropz{text-transform:none;letter-spacing:0;font-weight:500;cursor:pointer;display:grid;place-items:center;gap:6px;min-height:120px;transition:background .15s,border-color .15s}
 .dropz.over,.dropz:hover{background:#FFF0C8;border-color:var(--butter)}
@@ -371,7 +384,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.17-2';
+const APP_VERSION = '2026.11.17-3';
 /* contoh:
 const FIREBASE_CONFIG = {
   apiKey: "...", authDomain: "...", projectId: "...",
@@ -575,7 +588,7 @@ const Store={
 async function safe(p,okMsg){try{await p;if(okMsg){toast(okMsg,'ok');Snd.play('ok')}return true}catch(e){console.error(e);toast(e&&e.code==='invalid_argument'?L('Simpan ditolak. Akaun Claude anda mungkin belum ada akses edit pada KKB-HUB.','Gagal menyimpan. Akun Claude kamu mungkin belum punya akses edit di KKB-HUB.'):L('Gagal simpan: ','Gagal menyimpan: ')+(e.message||e.code||e),'err');Snd.play('err');return false}}
 
 /* ---------------- state ---------------- */
-const S={duty:{map:{},at:0,loaded:false},shifts:[],suara:[],leadchat:[],announce:[],webhooks:{},pukat:[],storage:[],staff:[],iban:{},cuti:[],resign:[],rekom:[],kawalan:null,kawalanLog:[],chat:[],log:[],bugs:[],bimbingan:{},uniform:null,evals:{},pimpinan:{},me:null,viewAs:null,loaded:false,ui:{}};
+const S={snake:[],duty:{map:{},at:0,loaded:false},shifts:[],suara:[],leadchat:[],announce:[],webhooks:{},pukat:[],storage:[],staff:[],iban:{},cuti:[],resign:[],rekom:[],kawalan:null,kawalanLog:[],chat:[],log:[],bugs:[],bimbingan:{},uniform:null,evals:{},pimpinan:{},me:null,viewAs:null,loaded:false,ui:{}};
 const staffById=id=>S.staff.find(s=>s.id===id);
 const nameOf=id=>staffById(id)?.name||'(staff dipadam)';
 const role=()=>S.viewAs||S.me?.role;
@@ -677,7 +690,7 @@ function resizeImg(file,max=160){return new Promise((res,rej)=>{const fr=new Fil
 
 /* ---------------- routing & render ---------------- */
 const PAGES=[
- {id:'dashboard',label:'Utama',ico:'🏥',g:'Wad Utama'},{id:'chat',label:'Lepak Chat',ico:'💬',g:'Wad Utama'},{id:'suara',label:'Suara Hati',ico:'💌',g:'Wad Utama'},
+ {id:'dashboard',label:'Utama',ico:'🏥',g:'Wad Utama'},{id:'chat',label:'Lepak Chat',ico:'💬',g:'Wad Utama'},{id:'suara',label:'Suara Hati',ico:'💌',g:'Wad Utama'},{id:'game',label:'Snake Medik',ico:'🐍',g:'Wad Utama'},
  {id:'kawalan',label:'Bilik Kawalan',ico:'📡',g:'KKB Center'},{id:'pukat',label:'Pembelian Pukat',ico:'🧾',g:'KKB Center'},{id:'storage',label:'Storage',ico:'📦',g:'KKB Center'},
  {id:'sop',label:'SOP Kerja',ico:'📘',g:'Info KKB'},{id:'uniform',label:'Uniform Code',ico:'🥼',g:'Info KKB'},{id:'kos',label:'Kos Rawatan',ico:'💊',g:'Info KKB'},
  {id:'chart',label:'Chart Organisasi',ico:'🧬',g:'Info KKB'},{id:'akkb',label:'Command /akkb',ico:'📣',g:'Info KKB'},
@@ -818,6 +831,67 @@ R.rekap=el=>{const mode=S.ui.rkMode||'minggu';const key=mode==='bulan'?(S.ui.rkM
   if(await safe(Store.set('kawalan/current',d),L('Sesi ditamatkan','Sesi diselesaikan'))){S.kawalan={...d};reconcileDuty(d);logAct('tamatkan sesi kerja',o.raw)}});
  $('#rkCopy').onclick=()=>copy(cb(`REKAP JAM KERJA KKB${mode==='bulan'?' (BULANAN)':' (MINGGUAN)'}\n${label}\n\n${list.filter(r=>r.mins>0).map((r,i)=>`${i+1}. ${r.s.name} - ${fmtH(r.mins)} (${r.n} sesi)${mode==='bulan'?'\n   '+WK.map((w,wi)=>`M${wi+1}: ${fmtH((r.weeks||[])[wi]||0)}`).join(' | '):''}`).join('\n')||'-'}\n\nJUMLAH : ${fmtH(total)}${mode==='bulan'&&list[0]&&list[0].mins>0?`\n\n🏆 CALON STAFF OF THE MONTH : ${list[0].s.name} (${fmtH(list[0].mins)})`:''}`),L('Rekap disalin','Rekap disalin'));
 };
+
+/* ---------------- Game: Snake Medik ---------------- */
+const SNK_ITEMS=[{e:'💊',p:1},{e:'🩹',p:1},{e:'💉',p:2},{e:'🩸',p:2},{e:'🧪',p:3}];
+let snakeGame=null;
+function renderSnakeBoard(){const box=$('#snkBoard');if(!box)return;const list=[...S.snake].filter(x=>x.best>0).sort((a,b)=>b.best-a.best).slice(0,10);
+ box.innerHTML=list.length?list.map((x,i)=>{const s=staffById(x.id);return `<div class="li" style="${x.id===S.me.id?'background:#FFF0C8':''}"><b class="num" style="width:22px;text-align:center">${['🥇','🥈','🥉'][i]||i+1}</b>${av(s,'sm')}<div class="grow"><b>${esc(s?s.name:'?')}</b><div class="muted" style="font-size:11px">${fmtDT(x.at)}</div></div><b class="num" style="font-family:var(--display);font-size:18px">${x.best}</b></div>`}).join(''):`<div class="empty" style="padding:14px">${L('Belum ada skor. Jadi yang pertama!','Belum ada skor. Jadi yang pertama!')}</div>`}
+R.game=el=>{const mine=(S.snake.find(x=>x.id===S.me.id)||{}).best||0;
+ el.innerHTML=`<div class="page-h"><div class="grow"><h2>🐍 Snake Medik</h2><p class="muted">${L('Game ular klasik ala telefon lama. Makan ubat dan barang medik untuk membesar. Jangan langgar badan sendiri!','Game ular klasik ala HP jadul. Makan obat dan barang medis supaya makin panjang. Jangan tabrak badan sendiri!')}</p></div></div>
+ <div class="snk-wrap"><div class="snk-phone"><div class="snk-top"><span>KKB<b>·</b>SNAKE</span><span id="snkScore" class="num">0000</span></div>
+ <div class="snk-screen"><canvas id="snk" width="400" height="400" aria-label="Papan permainan Snake"></canvas><div class="snk-over" id="snkOver"></div></div>
+ <div class="snk-keys"><div></div><button data-dir="up" aria-label="Atas">▲</button><div></div><button data-dir="left" aria-label="Kiri">◀</button><button id="snkMid" aria-label="Mula / jeda">●</button><button data-dir="right" aria-label="Kanan">▶</button><div></div><button data-dir="down" aria-label="Bawah">▼</button><div></div></div></div>
+ <div class="stack" style="min-width:0"><div class="card"><div class="card-h"><h3 class="grow">${L('Cara main','Cara main')}</h3></div><ul style="margin:0;padding-left:18px;font-size:14px;display:grid;gap:4px">
+ <li>${L('Komputer: anak panah atau W A S D. Space untuk jeda.','Komputer: tombol panah atau W A S D. Spasi untuk jeda.')}</li><li>${L('Telefon: leret di skrin permainan atau guna butang di bawahnya.','HP: geser di layar permainan atau pakai tombol di bawahnya.')}</li>
+ <li>💊 🩹 = 1 · 💉 🩸 = 2 · 🧪 = 3 · <b>🧰 ${L('Medkit emas','Medkit emas')} = 5</b> (${L('hilang dalam 6 saat','hilang dalam 6 detik')})</li><li>${L('Makin panjang, makin laju!','Makin panjang, makin cepat!')}</li></ul>
+ <div class="row" style="margin-top:12px"><span class="muted" style="font-size:13px">${L('Mod','Mode')}:</span><div class="tabs" id="snkMode"><button class="${(S.ui.snkMode||'klasik')==='klasik'?'on':''}" data-sm="klasik">${L('Klasik (tembus dinding)','Klasik (tembus dinding)')}</button><button class="${S.ui.snkMode==='susah'?'on':''}" data-sm="susah">${L('Susah (dinding maut)','Susah (dinding mematikan)')}</button></div></div></div>
+ <div class="card butter"><div class="row" style="justify-content:space-between"><span>${L('Skor terbaik anda','Skor terbaikmu')}</span><b class="num" style="font-family:var(--display);font-size:26px" id="snkBest">${mine}</b></div></div>
+ <div class="card"><div class="card-h"><span style="font-size:20px">🏆</span><h3 class="grow">${L('Papan markah KKB','Papan skor KKB')}</h3></div><div class="list" id="snkBoard"></div></div></div></div>`;
+ renderSnakeBoard();
+ $$('[data-sm]').forEach(b=>b.onclick=()=>{S.ui.snkMode=b.dataset.sm;$$('[data-sm]').forEach(x=>x.classList.toggle('on',x===b));Snd.play('nav');snakeGame&&snakeGame.reset(true)});
+ snakeGame=makeSnake($('#snk'),$('#snkOver'))};
+function makeSnake(cv,over){const N=20,C=cv.width/N,x=cv.getContext('2d');let snake,dir,nextQ,food,bonus,score,speed,timer=null,state='ready',eaten;
+ const LCD='#CFEFE3',LCD2='#BFE6D8',INK='#0F4F44',RED='#D3343A';
+ const rnd=()=>{let p;do{p={x:Math.floor(Math.random()*N),y:Math.floor(Math.random()*N)}}while(snake.some(s=>s.x===p.x&&s.y===p.y)||(food&&food.x===p.x&&food.y===p.y)||(bonus&&bonus.x===p.x&&bonus.y===p.y));return p};
+ const newFood=()=>{const it=SNK_ITEMS[Math.floor(Math.random()*SNK_ITEMS.length)];food={...rnd(),...it}};
+ function reset(show){clearInterval(timer);timer=null;snake=[{x:9,y:10},{x:8,y:10},{x:7,y:10}];dir={x:1,y:0};nextQ=[];bonus=null;score=0;speed=140;eaten=0;newFood();state='ready';draw();setScore();if(show!==false)msg(`<b>🐍 SNAKE MEDIK</b><span>${L('Tekan ● atau Space untuk mula','Tekan ● atau Spasi untuk mulai')}</span>`)}
+ const setScore=()=>{const e=$('#snkScore');if(e)e.textContent=String(score).padStart(4,'0')};
+ const msg=h=>{over.innerHTML=h;over.classList.toggle('hide',!h)};
+ function start(){if(state==='run'){state='pause';clearInterval(timer);msg(`<b>${L('JEDA','JEDA')}</b><span>${L('Tekan ● untuk sambung','Tekan ● untuk lanjut')}</span>`);return}
+  if(state==='over')reset(false);state='run';msg('');timer=setInterval(step,speed);Snd.play('pop')}
+ function turn(d){const m={up:{x:0,y:-1},down:{x:0,y:1},left:{x:-1,y:0},right:{x:1,y:0}}[d];if(!m)return;if(state!=='run'){if(state==='ready'||state==='over')start();}
+  const last=nextQ.length?nextQ[nextQ.length-1]:dir;if(m.x===-last.x&&m.y===-last.y||m.x===last.x&&m.y===last.y)return;if(nextQ.length<3)nextQ.push(m)}
+ function step(){if(!cv.isConnected){clearInterval(timer);return}if(nextQ.length)dir=nextQ.shift();const hard=S.ui.snkMode==='susah';
+  let hx=snake[0].x+dir.x,hy=snake[0].y+dir.y;if(!hard){hx=(hx+N)%N;hy=(hy+N)%N}
+  if(hx<0||hy<0||hx>=N||hy>=N||snake.some((s,i)=>i<snake.length-1&&s.x===hx&&s.y===hy))return die();
+  snake.unshift({x:hx,y:hy});let grew=false;
+  if(hx===food.x&&hy===food.y){score+=food.p;eaten++;grew=true;Snd.play('star');newFood();if(eaten%5===0&&!bonus){bonus={...rnd(),e:'🧰',p:5,t:now()}}
+   if(speed>65){speed-=4;clearInterval(timer);timer=setInterval(step,speed)}}
+  if(bonus&&hx===bonus.x&&hy===bonus.y){score+=bonus.p;grew=true;bonus=null;Snd.play('ok')}
+  if(bonus&&now()-bonus.t>6000)bonus=null;
+  if(!grew)snake.pop();setScore();draw()}
+ async function die(){clearInterval(timer);state='over';Snd.play('err');cv.parentElement.classList.add('shake');setTimeout(()=>cv.parentElement.classList.remove('shake'),400);
+  const prev=(S.snake.find(s=>s.id===S.me.id)||{}).best||0;const rec=score>prev;
+  msg(`<b>GAME OVER</b><span>${L('Skor','Skor')}: ${score}${rec&&score>0?` · 🎉 ${L('rekod baru!','rekor baru!')}`:''}</span><span style="font-size:12px;opacity:.8">${L('Tekan ● untuk main semula','Tekan ● untuk main lagi')}</span>`);
+  if(rec&&score>0){const b=$('#snkBest');b&&(b.textContent=score);await Store.set('snake/'+S.me.id,{best:score,at:now(),mode:S.ui.snkMode||'klasik'}).catch(()=>{});logAct('rekod Snake Medik',String(score))}}
+ function cell(px,py,col,r=5){x.fillStyle=col;x.beginPath();x.roundRect(px*C+1,py*C+1,C-2,C-2,r);x.fill()}
+ function draw(){x.fillStyle=LCD;x.fillRect(0,0,cv.width,cv.height);x.fillStyle=LCD2;for(let i=0;i<N;i++)for(let j=0;j<N;j++)if((i+j)%2)x.fillRect(i*C,j*C,C,C);
+  if(S.ui.snkMode==='susah'){x.strokeStyle=RED;x.lineWidth=4;x.strokeRect(2,2,cv.width-4,cv.height-4)}
+  x.font=`${C*.8}px serif`;x.textAlign='center';x.textBaseline='middle';x.fillText(food.e,food.x*C+C/2,food.y*C+C/2+1);
+  if(bonus){const left=6000-(now()-bonus.t);if(left>1500||Math.floor(now()/150)%2){x.font=`${C*.9}px serif`;x.fillText(bonus.e,bonus.x*C+C/2,bonus.y*C+C/2+1)}}
+  snake.forEach((s,i)=>cell(s.x,s.y,i===0?INK:(i%2?'#1F7F6E':'#23806F'),i===0?7:4));
+  const h0=snake[0];x.fillStyle='#fff';x.fillRect(h0.x*C+C/2-1.5,h0.y*C+4,3,C-8);x.fillRect(h0.x*C+4,h0.y*C+C/2-1.5,C-8,3)}
+ const key=e=>{if(current()!=='game'||!cv.isConnected){removeEventListener('keydown',key);return}if(/INPUT|TEXTAREA/.test(document.activeElement?.tagName))return;
+  const k={ArrowUp:'up',ArrowDown:'down',ArrowLeft:'left',ArrowRight:'right',w:'up',s:'down',a:'left',d:'right',W:'up',S:'down',A:'left',D:'right'}[e.key];
+  if(k){e.preventDefault();turn(k)}else if(e.key===' '||e.key==='p'||e.key==='P'){e.preventDefault();start()}};
+ addEventListener('keydown',key);
+ let tx=0,ty=0;cv.addEventListener('touchstart',e=>{const t=e.touches[0];tx=t.clientX;ty=t.clientY},{passive:true});
+ cv.addEventListener('touchmove',e=>e.preventDefault(),{passive:false});
+ cv.addEventListener('touchend',e=>{const t=e.changedTouches[0];const dx=t.clientX-tx,dy=t.clientY-ty;if(Math.max(Math.abs(dx),Math.abs(dy))<20){start();return}turn(Math.abs(dx)>Math.abs(dy)?(dx>0?'right':'left'):(dy>0?'down':'up'))});
+ cv.addEventListener('click',()=>{if(state!=='run')start()});
+ $$('[data-dir]').forEach(b=>b.onclick=()=>{turn(b.dataset.dir);Snd.play('nav')});$('#snkMid').onclick=start;
+ reset();return {reset}}
 
 /* ---------------- Tutorial ---------------- */
 function tourSteps(){const r=role();const dev=isDev()&&!S.viewAs;const st=[];const A=(i,t1,t2,d1,d2,pg)=>st.push({i,t:L(t1,t2),d:L(d1,d2),pg});
@@ -1554,7 +1628,7 @@ function bugModal(){modal(`<h3>Lapor bug 🐞</h3><p class="muted" style="margin
 
 setInterval(()=>{const c=document.getElementById('myClock');if(c)c.textContent='🕒 '+hm(new Date())+' MYT'},15000);
 /* Halaman hanya dilukis semula bila data yang ia guna berubah, supaya form yang sedang diisi tidak hilang */
-const DEPS={rekap:['shifts','kawalan','staff'],dashboard:['kawalan','cuti','announce','suara','staff'],kawalan:['kawalan','kawalanLog','staff','webhooks'],pukat:['pukat','staff','webhooks'],storage:['storage','pukat','staff','webhooks'],chat:['staff'],diskusi:['staff'],suara:['suara'],
+const DEPS={game:[],rekap:['shifts','kawalan','staff'],dashboard:['kawalan','cuti','announce','suara','staff'],kawalan:['kawalan','kawalanLog','staff','webhooks'],pukat:['pukat','staff','webhooks'],storage:['storage','pukat','staff','webhooks'],chat:['staff'],diskusi:['staff'],suara:['suara'],
  sop:[],uniform:['uniform'],kos:[],chart:['staff'],akkb:[],cuti:['cuti','webhooks'],resign:['resign','webhooks'],iban:['iban','staff'],profil:['staff','cuti','kawalanLog','evals'],
  bimbingan:['bimbingan','staff'],evaluasi:['evals','staff'],permohonan:['cuti','resign','staff'],staff:['staff'],pantau:['log','pimpinan','staff'],dev:['bugs','log','webhooks','staff']};
 function onData(col){if(!S.loaded||!S.me)return;const d=DEPS[current()];if(!d||d.includes(col))rerender();else{const nb=$('.nav');if(nb&&['cuti','resign','bugs'].includes(col)){$$('.nav a').forEach(a=>{const id=a.getAttribute('href').slice(1);const n=badgeFor(id);let b=$('.badge',a);if(n){if(!b){b=document.createElement('span');b.className='badge';a.append(b)}b.textContent=n}else if(b)b.remove()})}}}
@@ -1581,6 +1655,7 @@ function onData(col){if(!S.loaded||!S.me)return;const d=DEPS[current()];if(!d||d
  Store.watchCol('log',{orderBy:'at',dir:'desc',limit:300},d=>{S.log=d;onData('log')});
  Store.watchCol('leadchat',{orderBy:'at',dir:'desc',limit:150},d=>{const newer=d.filter(m=>m.at>(S.leadchat[0]?.at||0)&&m.by!==S.me?.id).length;const had=S.leadchat.length;S.leadchat=d;if(had&&newer&&isLeadGroup(S.me?.role))Snd.play('msg');if(current()==='diskusi')renderChatList()});
  Store.watchCol('shifts',{orderBy:'start',dir:'desc',limit:1000},d=>{S.shifts=d;onData('shifts')});
+ Store.watchCol('snake',{},d=>{S.snake=d;if(current()==='game'&&typeof renderSnakeBoard==='function')renderSnakeBoard()});
  Store.watchCol('suara',{orderBy:'at',dir:'desc',limit:120},d=>{S.suara=d;onData('suara')});
  Store.watchCol('announce',{orderBy:'at',dir:'desc',limit:50},d=>{S.announce=d;onData('announce')});
  Store.watchCol('chat',{orderBy:'at',dir:'desc',limit:120},d=>{const newer=d.filter(m=>m.at>(S.chat[0]?.at||0)&&m.by!==S.me?.id).length;const had=S.chat.length;S.chat=d;if(had&&newer)Snd.play('msg');if(current()==='chat')renderChatList();});
