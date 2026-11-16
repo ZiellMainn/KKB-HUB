@@ -272,7 +272,8 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 .stat-sel{min-width:150px;font-weight:700}
 .stat-aktif{border-color:#9ED9C8}.stat-cd{border-color:var(--butter);background:#FFF6DA}.stat-nonaktif{border-color:#F2B6B3;background:#FDECEB}
 .endbox{display:flex;gap:8px;align-items:center;flex-wrap:wrap;padding:12px;border-radius:16px;background:#FBE0DF}
-.duty{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.duty span{background:rgba(124,245,196,.12);color:#7CF5C4;border-radius:999px;padding:3px 10px;font-size:12px}
+.duty{display:flex;flex-wrap:wrap;gap:6px;margin-top:6px}.duty.dash span{background:rgba(255,255,255,.12);color:#fff}
+.duty span{font-variant-numeric:tabular-nums;background:rgba(124,245,196,.12);color:#7CF5C4;border-radius:999px;padding:3px 10px;font-size:12px}
 .rk-list{display:grid}
 .rk-row{border-radius:16px;transition:background .15s}.rk-row:hover,.rk-row.open{background:var(--cream)}
 .rk-head{all:unset;box-sizing:border-box;width:100%;display:grid;grid-template-columns:26px 32px minmax(140px,1.2fr) minmax(80px,2fr) 96px;gap:10px;align-items:center;padding:10px;cursor:pointer;border-radius:16px}
@@ -564,6 +565,7 @@ const Store={
   const merge=(a,b)=>{for(const k in b){if(b[k]&&typeof b[k]==='object'&&!Array.isArray(b[k])){a[k]=merge(a[k]&&typeof a[k]==='object'?a[k]:{},b[k])}else a[k]=b[k]}return a};
   this.data[path]=merge(this.data[path]||{},JSON.parse(JSON.stringify(d)));this.save();this._emit()})},
  async add(col,d){const id=uid();await this.set(col+'/'+id,d);return id},
+ async get(path){try{if(this.mode==='firebase'){const s=await this.fs.doc(path).get();return s.exists?{id:s.id,...s.data()}:null}if(this.mode==='remote'){const s=await this.db.doc(path).get();return s.exists?{id:s.id,...s.data()}:null}const v=this.data[path];return v?JSON.parse(JSON.stringify(v)):null}catch(e){return null}},
  del(path){return this._chain(path,async()=>{if(this.mode==='firebase')return this.fs.doc(path).delete();if(this.mode==='remote')return this.db.doc(path).delete();delete this.data[path];this.save();this._emit()})}
 };
 async function safe(p,okMsg){try{await p;if(okMsg){toast(okMsg,'ok');Snd.play('ok')}return true}catch(e){console.error(e);toast(e&&e.code==='invalid_argument'?L('Simpan ditolak. Akaun Claude anda mungkin belum ada akses edit pada KKB-HUB.','Gagal menyimpan. Akun Claude kamu mungkin belum punya akses edit di KKB-HUB.'):L('Gagal simpan: ','Gagal menyimpan: ')+(e.message||e.code||e),'err');Snd.play('err');return false}}
@@ -722,7 +724,7 @@ function renderShell(){
  $('#outBtn').onclick=()=>{LS.set('kkb_session',null);S.me=null;S.viewAs=null;Snd.play('nav');renderLogin()};
  $('#bugBtn').onclick=bugModal;$('[data-railbug]').onclick=()=>{document.body.classList.remove('nav-open');bugModal()};$('[data-railout]').onclick=()=>$('#outBtn').click();
  pasteHandler=null;const page=$('#page');if(lastPage===cur)page.style.animation='none';(R[cur]||R.dashboard)(page);
- $('.main').scrollTop=keep;$('.nav').scrollTop=navKeep;lastPage=cur;
+ tickLive();$('.main').scrollTop=keep;$('.nav').scrollTop=navKeep;lastPage=cur;
 }
 
 /* ---------------- LOGIN ---------------- */
@@ -787,17 +789,17 @@ R.rekap=el=>{const mode=S.ui.rkMode||'minggu';const key=mode==='bulan'?(S.ui.rkM
  for(const s of S.staff.filter(x=>x.active!==false))rows[s.id]={s,mins:0,n:0,last:0,sess:[],over:0};
  for(const x of allSessions()){const a=Math.max(x.start,A),b=Math.min(x.end,B);if(b<=a)continue;let mins=(b-a)/6e4;const full=(x.end-x.start)/6e4;let over=false;if(full>SHIFT_CAP){mins=mins*SHIFT_CAP/full;over=true}
   const key2=x.staffId&&staffById(x.staffId)?x.staffId:'raw:'+x.norm;rows[key2]=rows[key2]||{s:staffById(x.staffId)||{name:x.name,role:'',raw:true},mins:0,n:0,last:0,sess:[],over:0};
-  const r=rows[key2];r.mins+=mins;r.n++;r.last=Math.max(r.last,x.end);r.sess.push({...x,mins,over});if(over)r.over++}
+  const r=rows[key2];r.mins+=mins;r.n++;r.last=Math.max(r.last,x.end);r.sess.push({...x,mins,over,a});if(over)r.over++;if(x.live&&now()<B){r.liveSince=(r.liveSince||[]).concat(a)}else{r.baseMs=(r.baseMs||0)+mins*6e4}}
  const list=Object.entries(rows).map(([id,r])=>({id,...r})).sort((a,b)=>b.mins-a.mins||(RANK[b.s.role]||0)-(RANK[a.s.role]||0));
- const max=Math.max(60,...list.map(r=>r.mins));const total=list.reduce((t,r)=>t+r.mins,0);const worked=list.filter(r=>r.mins>0).length;const liveN=Object.keys((S.kawalan&&S.kawalan.onDuty)||{}).length;
+ const max=Math.max(60,...list.map(r=>r.mins));const total=list.reduce((t,r)=>t+r.mins,0);const worked=list.filter(r=>r.mins>0).length;const liveN=Object.keys((S.kawalan&&S.kawalan.onDuty)||{}).length;const allLive=list.flatMap(r=>r.liveSince||[]);const baseTotal=list.reduce((t,r)=>t+(r.baseMs||0),0);
  el.innerHTML=`<div class="page-h"><div class="grow"><h2>${L('Rekap Jam Kerja','Rekap Jam Kerja')}</h2><p class="muted">${L('Dikira automatik daripada bilik kawalan: mula bila nama diisi, tamat bila nama dikosongkan. Sesi melebihi 12 jam dihadkan kepada 12 jam dan ditanda ⚠.','Dihitung otomatis dari ruang kendali: mulai saat nama diisi, selesai saat nama dikosongkan. Sesi lebih dari 12 jam dibatasi 12 jam dan ditandai ⚠.')}</p></div>
  <div class="tabs"><button class="${mode==='minggu'?'on':''}" data-rkm="minggu">${L('Mingguan','Mingguan')}</button><button class="${mode==='bulan'?'on':''}" data-rkm="bulan">${L('Bulanan','Bulanan')}</button></div></div>
  <div class="row" style="margin-bottom:14px"><button class="iconbtn" id="rkP" aria-label="${L('Sebelum','Sebelumnya')}">‹</button><span class="chip butter" style="font-size:14px">${esc(label)}</span><button class="iconbtn" id="rkN" aria-label="${L('Seterusnya','Berikutnya')}">›</button><button class="btn sm ghost" id="rkCopy" style="margin-left:auto">📋 ${L('Salin rekap','Salin rekap')}</button></div>
- <div class="grid g4" style="margin-bottom:16px">${[['red',fmtH(total),L('jumlah jam kerja','total jam kerja')],['maroon',worked+' / '+list.filter(r=>!r.s.raw).length,L('staff yang bekerja','staff yang bekerja')],['mint',fmtH(worked?total/worked:0),L('purata setiap staff','rata-rata per staff')],['butter',liveN,L('sedang bertugas','sedang bertugas')]].map(([c,v,l])=>`<div class="card ${c} tilt" style="padding:14px"><div style="font-family:var(--display);font-size:28px;font-weight:800" class="num">${v}</div><div style="font-size:12px">${l}</div></div>`).join('')}</div>
+ <div class="grid g4" style="margin-bottom:16px">${[['red',allLive.length?liveSpan(baseTotal,allLive,B):fmtH(total),L('jumlah jam kerja','total jam kerja')+(allLive.length?' · LIVE':'')],['maroon',worked+' / '+list.filter(r=>!r.s.raw).length,L('staff yang bekerja','staff yang bekerja')],['mint',fmtH(worked?total/worked:0),L('purata setiap staff','rata-rata per staff')],['butter',liveN,L('sedang bertugas','sedang bertugas')]].map(([c,v,l])=>`<div class="card ${c} tilt" style="padding:14px"><div style="font-family:var(--display);font-size:28px;font-weight:800" class="num">${v}</div><div style="font-size:12px">${l}</div></div>`).join('')}</div>
  <div class="card" style="padding:8px"><div class="rk-list">${list.map((r,i)=>`<div class="rk-row ${S.ui.rkOpen===r.id?'open':''}"><button class="rk-head" data-rko="${esc(r.id)}"><span class="rk-rank">${i+1}</span>${r.s.raw?'<span class="av sm" style="background:#C9B6AD">?</span>':av(r.s,'sm')}
   <div class="rk-name"><b>${esc(r.s.name)}</b><div class="row" style="gap:4px">${r.s.role?roleChip(r.s.role,true):`<span class="chip">${L('bukan dalam senarai staff','tidak ada di daftar staff')}</span>`}${cdChip(r.s)}${r.sess.some(x=>x.live)?`<span class="chip red">● ${L('bertugas','bertugas')}</span>`:''}${r.over?`<span class="chip butter">⚠ ${r.over}</span>`:''}</div></div>
-  <div class="rk-bar"><i style="width:${Math.round(r.mins/max*100)}%"></i></div><div class="rk-val num"><b>${fmtH(r.mins)}</b><span class="muted">${r.n} ${L('sesi','sesi')}</span></div></button>
-  ${S.ui.rkOpen===r.id?`<div class="rk-sess">${r.sess.length?r.sess.sort((a,b)=>b.start-a.start).map(x=>`<div class="row" style="justify-content:space-between;font-size:13px;padding:6px 4px;border-top:1.5px dashed var(--line)"><span>📅 ${esc(fmtDT(x.start))} → ${x.live?`<b>${L('sekarang','sekarang')}</b>`:esc(fmtDT(x.end))}</span><span class="row" style="gap:6px"><b>${fmtH(x.mins)}</b>${x.over?'<span class="chip butter">⚠ >12j</span>':''}${lead&&!x.live?`<button class="linkbtn" data-shdel="${esc(x.id)}">${L('padam','hapus')}</button>`:''}${lead&&x.live?`<button class="linkbtn" data-shend="${esc(x.norm)}">${L('tamatkan sekarang','selesaikan sekarang')}</button>`:''}</span></div>`).join(''):`<div class="muted" style="font-size:13px;padding:6px">${L('Tiada sesi dalam tempoh ini.','Tidak ada sesi di periode ini.')}</div>`}</div>`:''}</div>`).join('')}</div></div>`;
+  <div class="rk-bar"><i style="width:${Math.round(r.mins/max*100)}%"></i></div><div class="rk-val num"><b>${r.liveSince?liveSpan(r.baseMs||0,r.liveSince,B):fmtH(r.mins)}</b><span class="muted">${r.n} ${L('sesi','sesi')}</span></div></button>
+  ${S.ui.rkOpen===r.id?`<div class="rk-sess">${r.sess.length?r.sess.sort((a,b)=>b.start-a.start).map(x=>`<div class="row" style="justify-content:space-between;font-size:13px;padding:6px 4px;border-top:1.5px dashed var(--line)"><span>📅 ${esc(fmtDT(x.start))} → ${x.live?`<b>${L('sekarang','sekarang')}</b>`:esc(fmtDT(x.end))}</span><span class="row" style="gap:6px"><b>${x.live?liveSpan(0,[x.a],B):fmtH(x.mins)}</b>${x.over?'<span class="chip butter">⚠ >12j</span>':''}${lead&&!x.live?`<button class="linkbtn" data-shdel="${esc(x.id)}">${L('padam','hapus')}</button>`:''}${lead&&x.live?`<button class="linkbtn" data-shend="${esc(x.norm)}">${L('tamatkan sekarang','selesaikan sekarang')}</button>`:''}</span></div>`).join(''):`<div class="muted" style="font-size:13px;padding:6px">${L('Tiada sesi dalam tempoh ini.','Tidak ada sesi di periode ini.')}</div>`}</div>`:''}</div>`).join('')}</div></div>`;
  $$('[data-rkm]').forEach(b=>b.onclick=()=>{S.ui.rkMode=b.dataset.rkm;Snd.play('nav');rerender(true)});
  $('#rkP').onclick=()=>{if(mode==='bulan')S.ui.rkMonth=shiftMonth(key,-1);else S.ui.rkWeek=shiftWeek(key,-1);rerender(true)};
  $('#rkN').onclick=()=>{if(mode==='bulan')S.ui.rkMonth=shiftMonth(key,1);else S.ui.rkWeek=shiftWeek(key,1);rerender(true)};
@@ -924,7 +926,8 @@ R.dashboard=el=>{
  <div class="card maroon kawal-mini"><div class="card-h"><span class="pulse-dot"></span><h3 class="grow">Bilik Kawalan</h3><span class="chip" style="color:var(--ink)">${fmtDT(k.at)}</span></div>
  <div style="font-family:var(--display);font-size:26px;font-weight:800;margin-bottom:8px">${esc(k.kawalan||'Belum diisi')}</div>
  ${((k.pairing||[]).length?k.pairing:['','','']).map((x,i)=>`<div class="slot"><span style="opacity:.7">Pairing ${i+1}</span><b style="text-align:right">${esc(x||'·')}</b></div>`).join('')}
- <div class="slot"><span style="opacity:.7">Backup</span><b>${esc((k.backup||[]).filter(Boolean).join(', ')||'·')}</b></div></div></div>
+ <div class="slot"><span style="opacity:.7">Backup</span><b>${esc((k.backup||[]).filter(Boolean).join(', ')||'·')}</b></div>
+ ${Object.keys(k.onDuty||{}).length?`<div style="margin-top:10px;font-size:12px;opacity:.75;letter-spacing:.08em">● ${L('SEDANG BERTUGAS','SEDANG BERTUGAS')}</div><div class="duty dash">${Object.values(k.onDuty).map(o=>`<span>${esc(o.raw)} · ${liveSpan(0,[o.start])}</span>`).join('')}</div>`:''}</div></div>
  ${(()=>{const list=S.announce.filter(annVisible).sort((a,b)=>(b.pinned?1:0)-(a.pinned?1:0)||((annTime(a)??a.at)-(annTime(b)??b.at)));
   return `<div class="card ann-wrap" style="margin-top:16px"><div class="card-h"><span style="font-size:22px">📣</span><h3 class="grow">${L('Pengumuman','Pengumuman')}</h3>${canAnnounce()?`<button class="btn sm red" id="annNew">+ ${L('Buat pengumuman','Buat pengumuman')}</button>`:''}</div>
   ${list.length?`<div class="ann-list">${list.map(annItem).join('')}</div>`:`<div class="empty">${L('Tiada pengumuman buat masa ini.','Belum ada pengumuman saat ini.')}</div>`}</div>`})()}
@@ -951,11 +954,16 @@ const SHIFT_CAP=12*60;
 const normName=s=>{let x=String(s||'').toUpperCase().replace(/[^A-Z0-9 ]/g,' ').replace(/\s+/g,' ').trim();let prev;do{prev=x;x=x.replace(/^(DR|DOKTOR|DOCTOR|NURSE|NRS|SD|HD|HDS|INTERN|MADAM|MISS|PUAN|SIR|TUAN|MR|MS|ENCIK|CIK)\s+/,'')}while(x!==prev);return x};
 function matchStaff(n){if(!n)return null;return S.staff.find(s=>normName(s.name)===n||normName(s.username)===n)||null}
 function dutyMap(d){const m={};const add=r=>{const n=normName(r);if(n&&!m[n])m[n]=String(r).trim()};add(d.kawalan);(d.pairs||[]).forEach(p=>{add(p.a);add(p.b)});(d.backup||[]).forEach(add);['register','diagnosis','treatment','pharmacy'].forEach(k=>add(d[k]));return m}
-async function applyDuty(d){const prev=(S.kawalan&&S.kawalan.onDuty)||{};const cur=dutyMap(d);const t=d.at||now();const next={};
+async function applyDuty(d){const fresh=await Store.get('kawalan/current');const prev=((fresh||S.kawalan)&&(fresh||S.kawalan).onDuty)||{};const cur=dutyMap(d);const t=d.at||now();const next={};
  for(const n in cur){next[n]=prev[n]?prev[n]:{raw:cur[n],start:t,staffId:matchStaff(n)?.id||''}}
  const ended=Object.keys(prev).filter(n=>!cur[n]);
  for(const n of ended){const p=prev[n];const mins=Math.max(0,Math.round((t-p.start)/6e4));await Store.add('shifts',{name:p.raw,norm:n,staffId:p.staffId||matchStaff(n)?.id||'',start:p.start,end:t,mins,by:S.me.id})}
  d.onDuty=next;return {started:Object.keys(cur).filter(n=>!prev[n]).length,ended:ended.length}}
+const fmtHMS=ms=>{const s=Math.max(0,Math.floor(ms/1000));const hh=Math.floor(s/3600),mm=Math.floor(s%3600/60),ss=s%60;return hh?`${hh}j ${p2(mm)}m ${p2(ss)}s`:`${mm}m ${p2(ss)}s`};
+function liveVal(el){const base=+el.dataset.base||0;const until=+el.dataset.until||Infinity;const cap=SHIFT_CAP*6e4;const t=Math.min(now(),until);return base+(el.dataset.since||'').split(',').filter(Boolean).reduce((s,x)=>s+Math.min(cap,Math.max(0,t-+x)),0)}
+const liveSpan=(baseMs,sinces,until)=>`<span data-live data-base="${Math.round(baseMs)}" data-since="${sinces.join(',')}" ${until?`data-until="${until}"`:''}>${fmtHMS(0)}</span>`;
+function tickLive(){$$('[data-live]').forEach(el=>{el.textContent=fmtHMS(liveVal(el))})}
+setInterval(tickLive,1000);
 const fmtH=m=>{m=Math.round(m||0);const hh=Math.floor(m/60),mm=m%60;return hh?`${hh}j ${p2(mm)}m`:`${mm}m`};
 const KW_AREA=['City','Sandy Shore','Paleto','Genting','Skydome','Hospital'];
 const pairLine=p=>{if(!p)return '';const a=(p.a||'').trim(),b=(p.b||'').trim(),ar=(p.area||'').trim();const who=[a,b].filter(Boolean).join(' + ');return who?who+(ar?` (${ar.toUpperCase()})`:''):''};
@@ -972,7 +980,7 @@ R.kawalan=el=>{
  <div class="k">PAIRING</div><div class="stack" style="gap:4px;margin:4px 0 12px">${shownPairs.map((p,i)=>`<div class="v">${i+1}. ${esc(p||'·')}</div>`).join('')}</div>
  <div class="k">BACKUP</div><div class="stack" style="gap:4px;margin:4px 0 12px">${(shownBack.length?shownBack:['','']).map((p,i)=>`<div class="v">${i+1}. ${esc(p||'·')}</div>`).join('')}</div>
  <div class="slots">${['register','diagnosis','treatment','pharmacy'].map(x=>`<div><div class="k">${x.toUpperCase()}</div><div class="v">${esc(k[x]||'·')}</div></div>`).join('')}</div>
- ${Object.keys(k.onDuty||{}).length?`<div class="k" style="margin-top:14px">${L('SEDANG BERTUGAS','SEDANG BERTUGAS')}</div><div class="duty">${Object.values(k.onDuty).map(o=>`<span>${esc(o.raw)} · ${fmtH((now()-o.start)/6e4)}</span>`).join('')}</div>`:''}
+ ${Object.keys(k.onDuty||{}).length?`<div class="k" style="margin-top:14px">${L('SEDANG BERTUGAS','SEDANG BERTUGAS')}</div><div class="duty">${Object.values(k.onDuty).map(o=>`<span>${esc(o.raw)} · ${liveSpan(0,[o.start])}</span>`).join('')}</div>`:''}
  <div class="k" style="margin-top:16px">UPDATE: ${fmtDT(k.at)} · ${esc(k.by?nameOf(k.by):'-')}</div>
  <svg viewBox="0 0 400 40" style="width:100%;margin-top:10px" aria-hidden="true"><path d="M0 20h120l10-16 10 32 10-24 8 8h232" stroke="#7CF5C4" stroke-width="2" fill="none" style="stroke-dasharray:500;animation:ecg 2s linear infinite"/></svg></div>
  <form class="card stack" id="kf"><div class="card-h"><h3 class="grow">${L('Kemas kini','Perbarui')}</h3><button type="button" class="btn sm butter" id="takeK">${L('Saya ambil kawalan','Saya ambil kendali')}</button></div>
