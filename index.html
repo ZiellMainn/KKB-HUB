@@ -424,7 +424,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.17-6';
+const APP_VERSION = '2026.11.17-8';
 /* contoh:
 const FIREBASE_CONFIG = {
   apiKey: "...", authDomain: "...", projectId: "...",
@@ -936,8 +936,11 @@ function makeSnake(cv,over){const N=20,C=cv.width/N,x=cv.getContext('2d');let sn
 
 /* ================= KKB SIM · game 3D hospital multiplayer ================= */
 const AV_SKIN=['#F6D2B8','#E8B48F','#C98E65','#9C6440','#6E4429'];
-const AV_HAIRC=['#2B1D16','#5A3825','#A0522D','#D8B26A','#ECE6D6','#B83A3A','#3B3B6D','#E88AA8'];
-const AV_HAIR=[['botak','Botak','Botak'],['pendek','Pendek','Pendek'],['spiky','Spiky','Spiky'],['bob','Bob','Bob'],['panjang','Panjang','Panjang'],['ekor','Ekor kuda','Kuncir kuda'],['sanggul','Sanggul','Cepol'],['tudung','Tudung','Kerudung']];
+const AV_HAIRC=['#2B1D16','#5A3825','#A0522D','#D8B26A','#ECE6D6','#B83A3A','#3B3B6D','#E88AA8','#0F0F12','#8A8F99','#E8742A','#F4E27A','#3D7BD9','#2E9D7E','#7E5BC2','#30C5D2','#F2A7C3','#6B2E2E'];
+const AV_HAIR=[['botak','Botak','Botak','l'],['cepak','Cepak','Cepak','l'],['pendek','Pendek','Pendek','l'],['belah','Belah tepi','Belah samping','l'],['spiky','Spiky','Spiky','l'],['undercut','Undercut','Undercut','l'],['mohawk','Mohawk','Mohawk','l'],['keriting','Keriting','Keriting','l'],['afro','Afro','Afro','l'],
+ ['pixie','Pixie','Pixie','p'],['bob','Bob','Bob','p'],['panjang','Panjang','Panjang','p'],['poni','Panjang berponi','Panjang berponi','p'],['ikal','Panjang ikal','Panjang ikal','p'],['ekor','Ekor kuda','Kuncir kuda','p'],['tocang','Tocang dua','Kuncir dua','p'],['sanggul','Sanggul','Cepol','p'],['tudung','Tudung','Kerudung','p']];
+const AV_EYE=['#1B1B1F','#5A3825','#8B5A2B','#2E6FD8','#30C5D2','#2E9D7E','#7E5BC2','#C0392B','#E9B949','#E88AA8','#7A8A99'];
+const SIMGLASS=new THREE.MeshLambertMaterial({color:'#DFF4FF',transparent:true,opacity:.28});
 /* outfit: top, bottom, coat (warna kot atau ''), trim, lead=hanya atasan */
 const AV_OUT=[
  {id:'scrub_biru',n:['Scrubs Biru','Scrubs Biru'],top:'#3D7BD9',bot:'#3569BD'},
@@ -958,14 +961,15 @@ const SIM_NAMES=['Ah Seng','Mak Jah','Pak Abu','Siti Aminah','Kumar','Mei Ling',
 const SIM_REG=[['City',500,'#7C8794'],['Sandy Shore',600,'#E2C58F'],['Paleto',700,'#7FA36B'],['Genting',800,'#9AA7C7']];
 const SIM_NEED={bandage:{ico:'🩹',sym:['Luka dan berdarah sikit','Luka dan berdarah sedikit'],rm:150,lbl:'Bandage'},medkit:{ico:'💊',sym:['Cedera parah, HP sangat rendah','Cedera parah, HP sangat rendah'],rm:500,lbl:'Medkit'},darah:{ico:'🩸',sym:['Pucat, lemah, kurang darah','Pucat, lemas, kurang darah'],rm:500,lbl:L('Tambah darah','Tambah darah')}};
 function avDefault(st){const r=st&&st.role;const out=isLeadGroup(r)&&r!=='HEAD DOCTOR'?'atasan_kot':r==='INTERN'?'intern':r==='NURSE'?'nurse':(RANK[r]||0)>=4?'kot_pakar':'kot_doktor';
- return {skin:1,hair:'pendek',hairC:0,out,acc:r==='NURSE'?['topi']:['steto']}}
+ return {skin:1,hair:'pendek',hairC:0,eye:0,out,acc:r==='NURSE'?['topi']:['steto']}}
 function avOf(st){const a=(S.avatars||{})[st&&st.id];return {...avDefault(st),...(a||{})}}
 const avOutAllowed=(o,st)=>!o.lead||isDev()||isLeadGroup(st&&st.role);
 
 /* ---------- voxel avatar ---------- */
 const SIMMAT={};const smat=c=>SIMMAT[c]||(SIMMAT[c]=new THREE.MeshLambertMaterial({color:c}));
 function sbox(w,h,d,c,x=0,y=0,z=0,p){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),smat(c));m.position.set(x,y,z);m.castShadow=true;if(p)p.add(m);return m}
-function buildAvatar(av,civ){const g=new THREE.Group();const o=AV_OUT.find(x=>x.id===av.out)||AV_OUT[0];const skin=AV_SKIN[av.skin]||AV_SKIN[1];const hc=AV_HAIRC[av.hairC]||AV_HAIRC[0];
+function buildAvatar(av,civ){const g=new THREE.Group();const o=AV_OUT.find(x=>x.id===av.out)||AV_OUT[0];const skin=AV_SKIN[av.skin]||AV_SKIN[1];const hc=civ?civ.hc:(AV_HAIRC[av.hairC]||AV_HAIRC[0]);
+ const eye=civ?'#1B1B1F':(AV_EYE[av.eye]||AV_EYE[0]);
  const top=civ?civ.top:o.top,bot=civ?civ.bot:o.bot,coat=civ?'':o.coat;
  const mkLimb=(x,c,h,y)=>{const piv=new THREE.Group();piv.position.set(x,y,0);sbox(.24,h,.26,c,0,-h/2,0,piv);g.add(piv);return piv};
  g.userData.legL=mkLimb(-.15,bot,.62,.62);g.userData.legR=mkLimb(.15,bot,.62,.62);
@@ -976,22 +980,45 @@ function buildAvatar(av,civ){const g=new THREE.Group();const o=AV_OUT.find(x=>x.
  const arm=coat||top;g.userData.armL=new THREE.Group();g.userData.armL.position.set(-.42,1.3,0);sbox(.2,.62,.22,arm,0,-.28,0,g.userData.armL);sbox(.18,.14,.2,skin,0,-.62,0,g.userData.armL);g.add(g.userData.armL);
  g.userData.armR=new THREE.Group();g.userData.armR.position.set(.42,1.3,0);sbox(.2,.62,.22,arm,0,-.28,0,g.userData.armR);sbox(.18,.14,.2,skin,0,-.62,0,g.userData.armR);g.add(g.userData.armR);
  const head=new THREE.Group();head.position.y=1.68;g.add(head);g.userData.head=head;
- sbox(.62,.6,.6,skin,0,0,0,head);sbox(.09,.12,.02,'#1B1B1F',-.13,.03,.305,head);sbox(.09,.12,.02,'#1B1B1F',.13,.03,.305,head);
+ sbox(.62,.6,.6,skin,0,0,0,head);
+ /* mata: warna + kilauan */
+ for(const x of [-.13,.13]){sbox(.1,.13,.02,eye,x,.03,.305,head);sbox(.035,.035,.01,'#FFFFFF',x-.025,.07,.317,head)}
  const acc=new Set(civ?[]:(av.acc||[]));
  if(acc.has('mask'))sbox(.5,.2,.03,'#BFE3EE',0,-.15,.31,head);else sbox(.16,.04,.02,'#A0524A',0,-.15,.305,head);
- if(acc.has('kacamata')){sbox(.18,.15,.02,'#202020',-.13,.03,.32,head);sbox(.18,.15,.02,'#202020',.13,.03,.32,head);sbox(.1,.03,.02,'#202020',0,.06,.32,head)}
- const h=civ?civ.hair:av.hair;
- if(h==='tudung'){const tc=civ?civ.hc:hc;sbox(.68,.2,.68,tc,0,.3,0,head);sbox(.68,.6,.14,tc,0,-.05,-.3,head);sbox(.06,.6,.66,tc,-.33,-.05,0,head);sbox(.06,.6,.66,tc,.33,-.05,0,head);sbox(.62,.28,.5,tc,0,-.42,-.05,head)}
- else if(h!=='botak'){const c=civ?civ.hc:hc;sbox(.66,.16,.66,c,0,.36,0,head);sbox(.66,.38,.12,c,0,.12,-.28,head);
-  if(h==='spiky')for(let i=-1;i<=1;i++){const k=new THREE.Mesh(new THREE.ConeGeometry(.12,.26,4),smat(c));k.position.set(i*.2,.55,0);head.add(k)}
-  if(h==='bob'){sbox(.08,.44,.6,c,-.33,.02,0,head);sbox(.08,.44,.6,c,.33,.02,0,head);sbox(.66,.5,.12,c,0,.02,-.28,head)}
-  if(h==='panjang'){sbox(.08,.62,.6,c,-.33,-.05,-.02,head);sbox(.08,.62,.6,c,.33,-.05,-.02,head);sbox(.66,.95,.14,c,0,-.2,-.3,head)}
-  if(h==='ekor'){sbox(.2,.5,.16,c,0,-.05,-.42,head);sbox(.3,.12,.12,'#E85A5A',0,.17,-.38,head)}
-  if(h==='sanggul')sbox(.32,.3,.3,c,0,.42,-.26,head)}
- if(acc.has('topi'))sbox(.46,.16,.36,'#FFFFFF',0,.5,.06,head),sbox(.12,.12,.02,'#D3343A',0,.5,.25,head);
+ if(acc.has('kacamata')){const fr='#2A2A2E';for(const x of [-.13,.13]){sbox(.2,.025,.02,fr,x,.115,.33,head);sbox(.2,.025,.02,fr,x,-.055,.33,head);sbox(.025,.17,.02,fr,x-.0875,.03,.33,head);sbox(.025,.17,.02,fr,x+.0875,.03,.33,head);
+   const lens=new THREE.Mesh(new THREE.BoxGeometry(.17,.15,.005),SIMGLASS);lens.position.set(x,.03,.33);head.add(lens)}
+  sbox(.08,.025,.02,fr,0,.08,.33,head);sbox(.02,.025,.32,fr,-.31,.08,.17,head);sbox(.02,.025,.32,fr,.31,.08,.17,head)}
+ buildHair(head,civ?civ.hair:av.hair,hc);
+ if(acc.has('topi'))sbox(.46,.16,.36,'#FFFFFF',0,.52,.06,head),sbox(.12,.12,.02,'#D3343A',0,.52,.25,head);
  if(acc.has('steto')){sbox(.06,.4,.06,'#2B2B33',-.16,1.12,.2,g);sbox(.06,.4,.06,'#2B2B33',.16,1.12,.2,g);sbox(.38,.06,.06,'#2B2B33',0,1.33,.2,g);sbox(.13,.13,.07,'#C9CED6',.16,.9,.21,g)}
  if(acc.has('kad'))sbox(.14,.18,.02,'#FFFFFF',-.18,1.1,.19,g),sbox(.14,.05,.021,'#D3343A',-.18,1.16,.191,g);
  g.userData.walk=0;return g}
+/* rambut: kepala ±.31; "topi rambut" penuh supaya tiada celah kulit */
+function buildHair(head,h,c){if(!h||h==='botak')return;const b=(w,hh,d,x,y,z)=>sbox(w,hh,d,c,x,y,z,head);
+ const cap=(th=.16)=>b(.68,th,.68,0,.30+th/2-.04,0);
+ const back=(len)=>b(.68,len,.1,0,.3-len/2,-.31);
+ const sides=(len,d=.62)=>{b(.06,len,d,-.335,.3-len/2,-.02);b(.06,len,d,.335,.3-len/2,-.02)};
+ const fringe=(hh=.1,w=.64,x=0)=>b(w,hh,.06,x,.26-hh/2+.04,.32);
+ if(h==='tudung'){b(.7,.2,.7,0,.32,0);b(.7,.66,.14,0,-.02,-.31);b(.07,.66,.68,-.345,-.02,0);b(.07,.66,.68,.345,-.02,0);b(.64,.3,.52,0,-.44,-.05);b(.7,.06,.06,0,.26,.33);return}
+ if(h==='cepak'){b(.65,.06,.65,0,.32,0);b(.65,.36,.04,0,.13,-.32);b(.04,.2,.5,-.325,.2,-.04);b(.04,.2,.5,.325,.2,-.04);return}
+ if(h==='mohawk'){b(.64,.04,.64,0,.31,0);b(.16,.3,.72,0,.46,-.02);b(.16,.2,.1,0,.2,-.36);return}
+ if(h==='afro'){b(.86,.5,.84,0,.4,-.04);b(.86,.36,.2,0,.06,-.38);b(.12,.4,.6,-.42,.12,-.06);b(.12,.4,.6,.42,.12,-.06);return}
+ cap();
+ switch(h){
+  case 'pendek':back(.4);sides(.22);fringe(.08);break;
+  case 'belah':back(.4);sides(.22);b(.44,.14,.08,-.11,.24,.33);b(.22,.08,.08,.21,.27,.33);break;
+  case 'spiky':back(.36);sides(.2);fringe(.06);for(let i=-1.5;i<=1.5;i++){const k=new THREE.Mesh(new THREE.ConeGeometry(.11,.28,4),smat(c));k.position.set(i*.17,.52,(i%2)*.08);head.add(k)}break;
+  case 'undercut':b(.66,.14,.74,0,.44,.03);b(.6,.12,.1,0,.36,.37);back(.2);break;
+  case 'keriting':back(.42);sides(.2);for(let i=-2;i<=2;i++)for(let j=-1;j<=1;j++)b(.16,.12,.16,i*.14,.44+((i+j)%2?.04:0),j*.2);fringe(.08);break;
+  case 'pixie':back(.4);sides(.3);b(.5,.16,.08,-.08,.22,.33);break;
+  case 'bob':back(.62);sides(.6,.66);fringe(.12);break;
+  case 'panjang':back(1.0);sides(.78,.6);fringe(.08);break;
+  case 'poni':back(1.0);sides(.78,.6);fringe(.2);break;
+  case 'ikal':back(1.0);sides(.78,.6);fringe(.08);for(let k=0;k<4;k++){b(.1,.14,.66,-.37,-.05-k*.17,-.02+(k%2?.03:-.03));b(.1,.14,.66,.37,-.05-k*.17,-.02+(k%2?-.03:.03))}break;
+  case 'ekor':back(.42);sides(.2);fringe(.08);b(.22,.6,.18,0,-.05,-.46);sbox(.3,.1,.12,'#E85A5A',0,.2,-.41,head);break;
+  case 'tocang':back(.42);sides(.2);fringe(.12);for(const x of [-.42,.42]){b(.18,.55,.18,x,-.08,-.12);sbox(.22,.08,.22,'#E85A5A',x,.2,-.12,head)}break;
+  case 'sanggul':back(.42);sides(.22);fringe(.08);b(.34,.3,.3,0,.44,-.26);break;
+  default:back(.4);sides(.22);fringe(.08)}}
 function animAvatar(g,moving,dt){const u=g.userData;u.walk=moving?u.walk+dt*9:u.walk*.85;const s=Math.sin(u.walk)*(moving?.6:Math.min(.6,Math.abs(Math.sin(u.walk))*.6));
  u.legL.rotation.x=s;u.legR.rotation.x=-s;u.armL.rotation.x=-s*.8;u.armR.rotation.x=s*.8}
 function disposeTree(o){o.traverse(m=>{if(m.geometry)m.geometry.dispose()})}
@@ -1110,7 +1137,7 @@ function simLobby(body){const net=Store.mode==='firebase'&&SimNet.rtdbURL();
  <ul class="sim-rules"><li>👥 <b>1–3 ${L('orang','orang')}</b>: ${L('kes luar dengan ambulans + jualan bandage/medkit di farmasi.','kasus luar dengan ambulans + penjualan bandage/medkit di farmasi.')}</li><li>🏥 <b>4+ ${L('orang','orang')}</b>: ${L('pesakit mula masuk wad, perlu dirawat.','pasien mulai masuk bangsal dan perlu dirawat.')}</li><li>🎯 ${L('Jawapan ikut SOP KKB (free, harga, cooldown). Betul = mata + RM.','Jawaban sesuai SOP KKB (free, harga, cooldown). Benar = poin + RM.')}</li></ul>
  <div class="row" style="flex-wrap:wrap"><button class="btn red" id="simGo">▶ ${L('Masuk shift','Masuk shift')}${net?'':' (offline)'}</button><button class="btn ghost" id="simTrain">🤖 ${L('Mod latihan (4 orang + bot)','Mode latihan (4 orang + bot)')}</button></div>
  <div class="muted" style="font-size:13px">${net?'🟢 '+L('Multiplayer aktif: staff lain yang masuk shift akan nampak di lobby.','Multiplayer aktif: staff lain yang masuk shift akan terlihat di lobby.'):'🟡 '+(Store.mode!=='firebase'?L('Versi ini tiada server, game berjalan offline.','Versi ini tanpa server, game berjalan offline.'):L('Realtime Database belum disambung, game berjalan offline.','Realtime Database belum terhubung, game berjalan offline.'))}</div>
- <div class="muted" style="font-size:12px">⌨ WASD/${L('anak panah','panah')} ${L('gerak','gerak')} · ${L('klik lantai untuk jalan','klik lantai untuk jalan')} · E ${L('tindakan','aksi')} · Enter chat · Q/R ${L('putar kamera','putar kamera')}</div></div></div></div>
+ <div class="muted" style="font-size:12px">⌨ WASD/${L('anak panah','panah')} ${L('gerak','gerak')} · ${L('klik lantai untuk jalan','klik lantai untuk jalan')} · E ${L('tindakan','aksi')} · Enter chat · ${L('tahan klik kanan + geser untuk putar kamera','tahan klik kanan + geser untuk memutar kamera')}</div></div></div></div>
  ${isDev()?`<div class="card" style="margin-top:14px"><h3>⚙ ${L('Server game (developer)','Server game (developer)')}</h3><p class="muted" style="margin:6px 0 10px;font-size:13px">${L('Tampal URL Realtime Database dari Firebase (cth: https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app).','Tempel URL Realtime Database dari Firebase (cth: https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app).')}</p><div class="row"><input type="url" id="simUrl" style="flex:1" value="${esc((S.simCfg&&S.simCfg.rtdb)||'')}" placeholder="https://...firebasedatabase.app"><button class="btn" id="simUrlSave">${L('Simpan','Simpan')}</button></div></div>`:''}`;
  previewSpin($('#simPrev'),avOf(S.me));
  $('#simGo').onclick=()=>simStart(body,false);$('#simTrain').onclick=()=>simStart(body,true);
@@ -1121,25 +1148,31 @@ function previewSpin(cv,av){if(simPrevStop)simPrevStop();if(!cv||!window.THREE)r
  const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight('#ffffff','#b9a89a',1));const dl=new THREE.DirectionalLight('#fff',.6);dl.position.set(2,4,3);sc.add(dl);
  const cam=new THREE.PerspectiveCamera(30,cv.width/cv.height,.1,50);cam.position.set(0,1.4,5.2);cam.lookAt(0,1.05,0);let g=buildAvatar(av);sc.add(g);
  const base=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.08,24),smat('#F0D9D2'));base.position.y=-.04;sc.add(base);
- let raf,alive=true,t=0;const loop=()=>{if(!alive||!cv.isConnected){stop();return}t+=.016;g.rotation.y=Math.sin(t*.8)*.9;g.userData.armR.rotation.z=Math.sin(t*3)*.05;r.render(sc,cam);raf=requestAnimationFrame(loop)};loop();
+ let raf,alive=true,t=0,rot=0,drag=null,manualT=0;cv.style.cursor='grab';cv.style.touchAction='none';
+ cv.addEventListener('contextmenu',e=>e.preventDefault());
+ cv.addEventListener('pointerdown',e=>{drag={x:e.clientX,r:rot};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing'});
+ cv.addEventListener('pointermove',e=>{if(!drag)return;rot=drag.r+(e.clientX-drag.x)*.012;manualT=4});
+ const up=()=>{drag=null;cv.style.cursor='grab'};cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',up);
+ const loop=()=>{if(!alive||!cv.isConnected){stop();return}t+=.016;if(drag||manualT>0){manualT-=.016;g.rotation.y=rot}else{rot+=(Math.sin(t*.8)*.9-rot)*.03;g.rotation.y=rot}g.userData.armR.rotation.z=Math.sin(t*3)*.05;r.render(sc,cam);raf=requestAnimationFrame(loop)};loop();
  const stop=()=>{alive=false;cancelAnimationFrame(raf);disposeTree(sc);r.dispose()};simPrevStop=stop;
- return {set(a){sc.remove(g);disposeTree(g);g=buildAvatar(a);sc.add(g)},stop}}
+ return {set(a){sc.remove(g);disposeTree(g);g=buildAvatar(a);g.rotation.y=rot;sc.add(g)},stop}}
 
 function simChar(body){const me=S.me;let av=avOf(me);
  const outs=AV_OUT.filter(o=>avOutAllowed(o,me));
  const sw=(arr,key,cur)=>arr.map((c,i)=>`<button type="button" class="sim-sw ${cur===i?'on':''}" data-${key}="${i}" style="background:${c}" aria-label="${key} ${i+1}"></button>`).join('');
- body.innerHTML=`<div class="grid g2" style="align-items:start"><div class="card sim-prevcard"><canvas id="charPrev" width="320" height="400"></canvas><div class="muted" style="text-align:center;font-size:13px">${esc(me.name)} · ${esc(SHORT[me.role]||'')}</div></div>
+ body.innerHTML=`<div class="grid g2" style="align-items:start"><div class="card sim-prevcard"><canvas id="charPrev" width="320" height="400"></canvas><div class="muted" style="text-align:center;font-size:13px">${esc(me.name)} · ${esc(SHORT[me.role]||'')}<br>🖱 ${L('Tarik untuk pusing karakter','Tarik untuk memutar karakter')}</div></div>
  <form class="card stack" id="charF"><h3>${L('Ubah karakter','Ubah karakter')}</h3>
  <div class="field"><label>${L('Warna kulit','Warna kulit')}</label><div class="row">${sw(AV_SKIN,'sk',av.skin)}</div></div>
- <div class="field"><label>${L('Gaya rambut','Gaya rambut')}</label><div class="sim-chips">${AV_HAIR.map(([k,a,b])=>`<button type="button" class="chip ${av.hair===k?'red':''}" data-hr="${k}">${L(a,b)}</button>`).join('')}</div></div>
- <div class="field"><label>${L('Warna rambut / tudung','Warna rambut / kerudung')}</label><div class="row">${sw(AV_HAIRC,'hc',av.hairC)}</div></div>
+ <div class="field"><label>${L('Gaya rambut','Gaya rambut')}</label>${[['l',L('Lelaki','Laki-laki')],['p',L('Perempuan','Perempuan')]].map(([gk,gl])=>`<div class="muted" style="font-size:12px;margin:4px 0">${gl}</div><div class="sim-chips">${AV_HAIR.filter(h=>h[3]===gk).map(([k,a,b])=>`<button type="button" class="chip ${av.hair===k?'red':''}" data-hr="${k}">${L(a,b)}</button>`).join('')}</div>`).join('')}</div>
+ <div class="field"><label>${L('Warna rambut / tudung','Warna rambut / kerudung')}</label><div class="row" style="flex-wrap:wrap">${sw(AV_HAIRC,'hc',av.hairC)}</div></div>
+ <div class="field"><label>${L('Warna mata','Warna mata')}</label><div class="row" style="flex-wrap:wrap">${sw(AV_EYE,'ey',av.eye||0)}</div></div>
  <div class="field"><label>${L('Pakaian hospital','Pakaian rumah sakit')}</label><div class="sim-outs">${outs.map(o=>`<button type="button" class="sim-out ${av.out===o.id?'on':''}" data-ot="${o.id}"><span style="background:linear-gradient(90deg,${o.coat||o.top} 0 50%,${o.top} 50% 75%,${o.bot} 75%)"></span>${L(...o.n)}</button>`).join('')}</div>${isLeadGroup(me.role)||isDev()?'':`<div class="muted" style="font-size:12px;margin-top:6px">🔒 ${L('Kot Pengarah & Sut Pengurusan khas untuk atasan.','Jas Pengarah & Setelan Manajemen khusus atasan.')}</div>`}</div>
  <div class="field"><label>${L('Aksesori','Aksesori')}</label><div class="sim-chips">${AV_ACC.map(([k,a,b])=>`<button type="button" class="chip ${(av.acc||[]).includes(k)?'mint':''}" data-ac="${k}">${L(a,b)}</button>`).join('')}</div></div>
  <div class="row"><button class="btn red">${L('Simpan karakter','Simpan karakter')}</button><button type="button" class="btn ghost" id="charReset">${L('Ikut jawatan','Sesuai jabatan')}</button></div></form></div>`;
  const pv=previewSpin($('#charPrev'),av);
- const upd=()=>{pv&&pv.set(av);$$('[data-sk]').forEach(b=>b.classList.toggle('on',+b.dataset.sk===av.skin));$$('[data-hc]').forEach(b=>b.classList.toggle('on',+b.dataset.hc===av.hairC));
+ const upd=()=>{pv&&pv.set(av);$$('[data-sk]').forEach(b=>b.classList.toggle('on',+b.dataset.sk===av.skin));$$('[data-hc]').forEach(b=>b.classList.toggle('on',+b.dataset.hc===av.hairC));$$('[data-ey]').forEach(b=>b.classList.toggle('on',+b.dataset.ey===(av.eye||0)));
   $$('[data-hr]').forEach(b=>b.classList.toggle('red',b.dataset.hr===av.hair));$$('[data-ot]').forEach(b=>b.classList.toggle('on',b.dataset.ot===av.out));$$('[data-ac]').forEach(b=>b.classList.toggle('mint',av.acc.includes(b.dataset.ac)));Snd.play('star')};
- $$('[data-sk]').forEach(b=>b.onclick=()=>{av.skin=+b.dataset.sk;upd()});$$('[data-hc]').forEach(b=>b.onclick=()=>{av.hairC=+b.dataset.hc;upd()});
+ $$('[data-sk]').forEach(b=>b.onclick=()=>{av.skin=+b.dataset.sk;upd()});$$('[data-hc]').forEach(b=>b.onclick=()=>{av.hairC=+b.dataset.hc;upd()});$$('[data-ey]').forEach(b=>b.onclick=()=>{av.eye=+b.dataset.ey;upd()});
  $$('[data-hr]').forEach(b=>b.onclick=()=>{av.hair=b.dataset.hr;upd()});$$('[data-ot]').forEach(b=>b.onclick=()=>{av.out=b.dataset.ot;upd()});
  $$('[data-ac]').forEach(b=>b.onclick=()=>{const k=b.dataset.ac;av.acc=av.acc.includes(k)?av.acc.filter(x=>x!==k):[...av.acc,k];upd()});
  $('#charReset').onclick=()=>{av=avDefault(me);upd()};
@@ -1155,6 +1188,14 @@ function simBoard(body){const day=myToday();body.innerHTML=`<div class="grid g2"
  else drawDay(LS.get('kkb_simscore_'+day,{}))}
 
 /* ---------- enjin game ---------- */
+/* pilihan salah diambil dari jadual SOP (kuantiti berdekatan), bukan nombor rawak */
+function sopFreeDist(item,qty,correct){const tbl=item==='medkit'?[10,20,30,40,50]:[10,20,30,40,50,60,70,80,90,100,200,300,400,500];
+ const vals=tbl.map(q=>[q,pukatFree('ht_bs',item,q)]).filter(([,v])=>v!==correct).sort((a,b)=>Math.abs(a[0]-qty)-Math.abs(b[0]-qty)).map(([,v])=>v);
+ if(item==='bandage'&&qty===100)vals.unshift(10);return [...new Set(vals)].slice(0,3)}
+function sopPriceDist(t,free,unit,price){const d=[(t.qty+free)*unit];
+ if(t.item==='medkit')d.push(t.qty*(unit===500?450:500),(t.qty+free)*(unit===500?450:500),t.qty*150);
+ else{const near=[10,20,30,50,100,200,300,400,500].filter(q=>q!==t.qty).sort((a,b)=>Math.abs(a-t.qty)-Math.abs(b-t.qty));d.push(near[0]*150,t.qty*500,near[1]*150)}
+ return d.filter(v=>v!==price)}
 async function simStart(body,training){if(!window.THREE){toast('Three.js gagal dimuat','err');return}if(simPrevStop)simPrevStop();
  body.innerHTML=`<div class="sim-wrap" id="simWrap"><canvas id="simCv"></canvas><div class="sim-labels" id="simLbl"></div>
  <div class="sim-hud tl" id="simShift"></div><div class="sim-hud tr"><div id="simMe"></div><div class="row" style="gap:6px;margin-top:6px;justify-content:flex-end"><button class="iconbtn sm" id="simRotL" title="Q">⟲</button><button class="iconbtn sm" id="simRotR" title="R">⟳</button><button class="iconbtn sm" id="simFull" title="Skrin penuh">⛶</button><button class="btn sm ghost" id="simQuit">🚪 ${L('Keluar shift','Keluar shift')}</button></div></div>
@@ -1171,7 +1212,7 @@ function simEngine(wrap,training){
  const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});renderer.setPixelRatio(Math.min(1.75,devicePixelRatio));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
  const scene=new THREE.Scene();scene.background=new THREE.Color('#F3D9CF');scene.fog=new THREE.Fog('#F3D9CF',38,75);
  scene.add(new THREE.HemisphereLight('#FFF6EE','#9C8F86',.85));const sun=new THREE.DirectionalLight('#FFFFFF',.7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);const sc=sun.shadow.camera;sc.left=-22;sc.right=22;sc.top=22;sc.bottom=-22;sc.far=80;scene.add(sun);scene.add(sun.target);
- const cam=new THREE.PerspectiveCamera(42,1,.1,200);let yaw=0,zoom=1;
+ const cam=new THREE.PerspectiveCamera(42,1,.1,200);let yaw=0,zoom=1,pitch=1.0;
  const obs=[];const world=buildWorld(scene,obs);
  const P={x:SIM_SPAWN.x+(Math.random()-.5)*3,z:SIM_SPAWN.z,ry:Math.PI,moving:false,target:null,stuck:0,scene:-1};
  const myG=buildAvatar(myAv);scene.add(myG);
@@ -1195,7 +1236,12 @@ function simEngine(wrap,training){
  const ku=e=>{const k=e.key.toLowerCase();keys[k]=false;if(k==='e'||k===' ')holdKey=false};
  window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);
  const ray=new THREE.Raycaster(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
- cv.addEventListener('pointerdown',e=>{if(busy)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-(e.clientY-r.top)/r.height*2+1},cam);if(ray.ray.intersectPlane(plane,hit)){P.target={x:hit.x,z:hit.z};P.stuck=0;spawnPing(hit.x,hit.z)}});
+ let camDrag=null;wrap.addEventListener('contextmenu',e=>e.preventDefault());
+ cv.addEventListener('pointerdown',e=>{if(e.button===2||e.button===1){camDrag={x:e.clientX,y:e.clientY};cv.setPointerCapture(e.pointerId);cv.style.cursor='grabbing';return}});
+ cv.addEventListener('pointermove',e=>{if(!camDrag)return;yaw-=(e.clientX-camDrag.x)*.008;pitch=Math.max(.42,Math.min(1.4,pitch+(e.clientY-camDrag.y)*.005));camDrag.x=e.clientX;camDrag.y=e.clientY});
+ const camEnd=()=>{camDrag=null;cv.style.cursor=''};cv.addEventListener('pointerup',camEnd);cv.addEventListener('pointercancel',camEnd);
+ const clearKeys=()=>{for(const k in keys)keys[k]=false;holdKey=false;joy={x:0,z:0}};window.addEventListener('blur',clearKeys);document.addEventListener('visibilitychange',clearKeys);
+ cv.addEventListener('pointerdown',e=>{if(e.button!==0||busy)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-(e.clientY-r.top)/r.height*2+1},cam);if(ray.ray.intersectPlane(plane,hit)){P.target={x:hit.x,z:hit.z};P.stuck=0;spawnPing(hit.x,hit.z)}});
  cv.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.6,Math.min(1.6,zoom+Math.sign(e.deltaY)*.08))},{passive:false});
  const pingM=new THREE.Mesh(new THREE.RingGeometry(.25,.4,20),new THREE.MeshBasicMaterial({color:'#D3343A',transparent:true}));pingM.rotation.x=-Math.PI/2;pingM.visible=false;scene.add(pingM);let pingT=0;
  const spawnPing=(x,z)=>{pingM.position.set(x,.03,z);pingM.visible=true;pingT=.6};
@@ -1220,17 +1266,21 @@ function simEngine(wrap,training){
   lastChatSeen=Math.max(lastChatSeen,...chat.map(m=>m.t||0),0)}
  /* host spawn misi */
  const rnd=a=>a[Math.floor(Math.random()*a.length)];
- function hostTick(){const ids=online().map(([id])=>id).filter(id=>!id.startsWith('bot')).sort();if(ids[0]!==me.id)return;const n=shiftN();const t=nowS();const list=Object.entries(tasks);
+ const nextAt={};function hostTick(){const ids=online().map(([id])=>id).filter(id=>!id.startsWith('bot')).sort();if(ids[0]!==me.id)return;const n=shiftN();const t=nowS();const list=Object.entries(tasks);
   for(const [id,tk] of list){if(t-tk.t>(tk.type==='luar'?240000:180000)&&!tk.by)SimNet.setTask(id,null);else if(tk.by&&!players[tk.by])SimNet.updTask(id,{by:'',byName:''});else if(tk.type==='wad'&&n<4&&!tk.by)SimNet.setTask(id,null)}
   const cnt=k=>list.filter(([,x])=>x.type===k).length;const roll=p=>Math.random()<p;
-  if(cnt('jual')<2&&roll(.22)){const used=list.filter(([,x])=>x.type==='jual').map(([,x])=>x.slot);const slot=[0,1].find(s=>!used.includes(s));if(slot!==undefined){
+  /* jadual rawak: setiap jenis ada masa ketibaan sendiri */
+  const rs=(a,b)=>(a+Math.random()*(b-a))*1000;
+  if(!nextAt.jual){nextAt.jual=t+rs(8,25);nextAt.luar=t+rs(20,60)}if(n<4)nextAt.wad=0;else if(!nextAt.wad)nextAt.wad=t+rs(15,40);
+  const due=(k,cap,a,b)=>{if(!nextAt[k]||t<nextAt[k])return false;if(cnt(k)>=cap){nextAt[k]=t+rs(15,45);return false}nextAt[k]=t+rs(a,b);return true};
+  if(due('jual',2,35,110)){const used=list.filter(([,x])=>x.type==='jual').map(([,x])=>x.slot);const slot=[0,1].find(s=>!used.includes(s));if(slot!==undefined){
    const cat=roll(.7)?'rakyat':rnd(['ht_bs','ht_gs','polis']);const item=roll(.75)?'bandage':'medkit';
    const qty=item==='medkit'?rnd([10,20,30,40,50]):cat==='rakyat'?rnd([10,20,30,50,70,90,100,100]):rnd([100,200,300,400,500]);
    const hist=item==='bandage'&&cat==='rakyat'&&roll(.25)?rnd([1,1,2]):0;
    SimNet.setTask(uid(),{type:'jual',t,slot,name:rnd(SIM_NAMES),cat,item,qty,hist,by:'',civ:civRand()})}}
-  if(cnt('luar')<Math.min(2,Math.max(1,n))&&roll(.16))SimNet.setTask(uid(),{type:'luar',t,reg:Math.floor(Math.random()*4),name:rnd(SIM_NAMES),by:'',civ:civRand()});
-  if(n>=4&&cnt('wad')<Math.min(4,n)&&roll(.25)){const used=list.filter(([,x])=>x.type==='wad').map(([,x])=>x.bed);const free=SIM_BEDS.map((_,i)=>i).filter(i=>!used.includes(i));if(free.length)SimNet.setTask(uid(),{type:'wad',t,bed:rnd(free),need:rnd(['bandage','medkit','darah']),name:rnd(SIM_NAMES),by:'',civ:civRand()})}}
- function civRand(){return {top:rnd(['#E2725B','#5B8DEF','#F2C14E','#7BC67E','#9B6BD6','#EDEDED','#333A45']),bot:rnd(['#2F3A4A','#5A4632','#3B5BA8','#6B6B6B']),hair:rnd(['pendek','spiky','panjang','botak','bob','tudung','ekor']),hc:rnd(AV_HAIRC)}}
+  if(due('luar',Math.min(2,Math.max(1,n)),50,150))SimNet.setTask(uid(),{type:'luar',t,reg:Math.floor(Math.random()*4),name:rnd(SIM_NAMES),by:'',civ:civRand()});
+  if(n>=4&&due('wad',Math.min(4,n),30,90)){const used=list.filter(([,x])=>x.type==='wad').map(([,x])=>x.bed);const free=SIM_BEDS.map((_,i)=>i).filter(i=>!used.includes(i));if(free.length)SimNet.setTask(uid(),{type:'wad',t,bed:rnd(free),need:rnd(['bandage','medkit','darah']),name:rnd(SIM_NAMES),by:'',civ:civRand()})}}
+ function civRand(){return {top:rnd(['#E2725B','#5B8DEF','#F2C14E','#7BC67E','#9B6BD6','#EDEDED','#333A45']),bot:rnd(['#2F3A4A','#5A4632','#3B5BA8','#6B6B6B']),hair:rnd(AV_HAIR.map(h=>h[0])),hc:rnd(AV_HAIRC.slice(0,10))}}
  /* NPC sync dari tasks */
  function syncNpcs(){for(const [id,tk] of Object.entries(tasks)){if(npcs[id])continue;const g=buildAvatar({skin:Math.floor(Math.random()*5)},tk.civ||civRand());let pos;
    if(tk.type==='jual'){const c=SIM_COUNTER.cust[tk.slot||0];g.position.set(c[0],0,c[1]);g.rotation.y=Math.PI/2}
@@ -1271,8 +1321,8 @@ function simEngine(wrap,training){
   const cat=L(...(PK_CAT[t.cat]||['Rakyat','Warga']));const free=pukatFree(t.cat,t.item,t.qty);const unit=t.item==='bandage'?150:t.cat==='polis'?450:500;const price=t.qty*unit;
   const steps=[];let score=0,sold=true;
   if(t.hist)steps.push({q:`${L('Saya dah beli 100 bandage','Saya sudah beli 100 bandage')} ${t.hist===1?L('semalam','kemarin'):L('2 hari lepas (lebih 48 jam)','2 hari lalu (lebih dari 48 jam)')}. ${L('Boleh jual?','Boleh dijual?')}`,o:[{t:L('Tolak · masih cooldown','Tolak · masih cooldown'),ok:t.hist===1,stop:true},{t:L('Jual','Jual'),ok:t.hist!==1}],why:L('Rakyat biasa: had 100 bandage setiap 2 hari (48 jam).','Warga biasa: batas 100 bandage per 2 hari (48 jam).')});
-  steps.push({q:`${L('Berapa free untuk','Berapa free untuk')} ${t.qty} ${t.item}?`,o:opts(free,[Math.floor(t.qty/10),free+5,Math.max(0,free-2),free*2,free+10,10]).map(o=>({...o,t:'+'+o.v})),why:t.item==='medkit'?L('Medkit: setiap 10 dapat 1, maks 50 (5 free).','Medkit: tiap 10 dapat 1, maks 50 (5 free).'):L('Bandage: 10 tiada free, 20–90 setiap 10 = 1, pakej 100=20 · 200=40 · 300=60 · 400=80 · 500=120.','Bandage: 10 tanpa free, 20–90 tiap 10 = 1, paket 100=20 · 200=40 · 300=60 · 400=80 · 500=120.')});
-  steps.push({q:L('Berapa jumlah bayaran?','Berapa total pembayaran?'),o:opts(price,[(t.qty+free)*unit,Math.round(price*.9/50)*50,t.qty*100,price+1500],v=>'RM'+v.toLocaleString('en-US')),why:`${t.item==='bandage'?'Bandage RM150':`Medkit RM${unit}`} × ${t.qty} = RM${price.toLocaleString('en-US')} (${L('free tidak dibayar','free tidak dibayar')})`});
+  steps.push({q:`${L('Berapa free untuk','Berapa free untuk')} ${t.qty} ${t.item}?`,o:opts(free,sopFreeDist(t.item,t.qty,free)).map(o=>({...o,t:o.v?'+'+o.v:L('Tiada free','Tanpa free')})),why:t.item==='medkit'?L('Medkit: setiap 10 dapat 1, maks 50 (5 free).','Medkit: tiap 10 dapat 1, maks 50 (5 free).'):L('Bandage: 10 tiada free, 20–90 setiap 10 = 1, pakej 100=20 · 200=40 · 300=60 · 400=80 · 500=120.','Bandage: 10 tanpa free, 20–90 tiap 10 = 1, paket 100=20 · 200=40 · 300=60 · 400=80 · 500=120.')});
+  steps.push({q:L('Berapa jumlah bayaran?','Berapa total pembayaran?'),o:opts(price,sopPriceDist(t,free,unit,price),v=>'RM'+v.toLocaleString('en-US')),why:`${t.item==='bandage'?'Bandage RM150':`Medkit RM${unit}`} × ${t.qty} = RM${price.toLocaleString('en-US')} (${L('free tidak dibayar','free tidak dibayar')})`});
   let i=0;const shownTotal=steps.length;
   const render=()=>{const s=steps[i];showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🛒</span><div class="grow"><b>${esc(t.name)}</b><div class="muted" style="font-size:12px">${esc(cat)} · ${L('mahu','mau beli')} <b>${t.qty} ${esc(t.item)}</b></div></div><span class="chip">${i+1}/${shownTotal}</span></div>
    <p class="sim-q">${esc(s.q)}</p><div class="sim-opts">${s.o.map((o,k)=>`<button class="btn ghost" data-o="${k}">${esc(o.t)}</button>`).join('')}</div><div id="simWhy"></div>`,d=>{
@@ -1330,7 +1380,7 @@ function simEngine(wrap,training){
   for(const n of Object.values(npcs)){if(n.lbl)n.lbl.d.classList.toggle('pulse',Math.sin(t/300)>0)}
   if(pingT>0){pingT-=dt;pingM.material.opacity=pingT/.6;pingM.scale.setScalar(1+(.6-pingT));if(pingT<=0)pingM.visible=false}
   /* kamera */
-  const D=17*zoom;const tx=P.x+Math.sin(yaw)*D*.72,tz=P.z+Math.cos(yaw)*D*.72;cam.position.x+=(tx-cam.position.x)*Math.min(1,dt*6);cam.position.z+=(tz-cam.position.z)*Math.min(1,dt*6);cam.position.y=D*1.12;cam.lookAt(P.x,.8,P.z);
+  const R=22.6*zoom;const hz=Math.cos(pitch)*R;const tx=P.x+Math.sin(yaw)*hz,tz=P.z+Math.cos(yaw)*hz;const k=camDrag?1:Math.min(1,dt*6);cam.position.x+=(tx-cam.position.x)*k;cam.position.z+=(tz-cam.position.z)*k;cam.position.y=Math.sin(pitch)*R;cam.lookAt(P.x,.8,P.z);
   sun.position.set(P.x+10,22,P.z+8);sun.target.position.set(P.x,0,P.z);
   /* aksi */
   act=busy?null:findAct();const ae=$('#simAct',wrap);if(act){ae.classList.remove('hide');ae.innerHTML=`${act.txt}${act.hold?`<div class="sim-bar"><span style="width:${Math.min(100,holdT/act.hold*100)}%"></span></div>`:''}`;ab.classList.toggle('on',act.k!=='none')}else{ae.classList.add('hide');ab.classList.remove('on')}
@@ -1343,7 +1393,7 @@ function simEngine(wrap,training){
    l.d.style.transform=`translate(-50%,-100%) translate(${(v3.x+1)/2*W}px,${(1-v3.y)/2*H}px)`;
    if(l.bubbleT>0){l.bubbleT-=dt;if(!l.d.querySelector('.sim-bub')){const b=document.createElement('div');b.className='sim-bub';l.d.prepend(b)}l.d.querySelector('.sim-bub').textContent=l.bubble}else{const b=l.d.querySelector('.sim-bub');b&&b.remove()}}}
  raf=requestAnimationFrame(frame);
- const api={_P:P,destroy(){if(!alive)return;alive=false;document.body.classList.remove('sim-playing');cancelAnimationFrame(raf);window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);ro.disconnect();
+ const api={_P:P,destroy(){if(!alive)return;alive=false;document.body.classList.remove('sim-playing');cancelAnimationFrame(raf);window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);window.removeEventListener('blur',clearKeys);document.removeEventListener('visibilitychange',clearKeys);ro.disconnect();
   for(const b of bots)SimNet.setBot(b.id,null);SimNet.leave();disposeTree(scene);renderer.dispose();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}};
  Snd.play('ok');toast(L('Selamat bertugas! Jalan ke farmasi atau garaj ambulans.','Selamat bertugas! Jalan ke farmasi atau garasi ambulans.'),'ok');
  return api}
