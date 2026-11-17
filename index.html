@@ -459,6 +459,22 @@ html{scrollbar-color:#C79A97 transparent}
 ::-webkit-scrollbar-thumb{background:#C79A97;border-radius:10px;border:2px solid transparent;background-clip:padding-box}::-webkit-scrollbar-thumb:hover{background-color:#A86C69}
 .rail,.rail *{scrollbar-width:thin;scrollbar-color:rgba(251,233,227,.32) transparent}
 .rail ::-webkit-scrollbar{width:8px}.rail ::-webkit-scrollbar-track{background:transparent}.rail ::-webkit-scrollbar-thumb{background:rgba(251,233,227,.28);border:2px solid transparent;background-clip:padding-box}.rail ::-webkit-scrollbar-thumb:hover{background-color:rgba(251,233,227,.5)}
+.jk-chk{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:9px;border:2px solid var(--line);background:#fff;cursor:pointer;position:relative;transition:.2s}.jk-chk input{position:absolute;opacity:0;inset:0;cursor:pointer;margin:0}.jk-chk span{color:#fff;font-weight:900;transform:scale(0);transition:transform .25s cubic-bezier(.2,1.6,.4,1)}.jk-chk.on{background:#2E9D7E;border-color:#2E9D7E}.jk-chk.on span{transform:scale(1)}.jk-chk:has(input:disabled){opacity:.4;cursor:not-allowed}.jk-chk:has(input:focus-visible){outline:3px solid var(--butter)}
+.sim-drive{position:absolute;inset:0;z-index:8;background:#000;animation:fade .3s;touch-action:none;user-select:none}.sim-drive canvas{width:100%;height:100%;display:block}
+.dv-top{position:absolute;left:12px;right:12px;top:12px;display:flex;gap:10px;align-items:center;flex-wrap:wrap;pointer-events:none}
+.dv-title{background:rgba(42,20,24,.85);color:#fff;border-radius:999px;padding:7px 14px;font-weight:700;font-size:14px}
+.dv-bar{flex:1;min-width:160px;height:14px;background:rgba(255,255,255,.75);border-radius:10px;position:relative;box-shadow:0 2px 8px rgba(0,0,0,.15)}.dv-bar i{position:absolute;left:0;top:0;bottom:0;background:linear-gradient(90deg,#F2C14E,#D3343A);border-radius:10px}.dv-bar span{position:absolute;top:50%;transform:translate(-50%,-50%) scaleX(-1);font-size:22px}.dv-bar em{position:absolute;right:-6px;top:50%;transform:translateY(-60%);font-size:20px;font-style:normal}
+.dv-hp{background:#fff;border-radius:999px;padding:6px 12px;font-weight:800;font-size:13px}
+.dv-cd{position:absolute;left:50%;top:42%;transform:translate(-50%,-50%);font-size:90px;font-weight:900;color:#fff;text-shadow:0 6px 20px rgba(0,0,0,.35);pointer-events:none}
+.dv-cd.pop{animation:dvPop .6s cubic-bezier(.2,1.4,.4,1)}.dv-cd.go{color:#F2C14E;font-size:64px}
+@keyframes dvPop{0%{transform:translate(-50%,-50%) scale(2.2);opacity:0}100%{transform:translate(-50%,-50%) scale(1);opacity:1}}
+.dv-flash{position:absolute;inset:0;pointer-events:none;background:radial-gradient(transparent 40%,rgba(211,52,58,.6));opacity:0}.dv-flash.on{animation:dvFlash .5s}@keyframes dvFlash{0%{opacity:1}100%{opacity:0}}
+.dv-msg{position:absolute;left:50%;top:30%;transform:translate(-50%,-50%) scale(.6);opacity:0;font-weight:900;font-size:26px;color:#fff;text-shadow:0 3px 10px rgba(0,0,0,.4);pointer-events:none;transition:.25s cubic-bezier(.2,1.4,.4,1);text-align:center}.dv-msg.show{opacity:1;transform:translate(-50%,-50%) scale(1)}.dv-msg.bad{color:#FFB3B3}.dv-msg.good{color:#FFE48A}
+.dv-msg.end{top:45%}.dv-end{background:rgba(255,251,247,.96);color:#2A1418;padding:18px 26px;border-radius:22px;text-shadow:none;display:grid;gap:6px;box-shadow:0 20px 50px rgba(0,0,0,.3)}.dv-end small{font-size:14px;font-weight:600;opacity:.8}
+.dv-help{position:absolute;left:50%;bottom:14px;transform:translateX(-50%);background:rgba(42,20,24,.7);color:#fff;border-radius:999px;padding:6px 14px;font-size:12px;white-space:nowrap;pointer-events:none}
+.dv-pad{position:absolute;right:16px;bottom:16px;display:none;flex-direction:column;align-items:center;gap:8px}.dv-pad div{display:flex;gap:10px}
+.dv-pad button{width:62px;height:62px;border-radius:50%;border:0;background:rgba(255,255,255,.85);font-size:22px;color:#8E2433;box-shadow:0 4px 12px rgba(0,0,0,.2);touch-action:none}.dv-pad button.on{background:#D3343A;color:#fff;transform:scale(.92)}
+@media (pointer:coarse){.dv-pad{display:flex}.dv-help{display:none}}
 </style>
 </head>
 <body>
@@ -481,7 +497,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.18-1';
+const APP_VERSION = '2026.11.18-3';
 /* banding versi ikut nombor (bukan teks): 2026.11.17-9 < 2026.11.17-12 */
 const verCmp=(a,b)=>{const x=String(a).match(/\d+/g)||[],y=String(b).match(/\d+/g)||[];for(let i=0;i<Math.max(x.length,y.length);i++){const d=(+x[i]||0)-(+y[i]||0);if(d)return d<0?-1:1}return 0};
 /* contoh:
@@ -975,6 +991,9 @@ const rm=n=>'RM'+Math.round(n).toLocaleString('en-US');
 function gajiText(w,g){const lines=g.rows.filter(r=>r.rate>0).sort((a,b)=>(RANK[b.s.role]||0)-(RANK[a.s.role]||0)||a.s.name.localeCompare(b.s.name));
  return `PENGIRAAN GAJI STAFF (PER HRS)\n\nDATE: ${w.range}\n      (MINGGU ${w.no})\n\n${lines.map(r=>`${payName(r.s)} - ${r.mins>0?'RM '+r.gaji:'(NA)'}`).join('\n')}\n\n      WEEKLY TOP\n${g.ranked.slice(0,g.c.top.length).map(r=>`TOP ${r.rank}  - ${payName(r.s)} (+RM ${r.prize})`).join('\n')||'-'}\n\nJUMLAH BAYARAN - RM ${Math.round(g.total)}`}
 
+const rmSp=n=>'RM '+String(Math.round(n)).replace(/\B(?=(\d{3})+(?!\d))/g,' ');
+function payReport(w,g,paid){const rows=g.rows.filter(r=>r.total>0).sort((a,b)=>(RANK[b.s.role]||0)-(RANK[a.s.role]||0)||a.s.name.localeCompare(b.s.name));
+ return `💸 **CHECKLIST MINGGUAN PEMBAYARAN GAJI STAFF** 💸\n${w.label} ${w.y} (${w.range})\n\n${rows.map(r=>`- ${payName(r.s)} - ${rmSp(r.total)} ${paid[r.s.id]?'✅':'❌'}`).join('\n')}\n\n**JUMLAH : ${rmSp(g.total)}**`}
 R.rekap=el=>{const tab=S.ui.rkTab||'manual';
  el.innerHTML=`<div class="tabs" style="margin-bottom:14px"><button class="${tab==='manual'?'on':''}" data-rkt="manual">✍️ ${L('Jam kerja & gaji','Jam kerja & gaji')}</button><button class="${tab==='auto'?'on':''}" data-rkt="auto">📡 ${L('Auto bilik kawalan','Auto ruang kendali')}</button></div><div id="rkBody"></div>`;
  $$('[data-rkt]').forEach(b=>b.onclick=()=>{S.ui.rkTab=b.dataset.rkt;Snd.play('nav');rerender(true)});
@@ -983,7 +1002,7 @@ R.rekap=el=>{const tab=S.ui.rkTab||'manual';
 function rekapManual(el){const today=myToday();const month=S.ui.jkMonth||today.slice(0,7);const mons=mondaysIn(month);
  const wk=S.ui.jkWeek&&S.ui.jkWeek.slice(0,7)===month?S.ui.jkWeek:(mons.includes(mondayOf(today))?mondayOf(today):mons[mons.length-1]);const w=wkInfo(wk);
  const rec=(S.jamkerja||[]).find(x=>x.id===wk)||{};const saved=rec.hours||{};const draft=S.ui.jkDraft&&S.ui.jkDraft.wk===wk?S.ui.jkDraft.h:null;const hours=draft||saved;
- const ed=canJam();const auto=autoMins(wk);const g=gajiWeek(hours);
+ const ed=canJam();const auto=autoMins(wk);const g=gajiWeek(hours);const paid=rec.paid||{};const payRows=g.rows.filter(r=>r.total>0);const paidN=payRows.filter(r=>paid[r.s.id]).length;const payDone=payRows.length>0&&paidN===payRows.length;
  /* rank bulanan */
  const mon={};for(const m of mons){const r=(S.jamkerja||[]).find(x=>x.id===m);if(!r)continue;for(const [sid,v] of Object.entries(r.hours||{})){if(typeof v!=='number')continue;(mon[sid]=mon[sid]||{t:0,w:{}}).t+=v;mon[sid].w[m]=v}}
  const monList=Object.entries(mon).map(([id,v])=>({s:staffById(id),...v})).filter(x=>x.s&&x.t>0).sort((a,b)=>b.t-a.t);
@@ -999,14 +1018,15 @@ function rekapManual(el){const today=myToday();const month=S.ui.jkMonth||today.s
  <div class="card" style="padding:12px"><div class="card-h" style="flex-wrap:wrap"><h3 class="grow">${esc(w.label)} <span class="muted" style="font-size:14px;font-weight:500">· ${w.range}</span></h3>
   ${rec.sentAt?`<span class="chip mint">📤 ${L('Dihantar','Terkirim')} ${esc(fmtDT(rec.sentAt))}</span>`:''}${rec.at?`<span class="chip">${L('Dikemas kini','Diperbarui')} ${esc(nameOf(rec.by))}</span>`:`<span class="chip butter">${L('Belum diisi','Belum diisi')}</span>`}</div>
   ${ed?`<p class="muted" style="font-size:13px;margin:0 0 8px">${L('Isi jam seperti','Isi jam seperti')} <code>10</code>, <code>9.5</code> ${L('atau','atau')} <code>9:30</code>. ${L('Kosong = (NA).','Kosong = (NA).')} ${Object.keys(auto).length?`<button class="btn sm ghost" id="jkAuto">⤵ ${L('Isi dari bilik kawalan','Isi dari ruang kendali')}</button>`:''}</p>`:''}
-  <div class="tbl-wrap"><table class="tbl jk-tbl"><thead><tr><th></th><th>Staff</th><th>${L('Jam kerja','Jam kerja')}</th><th>${L('Gaji','Gaji')}</th><th>OT</th><th>Top</th><th>${L('Jumlah','Total')}</th><th>IBAN</th></tr></thead><tbody>
+  <div class="tbl-wrap"><table class="tbl jk-tbl"><thead><tr><th></th><th>Staff</th><th>${L('Jam kerja','Jam kerja')}</th><th>${L('Gaji','Gaji')}</th><th>OT</th><th>Top</th><th>${L('Jumlah','Total')}</th><th>IBAN</th><th>${L('Dibayar','Dibayar')}</th></tr></thead><tbody>
   ${rows.map(r=>{const ib=(S.iban[r.s.id]||{}).value||'';const a=auto[r.s.id];return `<tr data-row="${esc(r.s.id)}" class="${r.rank&&r.rank<=3?'jk-top':''}"><td class="c-rank" style="text-align:center;font-size:20px">${medal(r.rank)}</td>
    <td><div class="row" style="flex-wrap:nowrap">${av(r.s,'sm')}<div><b>${esc(r.s.name)}</b><div class="muted" style="font-size:11px">${esc(SHORT[r.s.role]||r.s.role)} · ${r.rate?rm(r.rate)+'/'+L('jam','jam'):L('tiada kadar','tanpa tarif')}</div></div></div></td>
    <td>${ed?`<input class="jk-in" data-jk="${esc(r.s.id)}" value="${esc(jamTxt(r.mins))}" placeholder="NA" inputmode="decimal" aria-label="${L('Jam kerja','Jam kerja')} ${esc(r.s.name)}">`:`<b>${r.mins!=null?fmtH(r.mins):'<span class="muted">(NA)</span>'}</b>`}${a?`<div class="muted" style="font-size:11px">📡 ${fmtH(a)}</div>`:''}</td>
    <td class="num c-base">${r.mins>0&&r.rate?rm(r.base):'-'}</td><td class="num c-ot">${r.ot?'+'+rm(r.ot):'-'}</td><td class="num c-pr">${r.prize?'+'+rm(r.prize):'-'}</td><td class="num c-tot"><b>${r.total?rm(r.total):'-'}</b></td>
-   <td>${ib?`<div class="row" style="flex-wrap:nowrap;gap:6px"><code class="jk-iban">${esc(ib)}</code><button class="btn sm ghost" data-cpy="${esc(ib)}" aria-label="${L('Salin IBAN','Salin IBAN')} ${esc(r.s.name)}">📋</button></div>`:`<span class="muted" style="font-size:12px">${L('belum isi','belum diisi')}</span>`}</td></tr>`}).join('')}
-  </tbody><tfoot><tr><td></td><td colspan="5"><b>${L('Jumlah gaji minggu ini','Total gaji minggu ini')}</b></td><td class="num"><b style="font-size:17px" id="jkTot">${rm(g.total)}</b></td><td></td></tr></tfoot></table></div>
-  <div class="row" style="margin-top:12px;flex-wrap:wrap">${ed?`<button class="btn red" id="jkSave">💾 ${L('Simpan jam kerja','Simpan jam kerja')}</button><button class="btn" id="jkSend" ${whOn('gaji')?'':'disabled title="Webhook gaji belum diset"'}>📤 ${L('Hantar gaji ke Discord','Kirim gaji ke Discord')}</button>`:''}<button class="btn ghost" id="jkCopy">📋 ${L('Salin teks gaji','Salin teks gaji')}</button>${ed&&!whOn('gaji')?`<span class="muted" style="font-size:12px">${L('Webhook #gaji belum diset di Panel Developer.','Webhook #gaji belum diset di Panel Developer.')}</span>`:''}</div>
+   <td>${ib?`<div class="row" style="flex-wrap:nowrap;gap:6px"><code class="jk-iban">${esc(ib)}</code><button class="btn sm ghost" data-cpy="${esc(ib)}" aria-label="${L('Salin IBAN','Salin IBAN')} ${esc(r.s.name)}">📋</button></div>`:`<span class="muted" style="font-size:12px">${L('belum isi','belum diisi')}</span>`}</td>
+   <td style="text-align:center">${r.total>0?(ed?`<label class="jk-chk ${paid[r.s.id]?'on':''}" title="${paid[r.s.id]?esc(L('Dibayar oleh','Dibayar oleh')+' '+nameOf(paid[r.s.id].by)):''}"><input type="checkbox" data-paid="${esc(r.s.id)}" ${paid[r.s.id]?'checked':''} ${rec.at?'':'disabled'} aria-label="${L('Tanda sudah bayar','Tandai sudah dibayar')} ${esc(r.s.name)}"><span>✓</span></label>`:(paid[r.s.id]?'<span class="jk-chk on"><span>✓</span></span>':'<span class="muted">-</span>')):''}</td></tr>`}).join('')}
+  </tbody><tfoot><tr><td></td><td colspan="5"><b>${L('Jumlah gaji minggu ini','Total gaji minggu ini')}</b></td><td class="num"><b style="font-size:17px" id="jkTot">${rm(g.total)}</b></td><td></td><td style="text-align:center"><span class="chip ${payDone?'mint':''}" id="jkPaidN">${paidN}/${payRows.length}</span></td></tr></tfoot></table></div>
+  <div class="row" style="margin-top:12px;flex-wrap:wrap">${ed?`<button class="btn red" id="jkSave">💾 ${L('Simpan jam kerja','Simpan jam kerja')}</button><button class="btn" id="jkSend" ${whOn('gaji')?'':'disabled title="Webhook gaji belum diset"'}>📤 ${L('Hantar gaji ke Discord','Kirim gaji ke Discord')}</button>`:''}<button class="btn ghost" id="jkCopy">📋 ${L('Salin teks gaji','Salin teks gaji')}</button>${ed?`<button class="btn ${payDone?'red':''}" id="jkPayRep" ${payDone&&whOn('gaji')?'':'disabled'} title="${payDone?'':L('Tanda semua staff sebagai dibayar dulu','Tandai semua staff sebagai dibayar dulu')}">💸 ${L('Hantar laporan bayaran','Kirim laporan pembayaran')} (${paidN}/${payRows.length})</button>`:''}${rec.payRepAt?`<span class="chip mint">💸 ${L('Laporan dihantar','Laporan terkirim')} ${esc(fmtDT(rec.payRepAt))}</span>`:''}${ed&&!whOn('gaji')?`<span class="muted" style="font-size:12px">${L('Webhook #gaji belum diset di Panel Developer.','Webhook #gaji belum diset di Panel Developer.')}</span>`:''}</div>
   <div class="chip butter ${draft?'':'hide'}" id="jkDirty" style="margin-top:10px">✏️ ${L('Ada perubahan belum disimpan','Ada perubahan belum disimpan')}</div></div>
  <details class="card" style="margin-top:14px"><summary style="cursor:pointer;font-weight:700">📜 ${L('Peraturan gaji','Aturan gaji')}</summary><div class="muted" style="font-size:13px;margin-top:8px;display:grid;gap:4px">
   ${Object.entries(g.c.rates).filter(([,v])=>v>0).map(([k,v])=>`<div>${esc(k)}: <b>${rm(v)}</b>/${L('jam','jam')}</div>`).join('')}<div>⏳ OT (${g.c.otH} ${L('jam ke atas','jam ke atas')}): <b>+${rm(g.c.otRM)}</b></div><div>🗓 Top Weekly: ${g.c.top.map((v,i)=>`#${i+1} ${rm(v)}`).join(' · ')}</div></div></details>`;
@@ -1022,6 +1042,11 @@ function rekapManual(el){const today=myToday();const month=S.ui.jkMonth||today.s
  const save=async()=>{const {h,bad}=collect();if(bad){toast(L('Format jam tidak sah','Format jam tidak valid'),'err');bad.focus();return false}
   const ok=await safe(Store.set('jamkerja/'+wk,{hours:h,month:w.month,no:w.no,by:S.me.id,at:now(),...(rec.sentAt?{sentAt:rec.sentAt,sentBy:rec.sentBy||''}:{})}),L('Jam kerja disimpan','Jam kerja disimpan'));if(ok){S.ui.jkDraft=null;logAct('isi jam kerja',w.label)}return ok?h:false};
  $('#jkSave',el)&&($('#jkSave',el).onclick=save);
+ $$('[data-paid]',el).forEach(c=>c.onchange=async()=>{const sid=c.dataset.paid;const np={...(rec.paid||{})};if(c.checked)np[sid]={by:S.me.id,at:now()};else delete np[sid];c.parentElement.classList.toggle('on',c.checked);Snd.play(c.checked?'star':'pop');
+  if(await safe(Store.update('jamkerja/'+wk,{paid:np}))){rec.paid=np;logAct(c.checked?'tanda gaji dibayar':'batal tanda gaji dibayar',nameOf(sid));if(!c.checked||Object.keys(np).length>=payRows.length)rerender(true);else{const n=payRows.filter(r=>np[r.s.id]).length;$('#jkPaidN',el).textContent=`${n}/${payRows.length}`;const b=$('#jkPayRep',el);if(b)b.innerHTML=`💸 ${L('Hantar laporan bayaran','Kirim laporan pembayaran')} (${n}/${payRows.length})`}}else{c.checked=!c.checked;c.parentElement.classList.toggle('on',c.checked)}});
+ $('#jkPayRep',el)&&($('#jkPayRep',el).onclick=()=>{const txt=payReport(w,g,paid);
+  modal(`<h3>💸 ${L('Hantar laporan bayaran?','Kirim laporan pembayaran?')}</h3>${rec.payRepAt?`<p class="chip butter" style="white-space:normal">⚠ ${L('Laporan minggu ini sudah pernah dihantar','Laporan minggu ini sudah pernah dikirim')} (${esc(fmtDT(rec.payRepAt))}).</p>`:''}<pre class="jk-pre">${esc(txt)}</pre><div class="row"><button class="btn red" id="yes">${L('Hantar','Kirim')}</button><button class="btn ghost" data-close>${L('Batal','Batal')}</button></div>`,(m,close)=>{
+   $('#yes',m).onclick=async()=>{const r=await sendDiscord('gaji',txt);if(r){await Store.update('jamkerja/'+wk,{payRepAt:now(),payRepBy:S.me.id}).catch(()=>{});logAct('hantar laporan bayaran gaji',w.label)}close()}})});
  $('#jkCopy',el).onclick=()=>copy(cb(gajiText(w,gajiWeek(collect().h))),L('Teks gaji disalin','Teks gaji disalin'));
  $('#jkSend',el)&&($('#jkSend',el).onclick=()=>{const g2=gajiWeek(collect().h);const txt=gajiText(w,g2);
   modal(`<h3>📤 ${L('Hantar gaji','Kirim gaji')} ${esc(w.label)}?</h3>${rec.sentAt?`<p class="chip butter" style="white-space:normal">⚠ ${L('Minggu ini sudah pernah dihantar','Minggu ini sudah pernah dikirim')} (${esc(fmtDT(rec.sentAt))}).</p>`:''}<pre class="jk-pre">${esc(txt)}</pre><div class="row"><button class="btn red" id="yes">${L('Simpan & hantar','Simpan & kirim')}</button><button class="btn ghost" data-close>${L('Batal','Batal')}</button></div>`,(m,close)=>{
@@ -1207,7 +1232,7 @@ const SIM_TBEDS=[[-4.2,-9.6],[-1,-9.6],[2.2,-9.6]];
 const SIM_COUNTER={x:6,z:7,cust:[[4.4,5.4],[4.4,7],[4.4,8.6]]};
 const SIM_REGDESK={x:0,z:5,pat:[0,6.5],staff:[0,3.7]};
 const SIM_DIAG={desk:[-11,-8.6],pat:[-11,-7.2],doc:[-11,-10]};
-const SIM_AMB={x:17,z:4};
+const SIM_AMB={x:17,z:4};const SIM_HELI={x:30,z:3};
 const SIM_SCENE=i=>({x:90+i*40,z:0});
 const SIM_SPAWN={x:0,z:9};
 /* kerusi meeting: [x,z,ry,label] ; KP & TP di kepala meja */
@@ -1267,20 +1292,31 @@ function buildWorld(scene,obs){
  block(.6,2,4,'#F4F7FA',11.5,7);for(let i=0;i<8;i++)sbox(.3,.25,.3,i%2?'#D3343A':'#F2F2F2',11.25,.6+(i%3)*.55,5.4+Math.floor(i/2)*.9,scene);
  /* ambulans */
  const amb=buildAmb();amb.position.set(SIM_AMB.x,0,SIM_AMB.z);scene.add(amb);obs.push([SIM_AMB.x-1.15,SIM_AMB.z-2.4,SIM_AMB.x+1.15,SIM_AMB.z+2.4]);
+ /* lahan parkir + helipad */
+ const lot=add(new THREE.Mesh(new THREE.PlaneGeometry(14,16),smat('#6B717C')));lot.rotation.x=-Math.PI/2;lot.position.set(29,.003,4);lot.receiveShadow=true;
+ for(let x=13.2;x<=21;x+=2.6)sbox(.12,.02,4.6,'#F2F2F2',x,.02,9.3,scene);sbox(8,.02,.12,'#F2F2F2',17.1,.02,7,scene);
+ for(const [x,z] of [[14.5,1],[19.7,1]])sbox(1.8,.02,1.8,'#F2C14E',x,.015,z,scene);
+ const amb2=buildAmb();amb2.position.set(14.5,0,9.4);scene.add(amb2);obs.push([13.35,7,15.65,11.8]);
+ const pad=new THREE.Mesh(new THREE.CylinderGeometry(4.6,4.8,.16,40),smat('#3E434C'));pad.position.set(SIM_HELI.x,.08,SIM_HELI.z);pad.receiveShadow=true;scene.add(pad);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(3.8,.14,6,48),smat('#F2C14E'));ring.rotation.x=Math.PI/2;ring.position.set(SIM_HELI.x,.18,SIM_HELI.z);scene.add(ring);
+ sbox(.45,.03,2.6,'#FFFFFF',SIM_HELI.x-1,.18,SIM_HELI.z,scene);sbox(.45,.03,2.6,'#FFFFFF',SIM_HELI.x+1,.18,SIM_HELI.z,scene);sbox(1.6,.03,.45,'#FFFFFF',SIM_HELI.x,.18,SIM_HELI.z,scene);
+ const padL=[];for(let i=0;i<8;i++){const a=i/8*Math.PI*2;padL.push(sbox(.22,.16,.22,'#7AE0B0',SIM_HELI.x+Math.cos(a)*4.4,.24,SIM_HELI.z+Math.sin(a)*4.4,scene))}
+ const heli=buildHeli();heli.position.set(SIM_HELI.x,.16,SIM_HELI.z);heli.rotation.y=-Math.PI/2;scene.add(heli);obs.push([SIM_HELI.x-1.9,SIM_HELI.z-1.3,SIM_HELI.x+1.9,SIM_HELI.z+1.3]);
+ sbox(.15,1.2,.15,'#2A2A2E',35.4,.6,-3.4,scene);const sock=new THREE.Mesh(new THREE.ConeGeometry(.3,1.2,8,1,true),smat('#F2832E'));sock.rotation.z=Math.PI/2;sock.position.set(34.8,1.2,-3.4);scene.add(sock);
  /* taman */
  const garden=buildGarden(scene,obs);
  /* sempadan luar */
- obs.push([-60,-30,-41.4,30],[22.5,-30,40,30],[-60,-30,40,-12.4],[-60,16,40,30]);
+ obs.push([-60,-30,-41.4,30],[36.4,-30,60,30],[-60,-30,60,-12.4],[-60,16,60,30]);
  /* lokasi kes luar */
- const scenes=[];SIM_REG.forEach(([n,,c],i)=>{const s=SIM_SCENE(i);const f=new THREE.Mesh(new THREE.PlaneGeometry(26,26),smat(c));f.rotation.x=-Math.PI/2;f.position.set(s.x,.01,s.z);scene.add(f);
+ const scenes=[],sHelis=[];SIM_REG.forEach(([n,,c],i)=>{const s=SIM_SCENE(i);const f=new THREE.Mesh(new THREE.PlaneGeometry(26,26),smat(c));f.rotation.x=-Math.PI/2;f.position.set(s.x,.01,s.z);scene.add(f);
   const rd=new THREE.Mesh(new THREE.PlaneGeometry(26,5),smat('#4A505B'));rd.rotation.x=-Math.PI/2;rd.position.set(s.x,.02,s.z+6);scene.add(rd);
   const rnd=(a,b)=>a+Math.random()*(b-a);
   for(let k=0;k<7;k++){const px=s.x+rnd(-11,11),pz=s.z+rnd(-12,-3);if(i===0)sbox(rnd(2,4),rnd(3,7),rnd(2,4),['#B9C2CE','#8D98A8','#D6DCE4'][k%3],px,0,pz,scene).position.y=2;
    else if(i===1){const t=new THREE.Mesh(new THREE.CylinderGeometry(.15,.2,2.4,5),smat('#8B6B45'));t.position.set(px,1.2,pz);scene.add(t);sbox(1.6,.15,.5,'#3E9B5B',px,2.4,pz,scene)}
    else if(i===2){const m=new THREE.Mesh(new THREE.ConeGeometry(rnd(1,2),rnd(2,4),6),smat('#2F6B45'));m.position.set(px,1.5,pz);scene.add(m)}
    else{const d=new THREE.Mesh(new THREE.SphereGeometry(rnd(1.5,2.5),10,8,0,Math.PI*2,0,Math.PI/2),smat('#C9D2E8'));d.position.set(px,0,pz);scene.add(d)}}
-  const a=buildAmb();a.position.set(s.x+6,0,s.z+6);a.rotation.y=Math.PI/2;scene.add(a);scenes.push(a)});
- return {amb,scenes,garden}}
+  const a=buildAmb();a.position.set(s.x+6,0,s.z+6);a.rotation.y=Math.PI/2;scene.add(a);scenes.push(a);const h=buildHeli();h.position.set(s.x-6,0,s.z+5);h.rotation.y=Math.PI/2;h.visible=false;scene.add(h);sHelis.push(h)});
+ return {amb,scenes,garden,heli,padL,sHelis}}
 function chairMesh(scene,x,z,ry,c,big){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;
  sbox(.62,.1,.6,c,0,.45,0,g);sbox(.62,big?.95:.7,.1,c,0,big?.92:.8,-.28,g);if(big)sbox(.66,.08,.14,'#E9B949',0,1.42,-.28,g);
  for(const [a,b] of [[-.26,-.24],[.26,-.24],[-.26,.24],[.26,.24]])sbox(.06,.42,.06,'#2A2A2E',a,.21,b,g);scene.add(g);return g}
@@ -1340,6 +1376,109 @@ function buildGarden(scene,obs){const add=m=>{scene.add(m);return m};const R=(a,
    d.position.set(p.x,p.y,p.z);d.rotation.set(t*p.rs+p.ph,t*p.rs*.7,p.ph);d.updateMatrix();petals.setMatrixAt(i,d.matrix)}petals.instanceMatrix.needsUpdate=true;
   boats.forEach((b,i)=>{b.position.y=.15+Math.sin(t*1.5+i)*.04;b.rotation.y+=dt*.05})};
  return {upd}}
+function buildHeli(){const g=new THREE.Group();
+ sbox(2.2,1.7,3.4,'#FFFFFF',0,1.55,0,g);sbox(2.22,.32,3.42,'#D3343A',0,1.2,0,g);
+ const nose=new THREE.Mesh(new THREE.SphereGeometry(1.1,12,10,0,Math.PI*2,0,Math.PI/2),new THREE.MeshLambertMaterial({color:'#9FD3F0',transparent:true,opacity:.85}));nose.rotation.x=Math.PI/2;nose.scale.set(1,1.1,.85);nose.position.set(0,1.6,1.7);g.add(nose);
+ sbox(.9,.9,.05,'#D3343A',1.11,1.75,-.3,g).rotation.y=Math.PI/2;sbox(.3,.9,.06,'#FFFFFF',1.13,1.75,-.3,g).rotation.y=Math.PI/2;sbox(.9,.3,.06,'#FFFFFF',1.13,1.75,-.3,g).rotation.y=Math.PI/2;
+ sbox(.9,.9,.05,'#D3343A',-1.11,1.75,-.3,g).rotation.y=Math.PI/2;
+ const boom=new THREE.Mesh(new THREE.CylinderGeometry(.22,.38,4.2,8),smat('#FFFFFF'));boom.rotation.x=Math.PI/2;boom.position.set(0,1.9,-3.6);g.add(boom);
+ sbox(.12,1.2,.8,'#D3343A',0,2.5,-5.5,g);sbox(1.4,.1,.5,'#FFFFFF',0,2,-5.3,g);
+ const tr=new THREE.Group();tr.position.set(.2,2.5,-5.6);sbox(.04,1.2,.14,'#2A2A2E',0,0,0,tr);sbox(.04,.14,1.2,'#2A2A2E',0,0,0,tr);g.add(tr);g.userData.tail=tr;
+ sbox(.25,.5,.25,'#2A2A2E',0,2.65,0,g);const rot=new THREE.Group();rot.position.set(0,2.95,0);sbox(7,.06,.32,'#2A2A2E',0,0,0,rot);sbox(.32,.06,7,'#2A2A2E',0,0,0,rot);sbox(.5,.18,.5,'#D3343A',0,.05,0,rot);g.add(rot);g.userData.rotor=rot;
+ for(const x of [-.95,.95]){sbox(.12,.1,3.6,'#3A3A42',x,.08,.1,g);sbox(.08,.7,.08,'#3A3A42',x,.45,1,g);sbox(.08,.7,.08,'#3A3A42',x,.45,-.9,g)}
+ g.userData.l1=sbox(.25,.15,.25,'#FF3B3B',0,2.42,1.1,g);return g}
+
+/* minigame memandu: ambulans (jalan raya, elak kenderaan) / helikopter (elak bangunan, naik turun) */
+function driveGame(host,kind,regName,done){const heli=kind==='heli';
+ const ov=document.createElement('div');ov.className='sim-drive';ov.innerHTML=`<canvas></canvas>
+  <div class="dv-top"><div class="dv-title">${heli?'🚁':'🚑'} ${L('Menuju ke','Menuju ke')} <b>${esc(regName)}</b></div><div class="dv-bar"><i></i><span>${heli?'🚁':'🚑'}</span><em>📍</em></div><div class="dv-hp"></div></div>
+  <div class="dv-cd">3</div><div class="dv-flash"></div><div class="dv-msg"></div>
+  <div class="dv-help">${heli?L('⬅️➡️ / A D kiri kanan · ⬆️⬇️ / W S naik turun · atau seret di skrin','⬅️➡️ / A D kiri kanan · ⬆️⬇️ / W S naik turun · atau geser di layar'):L('⬅️➡️ / A D untuk belok · atau seret di skrin','⬅️➡️ / A D untuk belok · atau geser di layar')}</div>
+  <div class="dv-pad">${heli?'<button data-k="u">▲</button>':''}<div><button data-k="l">◀</button><button data-k="r">▶</button></div>${heli?'<button data-k="d">▼</button>':''}</div>`;
+ host.append(ov);const cv=ov.querySelector('canvas');
+ const R=new THREE.WebGLRenderer({canvas:cv,antialias:true});R.setPixelRatio(Math.min(1.75,devicePixelRatio));
+ const sc=new THREE.Scene();sc.background=new THREE.Color(heli?'#BFE3F5':'#F6D7CB');sc.fog=new THREE.Fog(heli?'#BFE3F5':'#F6D7CB',60,170);
+ sc.add(new THREE.HemisphereLight('#FFF6EE','#8C8A88',.95));const sun=new THREE.DirectionalLight('#fff',.6);sun.position.set(10,30,20);sc.add(sun);
+ const cam=new THREE.PerspectiveCamera(60,1,.1,400);
+ const ground=new THREE.Mesh(new THREE.PlaneGeometry(400,600),smat(heli?'#8FC07A':'#9CCB86'));ground.rotation.x=-Math.PI/2;ground.position.z=-200;sc.add(ground);
+ const veh=heli?buildHeli():buildAmb();if(!heli)veh.rotation.y=Math.PI;else veh.rotation.y=Math.PI;sc.add(veh);
+ const P={x:0,y:heli?9:0,vx:0,vy:0};const LIM={x:heli?11:3.6,y0:3,y1:24};
+ const scroll=[];/* objek yang bergerak ke arah kamera */
+ const addScroll=(m,z,len)=>{m.position.z=z;m.userData.len=len;sc.add(m);scroll.push(m);return m};
+ const deco=[];
+ if(!heli){const road=new THREE.Mesh(new THREE.PlaneGeometry(10,600),smat('#4A505B'));road.rotation.x=-Math.PI/2;road.position.set(0,.01,-200);sc.add(road);
+  for(const x of [-6.2,6.2]){const sw=new THREE.Mesh(new THREE.BoxGeometry(2.4,.2,600),smat('#D9D2C6'));sw.position.set(x,.1,-200);sc.add(sw)}
+  for(let i=0;i<40;i++){for(const x of [-1.7,1.7]){const d=sbox(.18,.02,2.2,'#F2F2F2',x,.03,0,sc);deco.push(addScroll(d,-i*8,8*40))}}}
+ const city=(z)=>{const g=new THREE.Group();const side=Math.random()<.5?-1:1;const w=3+Math.random()*4,h=heli?3+Math.random()*6:4+Math.random()*10;
+  const x=heli?(side*(14+Math.random()*16)):side*(9.5+w/2+Math.random()*3);
+  sbox(w,h,w,['#E9DCCB','#D6C4B0','#F4E7D6','#CFC6BC','#F2C9C0'][Math.floor(Math.random()*5)],0,h/2,0,g);for(let k=0;k<Math.floor(h/2.2);k++)sbox(w+.02,.4,w*.7,'#9FD3F0',0,1.4+k*2.1,0,g);
+  g.position.x=x;return addScroll(g,z,170)};
+ for(let i=0;i<24;i++)city(-i*7-10);
+ if(!heli)for(let i=0;i<14;i++){const t=new THREE.Group();const tr=new THREE.Mesh(new THREE.CylinderGeometry(.15,.2,1.6,5),smat('#7A5236'));tr.position.y=.8;t.add(tr);const c=new THREE.Mesh(new THREE.IcosahedronGeometry(1.1,0),smat(i%3?'#5DAA57':'#F7B6CF'));c.position.y=2.1;t.add(c);t.position.x=(i%2?-1:1)*7.6;addScroll(t,-i*12,168)}
+ if(heli)for(let i=0;i<10;i++){const c=new THREE.Group();for(let k=0;k<4;k++){const s=new THREE.Mesh(new THREE.SphereGeometry(1.2+Math.random(),8,6),smat('#FFFFFF'));s.position.set(k*1.4,Math.random()*.6,0);c.add(s)}c.position.set(-30+Math.random()*60,26+Math.random()*10,0);addScroll(c,-i*18,180)}
+ /* rintangan */
+ const obst=[];const rings=[];
+ const carColors=['#E2725B','#5B8DEF','#F2C14E','#7BC67E','#9B6BD6','#EDEDED','#333A45'];
+ function spawn(z){if(!heli){const lanes=[-2.6,0,2.6];const free=Math.floor(Math.random()*3);const n=Math.random()<.35?2:1;let used=0;
+   for(let i=0;i<3&&used<n;i++){if(i===free)continue;if(n===1&&Math.random()<.5&&used===0&&i<2)continue;const t=Math.random();const g=new THREE.Group();let hw=1,hd=2;
+    if(t<.55){const c=carColors[Math.floor(Math.random()*carColors.length)];sbox(1.9,.9,3.6,c,0,.65,0,g);sbox(1.7,.7,1.8,c,0,1.4,-.2,g);sbox(1.6,.5,.05,'#9FD3F0',0,1.4,.71,g);for(const [a,b] of [[-.95,1.2],[.95,1.2],[-.95,-1.2],[.95,-1.2]]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.35,.35,.25,10),smat('#1E1E24'));w.rotation.z=Math.PI/2;w.position.set(a,.35,b);g.add(w)}hw=1;hd=1.9}
+    else if(t<.8){for(let k=-1;k<=1;k++){const c=new THREE.Mesh(new THREE.ConeGeometry(.35,.9,8),smat('#F2832E'));c.position.set(k*.75,.45,0);g.add(c);sbox(.5,.08,.5,'#FFFFFF',k*.75,.55,0,g)}hw=1.2;hd=.5}
+    else{sbox(2.4,.9,.3,'#F2F2F2',0,.8,0,g);for(let k=0;k<3;k++)sbox(.35,.88,.31,'#D3343A',-.8+k*.8,.8,0,g);sbox(.12,.6,.12,'#2A2A2E',-1,.3,0,g);sbox(.12,.6,.12,'#2A2A2E',1,.3,0,g);hw=1.25;hd=.3}
+    g.position.x=lanes[i];g.position.z=z;g.userData={hw,hd,h:2};sc.add(g);obst.push(g);used++}}
+  else{const n=1+Math.floor(Math.random()*2);for(let i=0;i<n;i++){const w=4+Math.random()*4,h=6+Math.random()*16,x=-10+Math.random()*20;const g=new THREE.Group();
+    sbox(w,h,w,['#D6C4B0','#B9C2CE','#E9DCCB','#C9B6D9'][Math.floor(Math.random()*4)],0,h/2,0,g);for(let k=0;k<Math.floor(h/2.4);k++)sbox(w+.04,.5,w*.8,'#9FD3F0',0,1.4+k*2.4,0,g);
+    if(Math.random()<.4){sbox(.2,4,.2,'#E9B949',w/2-.3,h+2,0,g);sbox(.4,.3,.4,'#FF3B3B',w/2-.3,h+4.1,0,g)}
+    g.position.set(x,0,z-i*14);g.userData={hw:w/2,hd:w/2,h:h+(g.children.length>3?0:0)};sc.add(g);obst.push(g)}
+   if(Math.random()<.6){const r=new THREE.Mesh(new THREE.TorusGeometry(2,.25,8,20),smat('#E9B949'));r.position.set(-8+Math.random()*16,5+Math.random()*14,z-7);sc.add(r);rings.push(r)}}}
+ /* input */
+ const K={};const kd=e=>{const k=e.key.toLowerCase();if(['arrowleft','arrowright','arrowup','arrowdown','a','d','w','s',' '].includes(k)){e.preventDefault();e.stopPropagation();K[k]=true}};
+ const ku=e=>{K[e.key.toLowerCase()]=false};window.addEventListener('keydown',kd,true);window.addEventListener('keyup',ku,true);
+ const pad={};ov.querySelectorAll('[data-k]').forEach(b=>{const on=e=>{e.preventDefault();pad[b.dataset.k]=1;b.classList.add('on')},off=()=>{pad[b.dataset.k]=0;b.classList.remove('on')};b.addEventListener('pointerdown',on);['pointerup','pointerleave','pointercancel'].forEach(t=>b.addEventListener(t,off))});
+ let drag=null;cv.addEventListener('pointerdown',e=>{drag=e;cv.setPointerCapture(e.pointerId)});cv.addEventListener('pointermove',e=>{if(drag)drag=e});['pointerup','pointercancel'].forEach(t=>cv.addEventListener(t,()=>drag=null));
+ /* keadaan */
+ const GOAL=heli?820:700;let dist=0,speed=0,maxSp=heli?40:34,hits=0,ringN=0,slow=0,inv=0,cd=3,t=0,last=performance.now(),raf,alive=true,nextSpawn=60,shake=0,finished=false;
+ const bar=ov.querySelector('.dv-bar i'),barV=ov.querySelector('.dv-bar span'),hp=ov.querySelector('.dv-hp'),cdE=ov.querySelector('.dv-cd'),fl=ov.querySelector('.dv-flash'),msg=ov.querySelector('.dv-msg');
+ const drawHp=()=>{hp.innerHTML=`💥 ${hits} ${heli?`· 💛 ${ringN}`:''}`};drawHp();
+ const say=(t,c)=>{msg.textContent=t;msg.className='dv-msg show '+(c||'');clearTimeout(say.t);say.t=setTimeout(()=>msg.className='dv-msg',900)};
+ function resize(){const w=ov.clientWidth,h=ov.clientHeight;R.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}const ro=new ResizeObserver(resize);ro.observe(ov);resize();
+ Snd.play('nav');
+ function frame(now2){if(!alive)return;raf=requestAnimationFrame(frame);const dt=Math.min(.05,(now2-last)/1000);last=now2;t+=dt;
+  if(cd>0){cd-=dt;const n=Math.ceil(cd);if(cdE.textContent!==String(n)&&n>0){cdE.textContent=n;cdE.classList.remove('pop');void cdE.offsetWidth;cdE.classList.add('pop');Snd.play('star')}if(cd<=0){cdE.textContent=L('JALAN!','JALAN!');cdE.classList.remove('pop');void cdE.offsetWidth;cdE.classList.add('pop','go');Snd.play('ok');setTimeout(()=>cdE.remove(),700)}}
+  const run=cd<=0&&!finished;
+  if(run){speed+=(maxSp*(slow>0?.45:1)-speed)*Math.min(1,dt*1.5);slow-=dt;inv-=dt;maxSp+=dt*.25}else if(finished)speed*=.94;
+  /* kawalan */
+  let sx=(K.arrowright||K.d||pad.r?1:0)-(K.arrowleft||K.a||pad.l?1:0),sy=(K.arrowup||K.w||K[' ']||pad.u?1:0)-(K.arrowdown||K.s||pad.d?1:0);
+  if(drag){const r=cv.getBoundingClientRect();const tx=((drag.clientX-r.left)/r.width*2-1)*LIM.x*1.15;sx=Math.max(-1,Math.min(1,(tx-P.x)/1.2));if(heli){const ty=LIM.y1-((drag.clientY-r.top)/r.height)*(LIM.y1-LIM.y0);sy=Math.max(-1,Math.min(1,(ty-P.y)/1.5))}}
+  if(!run){sx=0;sy=0}
+  P.vx+=(sx*(heli?16:13)-P.vx)*Math.min(1,dt*8);P.x=Math.max(-LIM.x,Math.min(LIM.x,P.x+P.vx*dt));
+  if(heli){P.vy+=(sy*10-P.vy)*Math.min(1,dt*6);P.y=Math.max(LIM.y0,Math.min(LIM.y1,P.y+P.vy*dt))}
+  veh.position.set(P.x,P.y,0);veh.rotation.z=-P.vx*(heli?.035:.02);if(heli){veh.rotation.x=-.12-P.vy*.012;veh.userData.rotor.rotation.y+=dt*30;veh.userData.tail.rotation.x+=dt*40}else veh.rotation.y=Math.PI-P.vx*.03;
+  const bl=Math.sin(t*14)>0;if(veh.userData.l2){veh.userData.l1.material=smat(bl?'#FF3B3B':'#7A2020');veh.userData.l2.material=smat(bl?'#2A3D7A':'#3B7BFF')}else veh.userData.l1.material=smat(bl?'#FF3B3B':'#7A2020');
+  /* gerak dunia */
+  const dz=speed*dt;dist+=run?dz:0;
+  for(const m of scroll){m.position.z+=dz;if(m.position.z>12)m.position.z-=m.userData.len}
+  if(run&&dist<GOAL-80){nextSpawn-=dz;if(nextSpawn<=0){spawn(-150);nextSpawn=heli?26+Math.random()*12:20+Math.random()*12}}
+  for(let i=obst.length-1;i>=0;i--){const o=obst[i];o.position.z+=dz;if(o.userData.fly){o.position.y+=dt*8;o.rotation.x+=dt*6;o.position.x+=o.userData.fly*dt*10}
+   if(o.position.z>14){sc.remove(o);disposeTree(o);obst.splice(i,1);continue}
+   if(run&&inv<=0&&!o.userData.fly&&Math.abs(o.position.z)<o.userData.hd+(heli?1.6:1.9)&&Math.abs(o.position.x-P.x)<o.userData.hw+(heli?1.3:1.05)&&(!heli||P.y<o.userData.h+.8)){
+    hits++;drawHp();slow=.9;inv=1;shake=.4;fl.classList.remove('on');void fl.offsetWidth;fl.classList.add('on');Snd.play('err');say(heli?L('Aduh! Langgar bangunan','Aduh! Nabrak gedung'):L('Aduh! Langgar','Aduh! Nabrak'),'bad');
+    if(!heli){o.userData.fly=P.x<o.position.x?1:-1}}}
+  for(let i=rings.length-1;i>=0;i--){const r=rings[i];r.position.z+=dz;r.rotation.y+=dt*2;if(r.position.z>14){sc.remove(r);rings.splice(i,1);continue}
+   if(run&&Math.abs(r.position.z)<1.2&&Math.hypot(r.position.x-P.x,r.position.y-(P.y+1.6))<2.2){ringN++;drawHp();Snd.play('star');say('💛 +1','good');sc.remove(r);rings.splice(i,1)}}
+  /* kamera */
+  shake=Math.max(0,shake-dt);const sk=shake>0?(Math.random()-.5)*shake:0;
+  if(heli){cam.position.set(P.x*.7+sk,P.y+4.5,11);cam.lookAt(P.x*.85,P.y+.5,-12)}else{cam.position.set(P.x*.6+sk,5.2,9.5);cam.lookAt(P.x*.7,1,-10)}
+  cam.fov=60+speed*.25;cam.updateProjectionMatrix();
+  /* kemajuan */
+  const pr=Math.min(1,dist/GOAL);bar.style.width=(pr*100)+'%';barV.style.left=(pr*100)+'%';
+  if(run&&dist>=GOAL){finished=true;Snd.play('ok');const perfect=hits===0;const bonus=(hits===0?10:hits<=2?5:0)+(heli?ringN*2:0);
+   msg.innerHTML=`<div class="dv-end">${perfect?'🏆':'📍'} ${L('Sampai di','Sampai di')} ${esc(regName)}!<small>${perfect?L('Pemanduan sempurna!','Mengemudi sempurna!'):`💥 ${hits} ${L('kali langgar','kali menabrak')}`}${heli&&ringN?` · 💛 ${ringN}`:''} · ${L('bonus','bonus')} +${bonus}</small></div>`;msg.className='dv-msg show end';
+   setTimeout(()=>{end();done({hits,bonus,rings:ringN})},1800)}
+  R.render(sc,cam)}
+ raf=requestAnimationFrame(frame);
+ function end(){alive=false;cancelAnimationFrame(raf);window.removeEventListener('keydown',kd,true);window.removeEventListener('keyup',ku,true);ro.disconnect();disposeTree(sc);R.dispose();ov.remove()}
+ return {end}}
+
 function buildAmb(){const g=new THREE.Group();sbox(2.2,1.9,3.4,'#FFFFFF',0,1.25,-.6,g);sbox(2.1,1.3,1.4,'#FFFFFF',0,1,1.75,g);sbox(1.9,.6,.05,'#9FD3F0',0,1.3,2.46,g);
  sbox(2.22,.3,3.42,'#D3343A',0,1.0,-.6,g);sbox(.2,.7,.05,'#D3343A',0,1.6,-2.31,g);sbox(.7,.2,.05,'#D3343A',0,1.6,-2.31,g);sbox(.05,.6,.6,'#D3343A',1.11,1.5,-.6,g);sbox(.05,.6,.6,'#D3343A',-1.11,1.5,-.6,g);
  g.userData.l1=sbox(.4,.18,.3,'#FF3B3B',-.5,2.28,.3,g);g.userData.l2=sbox(.4,.18,.3,'#3B7BFF',.5,2.28,.3,g);
@@ -1480,6 +1619,7 @@ function simEngine(wrap,training){
  const roomL={};for(const r of SIM_ROOMS)if(r.ms)roomL[r.k]=mkLbl('room',L(r.ms,r.id),new THREE.Vector3((r.x0+r.x1)/2,2.2,r.k==='garaj'?-2:(r.z0+r.z1)/2-((r.z1-r.z0)/2)+.8));
  SIM_REG.forEach(([n],i)=>{const s=SIM_SCENE(i);mkLbl('room','📍 '+n.toUpperCase(),new THREE.Vector3(s.x,3,s.z-10))});
  mkLbl('room','🌸 '+L('TAMAN SAKURA','TAMAN SAKURA'),new THREE.Vector3(-22,3,13.5));mkLbl('room','📸 SPOT FOTO',new THREE.Vector3(-35.4,3.6,-6.4));mkLbl('room','⛩️ GAZEBO',new THREE.Vector3(-29,5.8,-7.2));
+ mkLbl('room','🅿️ '+L('PARKIR','PARKIR'),new THREE.Vector3(17,2.4,10.5));mkLbl('room','🚁 HELIPAD',new THREE.Vector3(SIM_HELI.x,4.2,SIM_HELI.z-3.4));
  SIM_CHAIRS.forEach(c=>{if(c[3])mkLbl('chair',c[3],new THREE.Vector3(c[0],1.9,c[1]))});
  const myL=mkLbl('name me',`${esc(me.name)}`,null,myG);
  /* input */
@@ -1575,9 +1715,10 @@ function simEngine(wrap,training){
   if(P.sit>=0)return {k:'stand',txt:L('E · Bangun','E · Berdiri')};
   for(let i=0;i<SIM_CHAIRS.length;i++){const c=SIM_CHAIRS[i];if(d(c[0],c[1])<1.15){const taken=online().some(([id,p])=>id!==me.id&&p.sit===i);if(taken)return {k:'none',txt:L('Kerusi ada orang','Kursi sudah terisi')};
     if(c[3]&&!(isDev()||SHORT[me.role]===c[3]))return {k:'none',txt:`🔒 ${L('Kerusi khas','Kursi khusus')} ${c[3]}`};return {k:'sit',i,txt:`E · ${L('Duduk','Duduk')}${c[3]?' ('+c[3]+')':''}`}}}
-  if(d(SIM_AMB.x,SIM_AMB.z)<3.4){const open=Object.entries(tasks).filter(([,t])=>t.type==='luar'&&(!t.by||t.by===me.id));if(open.length)return {k:'amb',list:open,txt:L('E · Naik ambulans','E · Naik ambulans')};return {k:'none',txt:L('Tiada panggilan kecemasan','Tidak ada panggilan darurat')}}
+  if(d(SIM_HELI.x,SIM_HELI.z)<4.2){const open=Object.entries(tasks).filter(([,t])=>t.type==='luar'&&(!t.by||t.by===me.id));if(open.length)return {k:'amb',veh:'heli',list:open,txt:L('E · Naik helikopter','E · Naik helikopter')};return {k:'none',txt:L('Tiada panggilan kecemasan','Tidak ada panggilan darurat')}}
+  if(d(SIM_AMB.x,SIM_AMB.z)<3.4){const open=Object.entries(tasks).filter(([,t])=>t.type==='luar'&&(!t.by||t.by===me.id));if(open.length)return {k:'amb',veh:'amb',list:open,txt:L('E · Naik ambulans','E · Naik ambulans')};return {k:'none',txt:L('Tiada panggilan kecemasan','Tidak ada panggilan darurat')}}
   return null}
- async function doAct(press){if(busy||!act)return;if(act.k==='jual')openJual(act.id,act.tk);else if(act.k==='pasien')openPasien(act.id,act.tk);else if(act.k==='sit')sitDown(act.i);else if(act.k==='stand')standUp();else if(act.k==='amb')openAmb(act.list);else if(act.k==='back')travel(-1)}
+ async function doAct(press){if(busy||!act)return;if(act.k==='jual')openJual(act.id,act.tk);else if(act.k==='pasien')openPasien(act.id,act.tk);else if(act.k==='sit')sitDown(act.i);else if(act.k==='stand')standUp();else if(act.k==='amb')openAmb(act.list,act.veh);else if(act.k==='back')travel(-1)}
  const dlg=$('#simDlg',wrap);
  function showDlg(html,bind){busy=true;dlg.innerHTML=html;dlg.classList.remove('hide','shake');dlg.style.animation='none';void dlg.offsetWidth;dlg.style.animation='';Snd.play('pop');bind&&bind(dlg)}
  function closeDlg(){dlg.classList.add('hide');dlg.innerHTML='';busy=false}
@@ -1646,16 +1787,18 @@ function simEngine(wrap,training){
   showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🧾</span><div class="grow"><b>${esc(t.name)} ${L('sudah sedar!','sudah sadar!')}</b><div class="muted" style="font-size:12px">📍 ${reg[0]}</div></div></div><p class="sim-q">${L('Billing revive untuk kawasan ini?','Billing revive untuk wilayah ini?')}</p><div class="sim-opts">${bo.map((o,i)=>`<button class="btn ghost" data-b="${i}">${o.t}</button>`).join('')}</div><div id="simWhy"></div>`,d=>{
    $$('[data-b]',d).forEach(b=>b.onclick=()=>{const o=bo[+b.dataset.b];$$('[data-b]',d).forEach(x=>{x.disabled=true;if(bo[+x.dataset.b].ok)x.classList.add('mint')});if(!o.ok)b.classList.add('red');Snd.play(o.ok?'star':'err');
     $('#simWhy',d).innerHTML=`<div class="chip ${o.ok?'mint':'butter'}" style="white-space:normal;margin-top:10px">${o.ok?'✓':'✗'} ${L('Harga revive','Harga revive')}: City RM500 · Sandy Shore RM600 · Paleto RM700 · Genting RM800</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="simNext">${L('Balik ke hospital','Kembali ke rumah sakit')} 🚑</button></div>`;
-    $('#simNext',d).onclick=()=>{closeDlg();reward(id,o.ok?25:15,o.ok?reg[1]:0,o.ok?`💓 ${L('Revive & billing betul','Revive & billing benar')} · +25 · RM${reg[1]}`:`💓 ${L('Pesakit selamat, tapi billing salah','Pasien selamat, tapi billing salah')} · +15`);setTimeout(()=>alive&&travel(-1),300)}})})}
+    $('#simNext',d).onclick=()=>{closeDlg();const db=driveBonus;driveBonus=0;const pts=(o.ok?25:15)+db;reward(id,pts,o.ok?reg[1]:0,(o.ok?`💓 ${L('Revive & billing betul','Revive & billing benar')} · RM${reg[1]}`:`💓 ${L('Pesakit selamat, tapi billing salah','Pasien selamat, tapi billing salah')}`)+` · +${pts}${db?` (🚦 +${db})`:''}`);setTimeout(()=>alive&&travel(-1),300)}})})}
  /* duduk */
  function sitDown(i){const c=SIM_CHAIRS[i];P.sit=i;P.target=null;P.x=c[0];P.z=c[1];P.ry=c[2];setSit(myG,true);SimNet.move(st());Snd.play('pop')}
  function standUp(){if(P.sit<0)return;const c=SIM_CHAIRS[P.sit];P.sit=-1;setSit(myG,false);P.x=c[0]-Math.sin(c[2])*.95;P.z=c[1]-Math.cos(c[2])*.95;SimNet.move(st())}
  function jump(){if(busy)return;if(P.sit>=0){standUp();return}if(P.y<=simGround(P.x,P.z)+.01){P.vy=6.2;Snd.play('star')}}
- function openAmb(list){showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🚑</span><div class="grow"><b>${L('Panggilan kecemasan','Panggilan darurat')}</b><div class="muted" style="font-size:12px">${L('Pilih kes untuk diambil','Pilih kasus yang diambil')}</div></div><button class="iconbtn sm" id="simX">✕</button></div>
-  <div class="list">${list.map(([id,t])=>`<div class="li"><div class="grow"><b>📍 ${SIM_REG[t.reg][0]}</b><div class="muted" style="font-size:12px">${esc(t.name)} ${L('pengsan','pingsan')} · revive RM${SIM_REG[t.reg][1]}${t.by===me.id?' · '+L('kes anda','kasus kamu'):''}</div></div><button class="btn sm red" data-go="${id}">${L('Gerak','Berangkat')}</button></div>`).join('')}</div>`,d=>{
-  $('#simX',d).onclick=closeDlg;$$('[data-go]',d).forEach(b=>b.onclick=async()=>{const id=b.dataset.go;if(!(await SimNet.claim(id))){toast(L('Kes ini sudah diambil staff lain','Kasus ini sudah diambil staff lain'),'err');closeDlg();return}closeDlg();travel(tasks[id].reg)})})}
- function travel(reg){busy=true;const f=$('#simFade',wrap);f.innerHTML=reg<0?`🏥 ${L('Balik ke hospital…','Kembali ke rumah sakit…')}`:`🚑 ${L('Menuju ke','Menuju ke')} ${SIM_REG[reg][0]}…`;f.classList.remove('hide');Snd.play('nav');
-  setTimeout(()=>{if(!alive)return;if(reg<0){P.x=SIM_AMB.x-2.2;P.z=SIM_AMB.z;P.scene=-1}else{const s=SIM_SCENE(reg);P.x=s.x+3.4;P.z=s.z+4;P.scene=reg}P.target=null;myG.position.set(P.x,0,P.z);SimNet.move(st());
+ let driveBonus=0,curVeh='amb',paused=false;
+ function openAmb(list,veh='amb'){const vi=veh==='heli'?'🚁':'🚑';showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">${vi}</span><div class="grow"><b>${L('Panggilan kecemasan','Panggilan darurat')}</b><div class="muted" style="font-size:12px">${L('Pilih kes untuk diambil','Pilih kasus yang diambil')}</div></div><button class="iconbtn sm" id="simX">✕</button></div>
+  <div class="list">${list.map(([id,t])=>`<div class="li"><div class="grow"><b>📍 ${SIM_REG[t.reg][0]}</b><div class="muted" style="font-size:12px">${esc(t.name)} ${L('pengsan','pingsan')} · revive RM${SIM_REG[t.reg][1]}${t.by===me.id?' · '+L('kes anda','kasus kamu'):''}</div></div><button class="btn sm red" data-go="${id}">${vi} ${L('Gerak','Berangkat')}</button></div>`).join('')}</div>`,d=>{
+  $('#simX',d).onclick=closeDlg;$$('[data-go]',d).forEach(b=>b.onclick=async()=>{const id=b.dataset.go;if(!(await SimNet.claim(id))){toast(L('Kes ini sudah diambil staff lain','Kasus ini sudah diambil staff lain'),'err');closeDlg();return}closeDlg();const reg=tasks[id].reg;curVeh=veh;busy=true;paused=true;$('#simLbl',wrap).style.visibility='hidden';
+   driveGame(wrap,veh,SIM_REG[reg][0],res=>{paused=false;$('#simLbl',wrap).style.visibility='';driveBonus=res.bonus;travel(reg)})})})}
+ function travel(reg){busy=true;const f=$('#simFade',wrap);f.innerHTML=reg<0?`🏥 ${L('Balik ke hospital…','Kembali ke rumah sakit…')}`:`📍 ${L('Tiba di','Tiba di')} ${SIM_REG[reg][0]}`;if(reg>=0){world.scenes[reg].visible=curVeh!=='heli';world.sHelis[reg].visible=curVeh==='heli'}f.classList.remove('hide');Snd.play('nav');
+  setTimeout(()=>{if(!alive)return;if(reg<0){if(curVeh==='heli'){P.x=SIM_HELI.x-4.6;P.z=SIM_HELI.z+3}else{P.x=SIM_AMB.x-2.2;P.z=SIM_AMB.z}P.scene=-1}else{const s=SIM_SCENE(reg);P.x=s.x+3.4;P.z=s.z+4;P.scene=reg}P.target=null;myG.position.set(P.x,0,P.z);SimNet.move(st());
    setTimeout(()=>{f.classList.add('hide');busy=false},400)},1500)}
  /* HUD */
  function drawMe(){const e=$('#simMe',wrap);if(e)e.innerHTML=`<div class="sim-pill">⭐ ${myPts} ${L('mata','poin')} · RM${myRm.toLocaleString('en-US')}</div>`}drawMe();
@@ -1697,6 +1840,7 @@ function simEngine(wrap,training){
   hostT+=dt;if(hostT>2){hostT=0;hostTick()}
   syncNpcs();syncRemotes(dt);
   /* ambulans lampu */
+  world.heli.userData.rotor.rotation.y+=dt*1.2;world.padL.forEach((m,i)=>m.material=smat(Math.floor(t/250)%8===i?'#FFFFFF':'#7AE0B0'));
   const bl=Math.sin(t/120)>0;[world.amb,...world.scenes].forEach(a=>{a.userData.l1.material=smat(bl?'#FF3B3B':'#7A2020');a.userData.l2.material=smat(bl?'#2A3D7A':'#3B7BFF')});
   world.garden.upd(dt,t/1000);
   for(const n of Object.values(npcs)){if(n.lbl)n.lbl.d.classList.toggle('pulse',Math.sin(t/300)>0)}
@@ -1707,7 +1851,7 @@ function simEngine(wrap,training){
   /* aksi */
   act=busy?null:findAct();const ae=$('#simAct',wrap);if(act){ae.classList.remove('hide');ae.innerHTML=`${act.txt}${act.hold?`<div class="sim-bar"><span style="width:${Math.min(100,holdT/act.hold*100)}%"></span></div>`:''}`;ab.classList.toggle('on',act.k!=='none')}else{ae.classList.add('hide');ab.classList.remove('on')}
   drawHud();
-  renderer.render(scene,cam);
+  if(!paused)renderer.render(scene,cam);
   /* label */
   const W=wrap.clientWidth,H=wrap.clientHeight;
   for(const l of labels){if(l.obj){v3.copy(l.obj.position);v3.y+=(l.obj.rotation.x||l.obj.rotation.z)?1.1:2.55}else v3.copy(l.pos);
