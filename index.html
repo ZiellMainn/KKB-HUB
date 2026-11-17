@@ -364,6 +364,44 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 }
 @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 .fg{display:block}.fg summary::-webkit-details-marker{display:none}.fg-tot{font-family:var(--display);font-size:18px;white-space:nowrap}.fg-sub{margin-top:10px;padding-top:10px;border-top:1px dashed rgba(0,0,0,.15);display:grid;gap:6px;font-size:13px}
+.sim-gate{background:linear-gradient(135deg,#FFF4EE,#FCE3E1)}.sim-gate-in{display:flex;gap:24px;align-items:center;flex-wrap:wrap}.sim-gate canvas{width:220px;height:254px}
+.sim-rules{margin:0;padding-left:0;list-style:none;display:grid;gap:6px;font-size:14px}
+.sim-sw{width:34px;height:34px;border-radius:50%;border:3px solid #fff;box-shadow:0 0 0 2px var(--line);cursor:pointer}.sim-sw.on{box-shadow:0 0 0 3px var(--red)}
+.sim-chips{display:flex;flex-wrap:wrap;gap:6px}.sim-chips .chip{cursor:pointer;border:0}
+.sim-outs{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}.sim-out{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:14px;border:2px solid var(--line);background:var(--paper);cursor:pointer;font-weight:600;font-size:13px;text-align:left;color:var(--ink)}.sim-out span{width:28px;height:28px;border-radius:8px;flex:none;box-shadow:inset 0 0 0 1px rgba(0,0,0,.15)}.sim-out.on{border-color:var(--red);background:#FFF0EE}
+.sim-prevcard{display:flex;flex-direction:column;align-items:center}.sim-prevcard canvas{width:100%;max-width:300px;height:auto;aspect-ratio:4/5}
+.sim-wrap{position:relative;height:calc(100vh - 190px);min-height:460px;border-radius:24px;overflow:hidden;background:#F3D9CF;box-shadow:0 10px 30px rgba(90,30,30,.15);user-select:none;-webkit-user-select:none;touch-action:none}
+.sim-wrap:fullscreen{height:100vh;border-radius:0}
+.sim-wrap canvas#simCv{display:block;width:100%;height:100%}
+.sim-labels{position:absolute;inset:0;pointer-events:none;overflow:hidden;z-index:1}
+.sim-lbl{position:absolute;left:0;top:0;white-space:nowrap;font-weight:700;font-size:12px;display:flex;flex-direction:column;align-items:center;gap:4px}
+.sim-lbl.room{background:rgba(42,20,24,.82);color:#fff;padding:5px 10px;border-radius:10px;font-size:11px;letter-spacing:.06em;box-shadow:0 4px 12px rgba(0,0,0,.2)}
+.sim-lbl.room i{font-style:normal;background:#E9B949;color:#2A1418;border-radius:6px;padding:1px 6px;margin-left:4px}.sim-lbl.room i.off{background:#ffffff30;color:#fff}
+.sim-lbl.name{background:#fff;color:#2A1418;padding:2px 8px;border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,.15)}.sim-lbl.name.me{background:#D3343A;color:#fff}
+.sim-lbl.npc{font-size:22px;transition:transform .2s}.sim-lbl.npc.pulse{filter:drop-shadow(0 0 6px #fff)}
+.sim-bub{background:#fff;color:#2A1418;border-radius:12px 12px 12px 3px;padding:6px 10px;max-width:200px;white-space:normal;font-weight:600;box-shadow:0 4px 12px rgba(0,0,0,.18);font-size:13px}
+.sim-hud{position:absolute;z-index:4}.sim-hud.tl{left:12px;top:12px;max-width:min(380px,60%)}.sim-hud.tr{right:12px;top:12px;text-align:right}
+.sim-pill{display:inline-block;background:rgba(255,255,255,.92);border-radius:999px;padding:6px 12px;font-weight:700;font-size:13px;box-shadow:0 3px 10px rgba(0,0,0,.12);color:#2A1418}.sim-pill.mint{background:#CFF3E3}
+.sim-sub{font-size:12px;margin-top:5px;background:rgba(255,255,255,.75);border-radius:10px;padding:4px 8px;display:inline-block;color:#2A1418}
+.sim-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:#2E9D7E;margin:0 3px 1px 6px}
+.sim-tasks{position:absolute;z-index:4;right:12px;top:96px;width:210px;background:rgba(255,255,255,.9);border-radius:16px;padding:10px;font-size:12px;display:grid;gap:5px;box-shadow:0 4px 14px rgba(0,0,0,.12);color:#2A1418;max-height:40%;overflow:auto}
+.sim-task{display:flex;justify-content:space-between;gap:6px;background:#F6EEE3;border-radius:8px;padding:5px 7px}.sim-task span{opacity:.6}.sim-task.mine{background:#FCE3E1;outline:2px solid #D3343A}
+.sim-chat{position:absolute;left:12px;bottom:12px;width:min(340px,70%);z-index:2}.sim-chatlog{background:rgba(42,20,24,.55);color:#fff;border-radius:14px;padding:8px 10px;font-size:13px;max-height:140px;overflow:auto;margin-bottom:6px;display:grid;gap:2px}.sim-chatlog:empty{display:none}
+.sim-chat input{flex:1;border-radius:999px;padding:8px 14px;border:0;background:rgba(255,255,255,.95)}
+.sim-act{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);background:#2A1418;color:#fff;padding:10px 18px;border-radius:999px;font-weight:700;font-size:14px;box-shadow:0 6px 18px rgba(0,0,0,.25);z-index:2;text-align:center;min-width:160px}
+.sim-bar{height:6px;background:#ffffff30;border-radius:4px;margin-top:6px;overflow:hidden}.sim-bar span{display:block;height:100%;background:#5FD1B5}
+.sim-joy,.sim-abtn{display:none}
+@media (pointer:coarse){.sim-joy{display:block;position:absolute;left:18px;bottom:18px;width:120px;height:120px;border-radius:50%;background:rgba(255,255,255,.35);border:2px solid rgba(255,255,255,.7);z-index:3;touch-action:none}.sim-joy div{position:absolute;left:35px;top:35px;width:50px;height:50px;border-radius:50%;background:#fff;box-shadow:0 3px 10px rgba(0,0,0,.2)}
+ .sim-abtn{display:block;position:absolute;right:20px;bottom:24px;width:74px;height:74px;border-radius:50%;border:0;background:#8E2433;color:#fff;font-weight:800;font-size:22px;z-index:3;opacity:.55;touch-action:none}.sim-abtn.on{opacity:1;background:#D3343A}
+ .sim-chat{left:150px;bottom:16px;width:calc(100% - 260px)}.sim-act{bottom:110px}.sim-tasks{display:none}}
+.sim-hud .btn.ghost,.sim-hud .iconbtn{background:#fff}
+@media (max-width:900px){body.sim-playing .page-h,body.sim-playing .topbar{display:none}body.sim-playing .sim-wrap{height:calc(100dvh - 120px);min-height:380px;border-radius:18px}}
+@media (max-width:700px){.sim-chatlog{max-height:80px}.sim-hud.tl{max-width:46%}.sim-hud.tl .sim-sub{display:none}.sim-hud.tr .sim-pill{font-size:12px}.sim-tasks{display:none}.sim-hud .btn.ghost{padding:6px 10px;font-size:12px}}
+.sim-fade{position:absolute;inset:0;background:rgba(42,20,24,.86);color:#fff;display:grid;place-items:center;font-size:24px;font-weight:800;z-index:5;animation:fade .3s}
+.sim-dlg{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:min(440px,92%);background:#FFFBF7;border-radius:22px;padding:18px;z-index:6;box-shadow:0 20px 50px rgba(0,0,0,.3);color:#2A1418}
+.sim-dlg-h{display:flex;gap:10px;align-items:center;margin-bottom:6px}.sim-q{font-size:16px;font-weight:600;margin:10px 0}
+.sim-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sim-opts .btn.mint{background:#CFF3E3;border-color:#2E9D7E}.sim-opts .btn.red{background:#FCE3E1;color:#8E2433}
+.sim-load{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;background:#F3D9CF;z-index:7}
 </style>
 </head>
 <body>
@@ -380,12 +418,13 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 const FIREBASE_CONFIG = {
   apiKey: "AIzaSyDISvHoGsdOTDbWIROUWiBxAaUFcBB-kes",
   authDomain: "kkb-hub.firebaseapp.com",
+  databaseURL: "https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app",
   projectId: "kkb-hub",
   storageBucket: "kkb-hub.firebasestorage.app",
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.17-4';
+const APP_VERSION = '2026.11.17-6';
 /* contoh:
 const FIREBASE_CONFIG = {
   apiKey: "...", authDomain: "...", projectId: "...",
@@ -691,14 +730,15 @@ function resizeImg(file,max=160){return new Promise((res,rej)=>{const fr=new Fil
 
 /* ---------------- routing & render ---------------- */
 const PAGES=[
- {id:'dashboard',label:'Utama',ico:'🏥',g:'Wad Utama'},{id:'chat',label:'Lepak Chat',ico:'💬',g:'Wad Utama'},{id:'suara',label:'Suara Hati',ico:'💌',g:'Wad Utama'},{id:'game',label:'Snake Medik',ico:'🐍',g:'Wad Utama'},
+ {id:'dashboard',label:'Utama',ico:'🏥',g:'Wad Utama'},{id:'chat',label:'Lepak Chat',ico:'💬',g:'Wad Utama'},{id:'suara',label:'Suara Hati',ico:'💌',g:'Wad Utama'},
  {id:'kawalan',label:'Bilik Kawalan',ico:'📡',g:'KKB Center'},{id:'pukat',label:'Pembelian Pukat',ico:'🧾',g:'KKB Center'},{id:'storage',label:'Storage',ico:'📦',g:'KKB Center'},
  {id:'sop',label:'SOP Kerja',ico:'📘',g:'Info KKB'},{id:'uniform',label:'Uniform Code',ico:'🥼',g:'Info KKB'},{id:'kos',label:'Kos Rawatan',ico:'💊',g:'Info KKB'},
  {id:'chart',label:'Chart Organisasi',ico:'🧬',g:'Info KKB'},{id:'akkb',label:'Command /akkb',ico:'📣',g:'Info KKB'},
  {id:'cuti',label:'Apply Cuti',ico:'🌴',g:'Saya'},{id:'resign',label:'Resign',ico:'📤',g:'Saya'},{id:'iban',label:'IBAN Staff',ico:'💳',g:'Saya'},{id:'profil',label:'Profil Saya',ico:'🙂',g:'Saya'},
  {id:'rekap',label:'Rekap Jam Kerja',ico:'⏱️',g:'Pengurusan'},{id:'bimbingan',label:'Bimbingan Staff',ico:'🩺',g:'Pengurusan'},{id:'diskusi',label:'Diskusi Pimpinan',ico:'🗣️',g:'Pengurusan'},{id:'evaluasi',label:'Evaluasi Staff',ico:'⭐',g:'Pengurusan'},
  {id:'permohonan',label:'Permohonan',ico:'📥',g:'Pengurusan'},{id:'staff',label:'Urus Staff',ico:'👥',g:'Pengurusan'},{id:'pantau',label:'Pantau KP & TP',ico:'🔭',g:'Pengurusan'},
- {id:'dev',label:'Panel Developer',ico:'🛠️',g:'Developer'}];
+ {id:'dev',label:'Panel Developer',ico:'🛠️',g:'Developer'},
+ {id:'sim',label:'KKB Sim 3D',ico:'🎮',g:'Mini Games'},{id:'game',label:'Snake Medik',ico:'🐍',g:'Mini Games'}];
 function current(){const h=location.hash.slice(1);return PAGES.find(p=>p.id===h&&can(h))?h:'dashboard'}
 let pending=false;
 function rerender(force){if(!S.me){renderLogin();return}
@@ -893,6 +933,420 @@ function makeSnake(cv,over){const N=20,C=cv.width/N,x=cv.getContext('2d');let sn
  cv.addEventListener('click',()=>{if(state!=='run')start()});
  $$('[data-dir]').forEach(b=>b.onclick=()=>{turn(b.dataset.dir);Snd.play('nav')});$('#snkMid').onclick=start;
  reset();return {reset}}
+
+/* ================= KKB SIM · game 3D hospital multiplayer ================= */
+const AV_SKIN=['#F6D2B8','#E8B48F','#C98E65','#9C6440','#6E4429'];
+const AV_HAIRC=['#2B1D16','#5A3825','#A0522D','#D8B26A','#ECE6D6','#B83A3A','#3B3B6D','#E88AA8'];
+const AV_HAIR=[['botak','Botak','Botak'],['pendek','Pendek','Pendek'],['spiky','Spiky','Spiky'],['bob','Bob','Bob'],['panjang','Panjang','Panjang'],['ekor','Ekor kuda','Kuncir kuda'],['sanggul','Sanggul','Cepol'],['tudung','Tudung','Kerudung']];
+/* outfit: top, bottom, coat (warna kot atau ''), trim, lead=hanya atasan */
+const AV_OUT=[
+ {id:'scrub_biru',n:['Scrubs Biru','Scrubs Biru'],top:'#3D7BD9',bot:'#3569BD'},
+ {id:'scrub_hijau',n:['Scrubs Hijau','Scrubs Hijau'],top:'#2E9D7E',bot:'#27866C'},
+ {id:'scrub_pink',n:['Scrubs Pink','Scrubs Pink'],top:'#E57FA5',bot:'#CF6D92'},
+ {id:'scrub_ungu',n:['Scrubs Ungu','Scrubs Ungu'],top:'#7E5BC2',bot:'#6A4BA8'},
+ {id:'scrub_maroon',n:['Scrubs Maroon KKB','Scrubs Maroon KKB'],top:'#8E2433',bot:'#6E1B28'},
+ {id:'intern',n:['Scrubs Intern','Scrubs Intern'],top:'#E8B931',bot:'#C99C22'},
+ {id:'nurse',n:['Uniform Nurse','Seragam Nurse'],top:'#A9D8F2',bot:'#F4F7FA',trim:'#3D7BD9'},
+ {id:'kot_doktor',n:['Kot Doktor','Jas Dokter'],top:'#3D9FA8',bot:'#2F3A4A',coat:'#F7F7F4'},
+ {id:'kot_pink',n:['Kot Doktor (dalam pink)','Jas Dokter (dalam pink)'],top:'#E57FA5',bot:'#2F3A4A',coat:'#F7F7F4'},
+ {id:'kot_pakar',n:['Kot Pakar + tali leher','Jas Spesialis + dasi'],top:'#F2E6D8',bot:'#2B2B33',coat:'#F7F7F4',tie:'#B83A3A'},
+ {id:'paramedik',n:['Jaket Paramedik','Jaket Paramedis'],top:'#E8732E',bot:'#2B2B33',trim:'#F5F06A'},
+ {id:'atasan_kot',n:['Kot Pengarah (atasan)','Jas Pengarah (atasan)'],top:'#F7F2EA',bot:'#3A1820',coat:'#7A1F2B',trim:'#E9B949',tie:'#E9B949',lead:1},
+ {id:'atasan_sut',n:['Sut Pengurusan (atasan)','Setelan Manajemen (atasan)'],top:'#F7F2EA',bot:'#1E1E24',coat:'#1E1E24',tie:'#C0392B',lead:1}];
+const AV_ACC=[['steto','🩺 Stetoskop','🩺 Stetoskop'],['kacamata','👓 Cermin mata','👓 Kacamata'],['mask','😷 Mask','😷 Masker'],['topi','🧢 Topi nurse','🧢 Topi nurse'],['kad','🪪 Kad ID','🪪 Kartu ID']];
+const SIM_NAMES=['Ah Seng','Mak Jah','Pak Abu','Siti Aminah','Kumar','Mei Ling','Rizal','Farah','Danial','Aiman','Nurul','Hafiz','Zul','Ijat','Kak Ros','Tok Wan','Ravi','Adik Mira','Encik Lim','Puteri'];
+const SIM_REG=[['City',500,'#7C8794'],['Sandy Shore',600,'#E2C58F'],['Paleto',700,'#7FA36B'],['Genting',800,'#9AA7C7']];
+const SIM_NEED={bandage:{ico:'🩹',sym:['Luka dan berdarah sikit','Luka dan berdarah sedikit'],rm:150,lbl:'Bandage'},medkit:{ico:'💊',sym:['Cedera parah, HP sangat rendah','Cedera parah, HP sangat rendah'],rm:500,lbl:'Medkit'},darah:{ico:'🩸',sym:['Pucat, lemah, kurang darah','Pucat, lemas, kurang darah'],rm:500,lbl:L('Tambah darah','Tambah darah')}};
+function avDefault(st){const r=st&&st.role;const out=isLeadGroup(r)&&r!=='HEAD DOCTOR'?'atasan_kot':r==='INTERN'?'intern':r==='NURSE'?'nurse':(RANK[r]||0)>=4?'kot_pakar':'kot_doktor';
+ return {skin:1,hair:'pendek',hairC:0,out,acc:r==='NURSE'?['topi']:['steto']}}
+function avOf(st){const a=(S.avatars||{})[st&&st.id];return {...avDefault(st),...(a||{})}}
+const avOutAllowed=(o,st)=>!o.lead||isDev()||isLeadGroup(st&&st.role);
+
+/* ---------- voxel avatar ---------- */
+const SIMMAT={};const smat=c=>SIMMAT[c]||(SIMMAT[c]=new THREE.MeshLambertMaterial({color:c}));
+function sbox(w,h,d,c,x=0,y=0,z=0,p){const m=new THREE.Mesh(new THREE.BoxGeometry(w,h,d),smat(c));m.position.set(x,y,z);m.castShadow=true;if(p)p.add(m);return m}
+function buildAvatar(av,civ){const g=new THREE.Group();const o=AV_OUT.find(x=>x.id===av.out)||AV_OUT[0];const skin=AV_SKIN[av.skin]||AV_SKIN[1];const hc=AV_HAIRC[av.hairC]||AV_HAIRC[0];
+ const top=civ?civ.top:o.top,bot=civ?civ.bot:o.bot,coat=civ?'':o.coat;
+ const mkLimb=(x,c,h,y)=>{const piv=new THREE.Group();piv.position.set(x,y,0);sbox(.24,h,.26,c,0,-h/2,0,piv);g.add(piv);return piv};
+ g.userData.legL=mkLimb(-.15,bot,.62,.62);g.userData.legR=mkLimb(.15,bot,.62,.62);
+ sbox(.25,.1,.3,'#2A2A2E',-.15,.05,.03,g);sbox(.25,.1,.3,'#2A2A2E',.15,.05,.03,g);
+ sbox(.62,.72,.36,coat||top,0,.98,0,g);
+ if(coat){sbox(.66,.34,.4,coat,0,.55,0,g);sbox(.2,.6,.02,top,0,1.02,.19,g);if(o.tie)sbox(.08,.42,.02,o.tie,0,.98,.205,g);if(o.trim)sbox(.62,.05,.38,o.trim,0,1.3,0,g)}
+ else if(o.trim&&!civ){sbox(.64,.06,.38,o.trim,0,.86,0,g);sbox(.64,.06,.38,o.trim,0,1.06,0,g)}
+ const arm=coat||top;g.userData.armL=new THREE.Group();g.userData.armL.position.set(-.42,1.3,0);sbox(.2,.62,.22,arm,0,-.28,0,g.userData.armL);sbox(.18,.14,.2,skin,0,-.62,0,g.userData.armL);g.add(g.userData.armL);
+ g.userData.armR=new THREE.Group();g.userData.armR.position.set(.42,1.3,0);sbox(.2,.62,.22,arm,0,-.28,0,g.userData.armR);sbox(.18,.14,.2,skin,0,-.62,0,g.userData.armR);g.add(g.userData.armR);
+ const head=new THREE.Group();head.position.y=1.68;g.add(head);g.userData.head=head;
+ sbox(.62,.6,.6,skin,0,0,0,head);sbox(.09,.12,.02,'#1B1B1F',-.13,.03,.305,head);sbox(.09,.12,.02,'#1B1B1F',.13,.03,.305,head);
+ const acc=new Set(civ?[]:(av.acc||[]));
+ if(acc.has('mask'))sbox(.5,.2,.03,'#BFE3EE',0,-.15,.31,head);else sbox(.16,.04,.02,'#A0524A',0,-.15,.305,head);
+ if(acc.has('kacamata')){sbox(.18,.15,.02,'#202020',-.13,.03,.32,head);sbox(.18,.15,.02,'#202020',.13,.03,.32,head);sbox(.1,.03,.02,'#202020',0,.06,.32,head)}
+ const h=civ?civ.hair:av.hair;
+ if(h==='tudung'){const tc=civ?civ.hc:hc;sbox(.68,.2,.68,tc,0,.3,0,head);sbox(.68,.6,.14,tc,0,-.05,-.3,head);sbox(.06,.6,.66,tc,-.33,-.05,0,head);sbox(.06,.6,.66,tc,.33,-.05,0,head);sbox(.62,.28,.5,tc,0,-.42,-.05,head)}
+ else if(h!=='botak'){const c=civ?civ.hc:hc;sbox(.66,.16,.66,c,0,.36,0,head);sbox(.66,.38,.12,c,0,.12,-.28,head);
+  if(h==='spiky')for(let i=-1;i<=1;i++){const k=new THREE.Mesh(new THREE.ConeGeometry(.12,.26,4),smat(c));k.position.set(i*.2,.55,0);head.add(k)}
+  if(h==='bob'){sbox(.08,.44,.6,c,-.33,.02,0,head);sbox(.08,.44,.6,c,.33,.02,0,head);sbox(.66,.5,.12,c,0,.02,-.28,head)}
+  if(h==='panjang'){sbox(.08,.62,.6,c,-.33,-.05,-.02,head);sbox(.08,.62,.6,c,.33,-.05,-.02,head);sbox(.66,.95,.14,c,0,-.2,-.3,head)}
+  if(h==='ekor'){sbox(.2,.5,.16,c,0,-.05,-.42,head);sbox(.3,.12,.12,'#E85A5A',0,.17,-.38,head)}
+  if(h==='sanggul')sbox(.32,.3,.3,c,0,.42,-.26,head)}
+ if(acc.has('topi'))sbox(.46,.16,.36,'#FFFFFF',0,.5,.06,head),sbox(.12,.12,.02,'#D3343A',0,.5,.25,head);
+ if(acc.has('steto')){sbox(.06,.4,.06,'#2B2B33',-.16,1.12,.2,g);sbox(.06,.4,.06,'#2B2B33',.16,1.12,.2,g);sbox(.38,.06,.06,'#2B2B33',0,1.33,.2,g);sbox(.13,.13,.07,'#C9CED6',.16,.9,.21,g)}
+ if(acc.has('kad'))sbox(.14,.18,.02,'#FFFFFF',-.18,1.1,.19,g),sbox(.14,.05,.021,'#D3343A',-.18,1.16,.191,g);
+ g.userData.walk=0;return g}
+function animAvatar(g,moving,dt){const u=g.userData;u.walk=moving?u.walk+dt*9:u.walk*.85;const s=Math.sin(u.walk)*(moving?.6:Math.min(.6,Math.abs(Math.sin(u.walk))*.6));
+ u.legL.rotation.x=s;u.legR.rotation.x=-s;u.armL.rotation.x=-s*.8;u.armR.rotation.x=s*.8}
+function disposeTree(o){o.traverse(m=>{if(m.geometry)m.geometry.dispose()})}
+
+/* ---------- peta ---------- */
+const SIM_ROOMS=[
+ {k:'wad',x0:-16,z0:-12,x1:-4,z1:-2,c:'#E3ECFA',ms:'WAD PESAKIT',id:'BANGSAL PASIEN'},
+ {k:'rawatan',x0:-4,z0:-12,x1:4,z1:-2,c:'#FBE3E6',ms:'BILIK RAWATAN',id:'RUANG RAWAT'},
+ {k:'kawalan',x0:4,z0:-12,x1:12,z1:-2,c:'#FFF1C9',ms:'BILIK KAWALAN',id:'RUANG KENDALI'},
+ {k:'koridor',x0:-16,z0:-2,x1:12,z1:2,c:'#EFE7DA',ms:'',id:''},
+ {k:'pejabat',x0:-16,z0:2,x1:-6,z1:12,c:'#EDE3F6',ms:'PEJABAT PENGURUSAN',id:'KANTOR MANAJEMEN'},
+ {k:'lobi',x0:-6,z0:2,x1:6,z1:12,c:'#F6EEE3',ms:'LOBI & KAUNTER',id:'LOBI & RESEPSIONIS'},
+ {k:'farmasi',x0:6,z0:2,x1:12,z1:12,c:'#DDF1E8',ms:'FARMASI · JUALAN',id:'FARMASI · PENJUALAN'},
+ {k:'garaj',x0:12,z0:-4,x1:22,z1:12,c:'#5D6470',ms:'GARAJ AMBULANS',id:'GARASI AMBULANS'}];
+/* dinding: [x0,z0,x1,z1] (segmen paksi), pintu = jurang */
+const SIM_WALLS=[[-16,-12,12,-12],[-16,-12,-16,12],[-16,12,-2,12],[2,12,12,12],[12,-12,12,-2],[12,2,12,12],
+ [-16,-2,-11,-2],[-9,-2,-1,-2],[1,-2,7,-2],[9,-2,12,-2],
+ [-16,2,-12,2],[-10,2,-6,2],[6,2,8,2],[10,2,12,2],
+ [-4,-12,-4,-2],[4,-12,4,-2],[-6,2,-6,5],[-6,8,-6,12],[6,2,6,4.5],[6,9.5,6,12]];
+const SIM_BEDS=[[-14.4,-10],[-11.6,-10],[-8.8,-10],[-6,-10],[-14.4,-5],[-6,-5]];
+const SIM_COUNTER={x:6,z:7,cust:[[4.4,6],[4.4,8]]};
+const SIM_AMB={x:17,z:4};
+const SIM_SCENE=i=>({x:90+i*40,z:0});
+const SIM_SPAWN={x:0,z:9};
+
+function simCollide(px,pz,r,obs){for(const o of obs){if(px>o[0]-r&&px<o[2]+r&&pz>o[1]-r&&pz<o[3]+r)return true}return false}
+
+function buildWorld(scene,obs){
+ const add=m=>{scene.add(m);return m};
+ const ground=add(new THREE.Mesh(new THREE.PlaneGeometry(400,200),smat('#9CCB86')));ground.rotation.x=-Math.PI/2;ground.position.set(60,-.02,0);ground.receiveShadow=true;
+ for(const r of SIM_ROOMS){const f=add(new THREE.Mesh(new THREE.PlaneGeometry(r.x1-r.x0,r.z1-r.z0),smat(r.c)));f.rotation.x=-Math.PI/2;f.position.set((r.x0+r.x1)/2,0,(r.z0+r.z1)/2);f.receiveShadow=true}
+ /* jalan */
+ const road=add(new THREE.Mesh(new THREE.PlaneGeometry(10,40),smat('#4A505B')));road.rotation.x=-Math.PI/2;road.position.set(17,.005,-24);
+ for(let i=0;i<5;i++)sbox(.3,.02,2,'#F2F2F2',17,.02,-8-i*7,scene);
+ for(let x=-14;x<=20;x+=8)sbox(1.6,.02,.3,'#F2F2F2',x,.02,4.6+9.4,scene);
+ /* dinding */
+ for(const [x0,z0,x1,z1] of SIM_WALLS){const t=.3,hh=1.5;const w=Math.abs(x1-x0)||t,d=Math.abs(z1-z0)||t;const m=sbox(w+(x1!==x0?t:0),hh,d+(z1!==z0?t:0),'#FDFBF7',(x0+x1)/2,hh/2,(z0+z1)/2,scene);m.receiveShadow=true;
+  sbox(m.geometry.parameters.width+.02,.12,m.geometry.parameters.depth+.02,'#8E2433',(x0+x1)/2,hh,(z0+z1)/2,scene);
+  obs.push([Math.min(x0,x1)-t/2,Math.min(z0,z1)-t/2,Math.max(x0,x1)+t/2,Math.max(z0,z1)+t/2])}
+ const block=(w,h,d,c,x,z,y=h/2)=>{sbox(w,h,d,c,x,y,z,scene);obs.push([x-w/2,z-d/2,x+w/2,z+d/2])};
+ /* katil wad */
+ for(const [x,z] of SIM_BEDS){block(1.3,.55,2.3,'#E7EDF3',x,z);sbox(1.3,.12,2.3,'#9BC3E6',x,.6,z+.05,scene);sbox(1.1,.18,.5,'#FFFFFF',x,.68,z-.85,scene);sbox(1.3,.9,.12,'#C9D2DC',x,.45,z-1.15,scene);sbox(.08,1.6,.08,'#B5BDC6',x+.85,.8,z-1,scene);sbox(.3,.4,.12,'#D3343A',x+.85,1.45,z-1,scene)}
+ /* bilik rawatan */
+ block(1.4,.7,2.4,'#E7EDF3',0,-8);sbox(1.4,.1,2.4,'#FFFFFF',0,.75,-8,scene);sbox(.9,.9,.2,'#2F3A4A',1.6,1.6,-9.5,scene);sbox(.8,.6,.05,'#5FD1B5',1.6,1.6,-9.39,scene);block(1.2,1.6,.6,'#F4F7FA',-2.8,-11.4);sbox(.5,.5,.06,'#D3343A',-2.8,1.1,-11.08,scene);
+ /* bilik kawalan */
+ block(3.6,.8,1,'#6B4A3A',8,-9);for(let i=0;i<3;i++){sbox(.8,.55,.06,'#20242C',6.9+i*1.1,1.15,-9.3,scene);sbox(.7,.45,.02,['#5FD1B5','#E9B949','#7FA6E8'][i],6.9+i*1.1,1.15,-9.26,scene)}sbox(.3,.5,.3,'#30343C',9.6,1.05,-8.8,scene);
+ /* pejabat */
+ block(3,.8,1.2,'#5A3A2E',-11,8.5);sbox(1.4,.3,.05,'#E9B949',-11,.55,7.88,scene);block(.8,1.6,.8,'#3A2A22',-11,10.6);block(2.2,2,.5,'#7A5A46',-15.4,6);for(let i=0;i<4;i++)sbox(.3,.4,.3,['#D3343A','#3D7BD9','#2E9D7E','#E9B949'][i],-15.3,1.5-(i%2)*.6,5.3+i*.4,scene);
+ /* lobi */
+ block(4,1,1,'#8E2433',0,5);sbox(4.1,.08,1.1,'#F7F2EA',0,1.02,5,scene);sbox(.9,.9,.12,'#FFFFFF',0,1.7,4.6,scene);sbox(.7,.22,.13,'#D3343A',0,1.7,4.6,scene);sbox(.22,.7,.13,'#D3343A',0,1.7,4.6,scene);
+ for(const x of [-4,4]){block(2.4,.45,.8,'#3D9FA8',x,10.2)}
+ for(const [x,z] of [[-5.3,3],[5.3,11.3],[-15.2,11.2],[11.2,-11.2],[-15.2,-1.3]]){block(.6,.6,.6,'#B07A55',x,z);const p=new THREE.Mesh(new THREE.ConeGeometry(.45,1.2,5),smat('#3E9B5B'));p.position.set(x,1.2,z);scene.add(p)}
+ /* farmasi */
+ block(.8,1,5,'#2E9D7E',SIM_COUNTER.x,SIM_COUNTER.z);sbox(.9,.08,5.1,'#F7F2EA',SIM_COUNTER.x,1.02,SIM_COUNTER.z,scene);
+ block(.6,2,4,'#F4F7FA',11.5,7);for(let i=0;i<8;i++)sbox(.3,.25,.3,i%2?'#D3343A':'#F2F2F2',11.25,.6+(i%3)*.55,5.4+Math.floor(i/2)*.9,scene);
+ /* ambulans */
+ const amb=buildAmb();amb.position.set(SIM_AMB.x,0,SIM_AMB.z);scene.add(amb);obs.push([SIM_AMB.x-1.15,SIM_AMB.z-2.4,SIM_AMB.x+1.15,SIM_AMB.z+2.4]);
+ /* sempadan luar */
+ obs.push([-30,-30,-16.4,30],[22.5,-30,40,30],[-30,-30,40,-12.4],[-30,16,40,30]);
+ /* lokasi kes luar */
+ const scenes=[];SIM_REG.forEach(([n,,c],i)=>{const s=SIM_SCENE(i);const f=new THREE.Mesh(new THREE.PlaneGeometry(26,26),smat(c));f.rotation.x=-Math.PI/2;f.position.set(s.x,.01,s.z);scene.add(f);
+  const rd=new THREE.Mesh(new THREE.PlaneGeometry(26,5),smat('#4A505B'));rd.rotation.x=-Math.PI/2;rd.position.set(s.x,.02,s.z+6);scene.add(rd);
+  const rnd=(a,b)=>a+Math.random()*(b-a);
+  for(let k=0;k<7;k++){const px=s.x+rnd(-11,11),pz=s.z+rnd(-12,-3);if(i===0)sbox(rnd(2,4),rnd(3,7),rnd(2,4),['#B9C2CE','#8D98A8','#D6DCE4'][k%3],px,0,pz,scene).position.y=2;
+   else if(i===1){const t=new THREE.Mesh(new THREE.CylinderGeometry(.15,.2,2.4,5),smat('#8B6B45'));t.position.set(px,1.2,pz);scene.add(t);sbox(1.6,.15,.5,'#3E9B5B',px,2.4,pz,scene)}
+   else if(i===2){const m=new THREE.Mesh(new THREE.ConeGeometry(rnd(1,2),rnd(2,4),6),smat('#2F6B45'));m.position.set(px,1.5,pz);scene.add(m)}
+   else{const d=new THREE.Mesh(new THREE.SphereGeometry(rnd(1.5,2.5),10,8,0,Math.PI*2,0,Math.PI/2),smat('#C9D2E8'));d.position.set(px,0,pz);scene.add(d)}}
+  const a=buildAmb();a.position.set(s.x+6,0,s.z+6);a.rotation.y=Math.PI/2;scene.add(a);scenes.push(a)});
+ return {amb,scenes}}
+function buildAmb(){const g=new THREE.Group();sbox(2.2,1.9,3.4,'#FFFFFF',0,1.25,-.6,g);sbox(2.1,1.3,1.4,'#FFFFFF',0,1,1.75,g);sbox(1.9,.6,.05,'#9FD3F0',0,1.3,2.46,g);
+ sbox(2.22,.3,3.42,'#D3343A',0,1.0,-.6,g);sbox(.2,.7,.05,'#D3343A',0,1.6,-2.31,g);sbox(.7,.2,.05,'#D3343A',0,1.6,-2.31,g);sbox(.05,.6,.6,'#D3343A',1.11,1.5,-.6,g);sbox(.05,.6,.6,'#D3343A',-1.11,1.5,-.6,g);
+ g.userData.l1=sbox(.4,.18,.3,'#FF3B3B',-.5,2.28,.3,g);g.userData.l2=sbox(.4,.18,.3,'#3B7BFF',.5,2.28,.3,g);
+ for(const [x,z] of [[-1,1.6],[1,1.6],[-1,-1.6],[1,-1.6]]){const w=new THREE.Mesh(new THREE.CylinderGeometry(.38,.38,.3,10),smat('#1E1E24'));w.rotation.z=Math.PI/2;w.position.set(x,.38,z);g.add(w)}
+ return g}
+
+/* ---------- rangkaian (RTDB / offline) ---------- */
+const SimNet={mode:'off',db:null,me:null,off:0,subs:[],cbs:{},local:{players:{},tasks:{},chat:[]},
+ now(){return Date.now()+this.off},
+ rtdbURL(){return (typeof FIREBASE_CONFIG!=='undefined'&&FIREBASE_CONFIG&&FIREBASE_CONFIG.databaseURL)||(S.simCfg&&S.simCfg.rtdb)||''},
+ async connect(training){this.cbs={};if(training||Store.mode!=='firebase'||!this.rtdbURL()){this.mode='off';this.local={players:{},tasks:{},chat:[]};return 'off'}
+  try{if(!firebase.database){await new Promise((res,rej)=>{const s=document.createElement('script');s.src='https://www.gstatic.com/firebasejs/10.12.2/firebase-database-compat.js';s.onload=res;s.onerror=rej;document.head.append(s)})}
+   this.db=firebase.app().database(this.rtdbURL());this.mode='rtdb';
+   const r=this.db.ref('.info/serverTimeOffset');const h=s=>{this.off=s.val()||0};r.on('value',h);this.subs.push(()=>r.off('value',h));
+   await Promise.race([this.db.ref('sim/ping').once('value'),new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout')),7000))]);
+   return 'rtdb'}catch(e){console.warn('RTDB',e);this.mode='off';this.local={players:{},tasks:{},chat:[]};return 'err'}},
+ on(path,cb){this.cbs[path]=cb;if(this.mode!=='rtdb'){this.emitLocal(path);return}
+  let ref=this.db.ref('sim/'+path);if(path==='chat')ref=ref.orderByChild('t').limitToLast(30);const h=s=>{const v=s.val()||{};cb(path==='chat'?Object.entries(v).map(([id,x])=>({id,...x})).sort((a,b)=>a.t-b.t):v)};ref.on('value',h);this.subs.push(()=>ref.off('value',h))},
+ emitLocal(path){const cb=this.cbs[path];if(!cb)return;if(path==='chat')cb(this.local.chat.slice(-30));else cb({...this.local[path]})},
+ join(me){this.me=me;if(this.mode==='rtdb'){const ref=this.db.ref('sim/players/'+me.id);ref.onDisconnect().remove();ref.set({...me.st,t:firebase.database.ServerValue.TIMESTAMP})}else{this.local.players[me.id]={...me.st,t:this.now()};this.emitLocal('players')}},
+ move(st){if(!this.me)return;if(this.mode==='rtdb')this.db.ref('sim/players/'+this.me.id).update({...st,t:firebase.database.ServerValue.TIMESTAMP});else{Object.assign(this.local.players[this.me.id]||(this.local.players[this.me.id]={}),st,{t:this.now()});this.emitLocal('players')}},
+ setBot(id,st){if(this.mode!=='rtdb'){if(st)this.local.players[id]={...st,t:this.now()};else delete this.local.players[id];this.emitLocal('players')}},
+ chat(text){const m={by:this.me.id,name:this.me.st.name,text:text.slice(0,140),t:this.now()};if(this.mode==='rtdb'){m.t=firebase.database.ServerValue.TIMESTAMP;this.db.ref('sim/chat').push(m);
+   if(Math.random()<.15)this.db.ref('sim/chat').orderByChild('t').once('value',s=>{const ks=[];s.forEach(c=>{ks.push(c.key)});const extra=ks.length-60;if(extra>0){const u={};ks.slice(0,extra).forEach(k=>u[k]=null);this.db.ref('sim/chat').update(u)}})}
+  else{this.local.chat.push({id:uid(),...m});this.emitLocal('chat')}},
+ setTask(id,v){if(this.mode==='rtdb')return this.db.ref('sim/tasks/'+id).set(v);if(v)this.local.tasks[id]=v;else delete this.local.tasks[id];this.emitLocal('tasks')},
+ updTask(id,p){if(this.mode==='rtdb')return this.db.ref('sim/tasks/'+id).update(p);if(this.local.tasks[id])Object.assign(this.local.tasks[id],p);this.emitLocal('tasks')},
+ async claim(id){const me=this.me.id;if(this.mode==='rtdb'){const r=await this.db.ref('sim/tasks/'+id).transaction(t=>{if(!t)return;if(t.by&&t.by!==me)return;t.by=me;t.byName=this.me.st.name;return t});return r.committed&&r.snapshot.exists()}
+  const t=this.local.tasks[id];if(!t||(t.by&&t.by!==me))return false;t.by=me;t.byName=this.me.st.name;this.emitLocal('tasks');return true},
+ score(day,id,patch){if(this.mode==='rtdb'){const ref=this.db.ref(`sim/scores/${day}/${id}`);return ref.transaction(v=>{v=v||{pts:0,rm:0,cases:0};v.name=patch.name;v.pts+=patch.pts;v.rm+=patch.rm;v.cases+=1;return v})}
+  const k='kkb_simscore_'+day;const all=LS.get(k,{});const v=all[id]||{pts:0,rm:0,cases:0};v.name=patch.name;v.pts+=patch.pts;v.rm+=patch.rm;v.cases++;all[id]=v;LS.set(k,all);this.emitLocal('scores')},
+ leave(){if(this.mode==='rtdb'&&this.me){const ref=this.db.ref('sim/players/'+this.me.id);ref.remove();ref.onDisconnect().cancel()}
+  for(const u of this.subs)try{u()}catch(e){};this.subs=[];this.cbs={};this.me=null}};
+
+/* ---------- halaman ---------- */
+let SIMG=null;
+R.sim=el=>{if(SIMG){SIMG.destroy();SIMG=null}
+ const tab=S.ui.simTab||'main';
+ el.innerHTML=`<div class="page-h"><div class="grow"><h2>🏥 KKB Sim</h2><p class="muted">${L('Simulasi hospital KKB. Masuk shift, layan pelanggan farmasi, bawa ambulans ke kes luar, dan rawat pesakit wad bila shift 4 orang ke atas.','Simulasi rumah sakit KKB. Masuk shift, layani pembeli di farmasi, bawa ambulans ke kasus luar, dan rawat pasien bangsal saat shift 4 orang ke atas.')}</p></div>
+ <div class="tabs" role="tablist">${[['main','🎮 '+L('Main','Main')],['char','👕 '+L('Karakter','Karakter')],['board','🏆 '+L('Papan skor','Papan skor')]].map(([k,l])=>`<button role="tab" class="${tab===k?'on':''}" data-st="${k}">${l}</button>`).join('')}</div></div><div id="simBody"></div>`;
+ $$('[data-st]').forEach(b=>b.onclick=()=>{S.ui.simTab=b.dataset.st;Snd.play('nav');rerender(true)});
+ const body=$('#simBody');if(tab==='char')simChar(body);else if(tab==='board')simBoard(body);else simLobby(body)};
+
+function simLobby(body){const net=Store.mode==='firebase'&&SimNet.rtdbURL();
+ body.innerHTML=`<div class="card sim-gate"><div class="sim-gate-in"><canvas id="simPrev" width="260" height="300"></canvas><div class="stack" style="max-width:520px">
+ <h3 style="font-size:26px">${L('Sedia untuk shift?','Siap untuk shift?')}</h3>
+ <ul class="sim-rules"><li>👥 <b>1–3 ${L('orang','orang')}</b>: ${L('kes luar dengan ambulans + jualan bandage/medkit di farmasi.','kasus luar dengan ambulans + penjualan bandage/medkit di farmasi.')}</li><li>🏥 <b>4+ ${L('orang','orang')}</b>: ${L('pesakit mula masuk wad, perlu dirawat.','pasien mulai masuk bangsal dan perlu dirawat.')}</li><li>🎯 ${L('Jawapan ikut SOP KKB (free, harga, cooldown). Betul = mata + RM.','Jawaban sesuai SOP KKB (free, harga, cooldown). Benar = poin + RM.')}</li></ul>
+ <div class="row" style="flex-wrap:wrap"><button class="btn red" id="simGo">▶ ${L('Masuk shift','Masuk shift')}${net?'':' (offline)'}</button><button class="btn ghost" id="simTrain">🤖 ${L('Mod latihan (4 orang + bot)','Mode latihan (4 orang + bot)')}</button></div>
+ <div class="muted" style="font-size:13px">${net?'🟢 '+L('Multiplayer aktif: staff lain yang masuk shift akan nampak di lobby.','Multiplayer aktif: staff lain yang masuk shift akan terlihat di lobby.'):'🟡 '+(Store.mode!=='firebase'?L('Versi ini tiada server, game berjalan offline.','Versi ini tanpa server, game berjalan offline.'):L('Realtime Database belum disambung, game berjalan offline.','Realtime Database belum terhubung, game berjalan offline.'))}</div>
+ <div class="muted" style="font-size:12px">⌨ WASD/${L('anak panah','panah')} ${L('gerak','gerak')} · ${L('klik lantai untuk jalan','klik lantai untuk jalan')} · E ${L('tindakan','aksi')} · Enter chat · Q/R ${L('putar kamera','putar kamera')}</div></div></div></div>
+ ${isDev()?`<div class="card" style="margin-top:14px"><h3>⚙ ${L('Server game (developer)','Server game (developer)')}</h3><p class="muted" style="margin:6px 0 10px;font-size:13px">${L('Tampal URL Realtime Database dari Firebase (cth: https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app).','Tempel URL Realtime Database dari Firebase (cth: https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app).')}</p><div class="row"><input type="url" id="simUrl" style="flex:1" value="${esc((S.simCfg&&S.simCfg.rtdb)||'')}" placeholder="https://...firebasedatabase.app"><button class="btn" id="simUrlSave">${L('Simpan','Simpan')}</button></div></div>`:''}`;
+ previewSpin($('#simPrev'),avOf(S.me));
+ $('#simGo').onclick=()=>simStart(body,false);$('#simTrain').onclick=()=>simStart(body,true);
+ $('#simUrlSave')&&($('#simUrlSave').onclick=()=>{const v=$('#simUrl').value.trim().replace(/\/+$/,'');if(v&&!/^https:\/\/[a-z0-9-]+\.(firebaseio\.com|[a-z0-9-]+\.firebasedatabase\.app)$/i.test(v)){toast(L('URL tidak sah','URL tidak valid'),'err');return}safe(Store.set('content/game',{rtdb:v,at:now()}),L('Server game disimpan','Server game disimpan'))})}
+
+let simPrevStop=null;
+function previewSpin(cv,av){if(simPrevStop)simPrevStop();if(!cv||!window.THREE)return;const r=new THREE.WebGLRenderer({canvas:cv,antialias:true,alpha:true});r.setPixelRatio(Math.min(2,devicePixelRatio));
+ const sc=new THREE.Scene();sc.add(new THREE.HemisphereLight('#ffffff','#b9a89a',1));const dl=new THREE.DirectionalLight('#fff',.6);dl.position.set(2,4,3);sc.add(dl);
+ const cam=new THREE.PerspectiveCamera(30,cv.width/cv.height,.1,50);cam.position.set(0,1.4,5.2);cam.lookAt(0,1.05,0);let g=buildAvatar(av);sc.add(g);
+ const base=new THREE.Mesh(new THREE.CylinderGeometry(.9,.9,.08,24),smat('#F0D9D2'));base.position.y=-.04;sc.add(base);
+ let raf,alive=true,t=0;const loop=()=>{if(!alive||!cv.isConnected){stop();return}t+=.016;g.rotation.y=Math.sin(t*.8)*.9;g.userData.armR.rotation.z=Math.sin(t*3)*.05;r.render(sc,cam);raf=requestAnimationFrame(loop)};loop();
+ const stop=()=>{alive=false;cancelAnimationFrame(raf);disposeTree(sc);r.dispose()};simPrevStop=stop;
+ return {set(a){sc.remove(g);disposeTree(g);g=buildAvatar(a);sc.add(g)},stop}}
+
+function simChar(body){const me=S.me;let av=avOf(me);
+ const outs=AV_OUT.filter(o=>avOutAllowed(o,me));
+ const sw=(arr,key,cur)=>arr.map((c,i)=>`<button type="button" class="sim-sw ${cur===i?'on':''}" data-${key}="${i}" style="background:${c}" aria-label="${key} ${i+1}"></button>`).join('');
+ body.innerHTML=`<div class="grid g2" style="align-items:start"><div class="card sim-prevcard"><canvas id="charPrev" width="320" height="400"></canvas><div class="muted" style="text-align:center;font-size:13px">${esc(me.name)} · ${esc(SHORT[me.role]||'')}</div></div>
+ <form class="card stack" id="charF"><h3>${L('Ubah karakter','Ubah karakter')}</h3>
+ <div class="field"><label>${L('Warna kulit','Warna kulit')}</label><div class="row">${sw(AV_SKIN,'sk',av.skin)}</div></div>
+ <div class="field"><label>${L('Gaya rambut','Gaya rambut')}</label><div class="sim-chips">${AV_HAIR.map(([k,a,b])=>`<button type="button" class="chip ${av.hair===k?'red':''}" data-hr="${k}">${L(a,b)}</button>`).join('')}</div></div>
+ <div class="field"><label>${L('Warna rambut / tudung','Warna rambut / kerudung')}</label><div class="row">${sw(AV_HAIRC,'hc',av.hairC)}</div></div>
+ <div class="field"><label>${L('Pakaian hospital','Pakaian rumah sakit')}</label><div class="sim-outs">${outs.map(o=>`<button type="button" class="sim-out ${av.out===o.id?'on':''}" data-ot="${o.id}"><span style="background:linear-gradient(90deg,${o.coat||o.top} 0 50%,${o.top} 50% 75%,${o.bot} 75%)"></span>${L(...o.n)}</button>`).join('')}</div>${isLeadGroup(me.role)||isDev()?'':`<div class="muted" style="font-size:12px;margin-top:6px">🔒 ${L('Kot Pengarah & Sut Pengurusan khas untuk atasan.','Jas Pengarah & Setelan Manajemen khusus atasan.')}</div>`}</div>
+ <div class="field"><label>${L('Aksesori','Aksesori')}</label><div class="sim-chips">${AV_ACC.map(([k,a,b])=>`<button type="button" class="chip ${(av.acc||[]).includes(k)?'mint':''}" data-ac="${k}">${L(a,b)}</button>`).join('')}</div></div>
+ <div class="row"><button class="btn red">${L('Simpan karakter','Simpan karakter')}</button><button type="button" class="btn ghost" id="charReset">${L('Ikut jawatan','Sesuai jabatan')}</button></div></form></div>`;
+ const pv=previewSpin($('#charPrev'),av);
+ const upd=()=>{pv&&pv.set(av);$$('[data-sk]').forEach(b=>b.classList.toggle('on',+b.dataset.sk===av.skin));$$('[data-hc]').forEach(b=>b.classList.toggle('on',+b.dataset.hc===av.hairC));
+  $$('[data-hr]').forEach(b=>b.classList.toggle('red',b.dataset.hr===av.hair));$$('[data-ot]').forEach(b=>b.classList.toggle('on',b.dataset.ot===av.out));$$('[data-ac]').forEach(b=>b.classList.toggle('mint',av.acc.includes(b.dataset.ac)));Snd.play('star')};
+ $$('[data-sk]').forEach(b=>b.onclick=()=>{av.skin=+b.dataset.sk;upd()});$$('[data-hc]').forEach(b=>b.onclick=()=>{av.hairC=+b.dataset.hc;upd()});
+ $$('[data-hr]').forEach(b=>b.onclick=()=>{av.hair=b.dataset.hr;upd()});$$('[data-ot]').forEach(b=>b.onclick=()=>{av.out=b.dataset.ot;upd()});
+ $$('[data-ac]').forEach(b=>b.onclick=()=>{const k=b.dataset.ac;av.acc=av.acc.includes(k)?av.acc.filter(x=>x!==k):[...av.acc,k];upd()});
+ $('#charReset').onclick=()=>{av=avDefault(me);upd()};
+ $('#charF').onsubmit=async e=>{e.preventDefault();S.avatars=S.avatars||{};S.avatars[me.id]=av;if(await safe(Store.set('avatar/'+me.id,{...av,at:now()}),L('Karakter disimpan','Karakter disimpan'))){logAct('ubah karakter KKB Sim',av.out);Snd.play('ok')}}}
+
+function simBoard(body){const day=myToday();body.innerHTML=`<div class="grid g2" style="align-items:start"><div class="card"><div class="card-h"><h3 class="grow">🏆 ${L('Shift hari ini','Shift hari ini')}</h3><span class="chip">${ddmmyyyy(day)}</span></div><div id="sbDay"><div class="muted">${L('Memuatkan…','Memuat…')}</div></div></div>
+ <div class="card"><div class="card-h"><h3 class="grow">⭐ ${L('Sepanjang masa','Sepanjang masa')}</h3></div><div id="sbAll"></div></div></div>`;
+ const row=(i,n,v)=>`<div class="li"><b style="width:28px">${['🥇','🥈','🥉'][i]||i+1}</b><div class="grow"><b>${esc(n)}</b><div class="muted" style="font-size:12px">${v.cases||0} ${L('kes','kasus')} · RM${(v.rm||0).toLocaleString('en-US')}</div></div><b class="num">${v.pts||0} ${L('mata','poin')}</b></div>`;
+ const all=[...(S.simscore||[])].sort((a,b)=>(b.pts||0)-(a.pts||0)).slice(0,15);
+ $('#sbAll').innerHTML=all.length?`<div class="list">${all.map((v,i)=>row(i,v.name||nameOf(v.id),v)).join('')}</div>`:`<div class="empty">${L('Belum ada skor','Belum ada skor')}</div>`;
+ const drawDay=v=>{const l=Object.entries(v||{}).map(([id,x])=>({id,...x})).sort((a,b)=>b.pts-a.pts);const e=$('#sbDay');if(e)e.innerHTML=l.length?`<div class="list">${l.map((v,i)=>row(i,v.name,v)).join('')}</div>`:`<div class="empty">${L('Belum ada yang main hari ini','Belum ada yang main hari ini')}</div>`};
+ if(Store.mode==='firebase'&&SimNet.rtdbURL()){SimNet.connect(false).then(m=>{if(m!=='rtdb'){drawDay(LS.get('kkb_simscore_'+day,{}));return}SimNet.db.ref('sim/scores/'+day).once('value',s=>drawDay(s.val()));SimNet.leave()})}
+ else drawDay(LS.get('kkb_simscore_'+day,{}))}
+
+/* ---------- enjin game ---------- */
+async function simStart(body,training){if(!window.THREE){toast('Three.js gagal dimuat','err');return}if(simPrevStop)simPrevStop();
+ body.innerHTML=`<div class="sim-wrap" id="simWrap"><canvas id="simCv"></canvas><div class="sim-labels" id="simLbl"></div>
+ <div class="sim-hud tl" id="simShift"></div><div class="sim-hud tr"><div id="simMe"></div><div class="row" style="gap:6px;margin-top:6px;justify-content:flex-end"><button class="iconbtn sm" id="simRotL" title="Q">⟲</button><button class="iconbtn sm" id="simRotR" title="R">⟳</button><button class="iconbtn sm" id="simFull" title="Skrin penuh">⛶</button><button class="btn sm ghost" id="simQuit">🚪 ${L('Keluar shift','Keluar shift')}</button></div></div>
+ <div class="sim-tasks" id="simTasks"></div>
+ <div class="sim-chat"><div id="simChatLog" class="sim-chatlog"></div><form id="simChatF" class="row" style="gap:6px;flex-wrap:nowrap"><input id="simChatIn" maxlength="140" placeholder="${L('Enter untuk chat…','Enter untuk chat…')}" autocomplete="off"><button class="btn sm">➤</button></form></div>
+ <div class="sim-act hide" id="simAct"></div><div class="sim-joy" id="simJoy"><div></div></div><button class="sim-abtn" id="simABtn">E</button>
+ <div class="sim-fade hide" id="simFade"></div><div class="sim-dlg hide" id="simDlg"></div><div class="sim-load" id="simLoad">${L('Menyambung ke hospital…','Menghubungkan ke rumah sakit…')}</div></div>`;
+ const mode=await SimNet.connect(training);if(!$('#simWrap'))return;
+ if(mode==='err')toast(L('Server game tidak dapat dicapai. Main offline dulu.','Server game tidak bisa dihubungi. Main offline dulu.'),'err');
+ SIMG=simEngine($('#simWrap'),training);document.body.classList.add('sim-playing')}
+
+function simEngine(wrap,training){
+ const cv=$('#simCv',wrap),lblBox=$('#simLbl',wrap);const me=S.me;const myAv=avOf(me);
+ const renderer=new THREE.WebGLRenderer({canvas:cv,antialias:true});renderer.setPixelRatio(Math.min(1.75,devicePixelRatio));renderer.shadowMap.enabled=true;renderer.shadowMap.type=THREE.PCFSoftShadowMap;
+ const scene=new THREE.Scene();scene.background=new THREE.Color('#F3D9CF');scene.fog=new THREE.Fog('#F3D9CF',38,75);
+ scene.add(new THREE.HemisphereLight('#FFF6EE','#9C8F86',.85));const sun=new THREE.DirectionalLight('#FFFFFF',.7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);const sc=sun.shadow.camera;sc.left=-22;sc.right=22;sc.top=22;sc.bottom=-22;sc.far=80;scene.add(sun);scene.add(sun.target);
+ const cam=new THREE.PerspectiveCamera(42,1,.1,200);let yaw=0,zoom=1;
+ const obs=[];const world=buildWorld(scene,obs);
+ const P={x:SIM_SPAWN.x+(Math.random()-.5)*3,z:SIM_SPAWN.z,ry:Math.PI,moving:false,target:null,stuck:0,scene:-1};
+ const myG=buildAvatar(myAv);scene.add(myG);
+ const remotes={};const npcs={};let tasks={},players={},chat=[],lastChatSeen=0;let busy=false,holdT=0,holdKey=false;
+ const keys={};let joy={x:0,z:0};let alive=true,raf=0,last=performance.now(),sendT=0,hbT=0,hostT=0;
+ const st=()=>({name:me.name,role:SHORT[me.role]||me.role,av:myAv,x:+P.x.toFixed(2),z:+P.z.toFixed(2),ry:+P.ry.toFixed(2),m:P.moving?1:0});
+ SimNet.join({id:me.id,st:st()});
+ /* bot latihan */
+ const bots=[];if(training){for(let i=0;i<3;i++){const id='bot'+i;const b={id,x:-3+i*3,z:-0,ry:0,tx:0,tz:0,wait:0,name:['BOT ALYA','BOT HAKIM','BOT SURI'][i],av:{skin:i+1,hair:['panjang','spiky','tudung'][i],hairC:i*2,out:['scrub_pink','kot_doktor','nurse'][i],acc:['steto']}};bots.push(b);SimNet.setBot(id,{name:b.name,role:'BOT',av:b.av,x:b.x,z:b.z,ry:0,m:0})}}
+ /* label HTML */
+ const labels=[];const mkLbl=(cls,html,pos,obj)=>{const d=document.createElement('div');d.className='sim-lbl '+cls;d.innerHTML=html;lblBox.append(d);const l={d,pos,obj};labels.push(l);return l};
+ const rmLbl=l=>{if(!l)return;l.d.remove();const i=labels.indexOf(l);if(i>=0)labels.splice(i,1)};
+ const roomL={};for(const r of SIM_ROOMS)if(r.ms)roomL[r.k]=mkLbl('room',L(r.ms,r.id),new THREE.Vector3((r.x0+r.x1)/2,2.2,r.k==='garaj'?-2:(r.z0+r.z1)/2-((r.z1-r.z0)/2)+.8));
+ SIM_REG.forEach(([n],i)=>{const s=SIM_SCENE(i);mkLbl('room','📍 '+n.toUpperCase(),new THREE.Vector3(s.x,3,s.z-10))});
+ const myL=mkLbl('name me',`${esc(me.name)}`,null,myG);
+ /* input */
+ const kd=e=>{if(!alive)return;const t=e.target;if(t&&/INPUT|TEXTAREA/.test(t.tagName)){if(e.key==='Escape')t.blur();return}
+  const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&wrap.isConnected)e.preventDefault();
+  if(k==='enter'){$('#simChatIn',wrap).focus();e.preventDefault();return}if(busy)return;
+  if(k==='e'||k===' '){if(!holdKey){holdKey=true;doAct(true)}return}if(k==='q'){yaw+=Math.PI/4;return}if(k==='r'){yaw-=Math.PI/4;return}keys[k]=true};
+ const ku=e=>{const k=e.key.toLowerCase();keys[k]=false;if(k==='e'||k===' ')holdKey=false};
+ window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);
+ const ray=new THREE.Raycaster(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
+ cv.addEventListener('pointerdown',e=>{if(busy)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-(e.clientY-r.top)/r.height*2+1},cam);if(ray.ray.intersectPlane(plane,hit)){P.target={x:hit.x,z:hit.z};P.stuck=0;spawnPing(hit.x,hit.z)}});
+ cv.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.6,Math.min(1.6,zoom+Math.sign(e.deltaY)*.08))},{passive:false});
+ const pingM=new THREE.Mesh(new THREE.RingGeometry(.25,.4,20),new THREE.MeshBasicMaterial({color:'#D3343A',transparent:true}));pingM.rotation.x=-Math.PI/2;pingM.visible=false;scene.add(pingM);let pingT=0;
+ const spawnPing=(x,z)=>{pingM.position.set(x,.03,z);pingM.visible=true;pingT=.6};
+ /* joystick */
+ const jb=$('#simJoy',wrap),jk=jb.firstElementChild;let jid=null;
+ jb.addEventListener('pointerdown',e=>{jid=e.pointerId;jb.setPointerCapture(jid);jmove(e)});jb.addEventListener('pointermove',e=>{if(e.pointerId===jid)jmove(e)});
+ const jend=()=>{jid=null;joy={x:0,z:0};jk.style.transform=''};jb.addEventListener('pointerup',jend);jb.addEventListener('pointercancel',jend);
+ function jmove(e){const r=jb.getBoundingClientRect();let dx=e.clientX-(r.left+r.width/2),dy=e.clientY-(r.top+r.height/2);const m=Math.hypot(dx,dy),mx=r.width/2-18;if(m>mx){dx*=mx/m;dy*=mx/m}jk.style.transform=`translate(${dx}px,${dy}px)`;joy={x:dx/mx,z:dy/mx}}
+ const ab=$('#simABtn',wrap);ab.addEventListener('pointerdown',e=>{e.preventDefault();holdKey=true;doAct(true)});['pointerup','pointercancel','pointerleave'].forEach(t=>ab.addEventListener(t,()=>holdKey=false));
+ $('#simRotL',wrap).onclick=()=>yaw+=Math.PI/4;$('#simRotR',wrap).onclick=()=>yaw-=Math.PI/4;
+ $('#simFull',wrap).onclick=()=>{document.fullscreenElement?document.exitFullscreen():wrap.requestFullscreen&&wrap.requestFullscreen().catch(()=>{})};
+ $('#simQuit',wrap).onclick=()=>{api.destroy();SIMG=null;rerender(true)};
+ $('#simChatF',wrap).onsubmit=e=>{e.preventDefault();const i=$('#simChatIn',wrap);const v=i.value.trim();if(v){SimNet.chat(v);Snd.play('pop')}i.value='';i.blur()};
+ /* data */
+ SimNet.on('players',v=>{players=v||{}});SimNet.on('tasks',v=>{tasks=v||{}});
+ SimNet.on('chat',l=>{chat=l;drawChat()});
+ const nowS=()=>SimNet.now();
+ const online=()=>Object.entries(players).filter(([id,p])=>id===me.id||nowS()-(p.t||0)<25000);
+ const shiftN=()=>online().length;
+ function drawChat(){const box=$('#simChatLog',wrap);if(!box)return;box.innerHTML=chat.slice(-8).map(m=>`<div><b>${esc(m.name)}:</b> ${esc(m.text)}</div>`).join('');box.scrollTop=1e9;
+  for(const m of chat){if(m.t>lastChatSeen&&nowS()-m.t<8000){const tgt=m.by===me.id?myL:remotes[m.by]&&remotes[m.by].lbl;if(tgt){tgt.bubble=m.text;tgt.bubbleT=5}if(m.by!==me.id)Snd.play('msg')}}
+  lastChatSeen=Math.max(lastChatSeen,...chat.map(m=>m.t||0),0)}
+ /* host spawn misi */
+ const rnd=a=>a[Math.floor(Math.random()*a.length)];
+ function hostTick(){const ids=online().map(([id])=>id).filter(id=>!id.startsWith('bot')).sort();if(ids[0]!==me.id)return;const n=shiftN();const t=nowS();const list=Object.entries(tasks);
+  for(const [id,tk] of list){if(t-tk.t>(tk.type==='luar'?240000:180000)&&!tk.by)SimNet.setTask(id,null);else if(tk.by&&!players[tk.by])SimNet.updTask(id,{by:'',byName:''});else if(tk.type==='wad'&&n<4&&!tk.by)SimNet.setTask(id,null)}
+  const cnt=k=>list.filter(([,x])=>x.type===k).length;const roll=p=>Math.random()<p;
+  if(cnt('jual')<2&&roll(.22)){const used=list.filter(([,x])=>x.type==='jual').map(([,x])=>x.slot);const slot=[0,1].find(s=>!used.includes(s));if(slot!==undefined){
+   const cat=roll(.7)?'rakyat':rnd(['ht_bs','ht_gs','polis']);const item=roll(.75)?'bandage':'medkit';
+   const qty=item==='medkit'?rnd([10,20,30,40,50]):cat==='rakyat'?rnd([10,20,30,50,70,90,100,100]):rnd([100,200,300,400,500]);
+   const hist=item==='bandage'&&cat==='rakyat'&&roll(.25)?rnd([1,1,2]):0;
+   SimNet.setTask(uid(),{type:'jual',t,slot,name:rnd(SIM_NAMES),cat,item,qty,hist,by:'',civ:civRand()})}}
+  if(cnt('luar')<Math.min(2,Math.max(1,n))&&roll(.16))SimNet.setTask(uid(),{type:'luar',t,reg:Math.floor(Math.random()*4),name:rnd(SIM_NAMES),by:'',civ:civRand()});
+  if(n>=4&&cnt('wad')<Math.min(4,n)&&roll(.25)){const used=list.filter(([,x])=>x.type==='wad').map(([,x])=>x.bed);const free=SIM_BEDS.map((_,i)=>i).filter(i=>!used.includes(i));if(free.length)SimNet.setTask(uid(),{type:'wad',t,bed:rnd(free),need:rnd(['bandage','medkit','darah']),name:rnd(SIM_NAMES),by:'',civ:civRand()})}}
+ function civRand(){return {top:rnd(['#E2725B','#5B8DEF','#F2C14E','#7BC67E','#9B6BD6','#EDEDED','#333A45']),bot:rnd(['#2F3A4A','#5A4632','#3B5BA8','#6B6B6B']),hair:rnd(['pendek','spiky','panjang','botak','bob','tudung','ekor']),hc:rnd(AV_HAIRC)}}
+ /* NPC sync dari tasks */
+ function syncNpcs(){for(const [id,tk] of Object.entries(tasks)){if(npcs[id])continue;const g=buildAvatar({skin:Math.floor(Math.random()*5)},tk.civ||civRand());let pos;
+   if(tk.type==='jual'){const c=SIM_COUNTER.cust[tk.slot||0];g.position.set(c[0],0,c[1]);g.rotation.y=Math.PI/2}
+   else if(tk.type==='wad'){const b=SIM_BEDS[tk.bed];g.rotation.x=-Math.PI/2;g.position.set(b[0],.86,b[1]+.85)}
+   else{const s=SIM_SCENE(tk.reg);g.rotation.z=Math.PI/2;g.rotation.y=Math.random()*3;g.position.set(s.x,.3,s.z)}
+   scene.add(g);const ico=tk.type==='jual'?'🛒':tk.type==='wad'?SIM_NEED[tk.need].ico:'🆘';
+   npcs[id]={g,lbl:mkLbl('npc',ico,null,g)}}
+  for(const id of Object.keys(npcs))if(!tasks[id]){scene.remove(npcs[id].g);disposeTree(npcs[id].g);rmLbl(npcs[id].lbl);delete npcs[id]}}
+ /* pemain lain */
+ function syncRemotes(dt){const live=new Set();for(const [id,p] of online()){if(id===me.id)continue;live.add(id);let r=remotes[id];const avk=JSON.stringify(p.av||{});
+   if(!r||r.avk!==avk){if(r){scene.remove(r.g);disposeTree(r.g)}const g=buildAvatar(p.av||avDefault({}));g.position.set(p.x||0,0,p.z||0);scene.add(g);r=remotes[id]={...(r||{}),g,avk};if(!r.lbl)r.lbl=mkLbl('name',esc(p.name||'?'),null,g);r.lbl.obj=g}
+   const g=r.g;const dx=(p.x||0)-g.position.x,dz=(p.z||0)-g.position.z;const far=Math.hypot(dx,dz)>12;
+   g.position.x+=far?dx:dx*Math.min(1,dt*10);g.position.z+=far?dz:dz*Math.min(1,dt*10);let dr=(p.ry||0)-g.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));g.rotation.y+=dr*Math.min(1,dt*10);
+   animAvatar(g,p.m||Math.hypot(dx,dz)>.05,dt)}
+  for(const id of Object.keys(remotes))if(!live.has(id)){scene.remove(remotes[id].g);disposeTree(remotes[id].g);rmLbl(remotes[id].lbl);delete remotes[id]}}
+ /* tindakan */
+ let act=null;
+ function findAct(){const d=(x,z)=>Math.hypot(P.x-x,P.z-z);
+  if(P.scene>=0){const tk=Object.entries(tasks).find(([,t])=>t.type==='luar'&&t.reg===P.scene&&t.by===me.id);const s=SIM_SCENE(P.scene);
+   if(tk&&d(s.x,s.z)<2.4)return {k:'revive',id:tk[0],tk:tk[1],hold:2.5,txt:L('Tahan E untuk revive','Tahan E untuk revive')};
+   if(!tk&&d(s.x+6,s.z+6)<4)return {k:'back',txt:L('E · Balik ke hospital','E · Kembali ke rumah sakit')};
+   if(tk&&d(s.x+6,s.z+6)<4)return {k:'none',txt:L('Pergi ke pesakit 🆘','Pergi ke pasien 🆘')};return null}
+  for(const [id,t] of Object.entries(tasks)){if(t.type==='jual'){const c=SIM_COUNTER.cust[t.slot||0];if(d(c[0],c[1])<2.4||d(SIM_COUNTER.x+.9,c[1])<1.6){if(t.by&&t.by!==me.id)return {k:'none',txt:`${esc(t.byName)} ${L('sedang layan','sedang melayani')}`};return {k:'jual',id,tk:t,txt:L('E · Layan pelanggan','E · Layani pembeli')}}}
+   if(t.type==='wad'){const b=SIM_BEDS[t.bed];if(d(b[0],b[1])<2.1){if(t.by&&t.by!==me.id)return {k:'none',txt:`${esc(t.byName)} ${L('sedang rawat','sedang merawat')}`};return {k:'wad',id,tk:t,txt:L('E · Periksa pesakit','E · Periksa pasien')}}}}
+  if(d(SIM_AMB.x,SIM_AMB.z)<3.4){const open=Object.entries(tasks).filter(([,t])=>t.type==='luar'&&(!t.by||t.by===me.id));if(open.length)return {k:'amb',list:open,txt:L('E · Naik ambulans','E · Naik ambulans')};return {k:'none',txt:L('Tiada panggilan kecemasan','Tidak ada panggilan darurat')}}
+  return null}
+ async function doAct(press){if(busy||!act)return;if(act.k==='jual')openJual(act.id,act.tk);else if(act.k==='wad')openWad(act.id,act.tk);else if(act.k==='amb')openAmb(act.list);else if(act.k==='back')travel(-1)}
+ const dlg=$('#simDlg',wrap);
+ function showDlg(html,bind){busy=true;dlg.innerHTML=html;dlg.classList.remove('hide');Snd.play('pop');bind&&bind(dlg)}
+ function closeDlg(){dlg.classList.add('hide');dlg.innerHTML='';busy=false}
+ const shuffle=a=>a.map(v=>[Math.random(),v]).sort((x,y)=>x[0]-y[0]).map(x=>x[1]);
+ const opts=(correct,dist,fmt=v=>v)=>shuffle([...new Set([correct,...dist.filter(v=>v!==correct&&v>=0)])].slice(0,4)).map(v=>({v,t:fmt(v),ok:v===correct}));
+ async function reward(id,pts,rm,msg){await SimNet.setTask(id,null);if(pts>0)SimNet.score(myToday(),me.id,{name:me.name,pts,rm});myPts+=pts;myRm+=rm;
+  if(pts>0){const cur=(S.simscore||[]).find(x=>x.id===me.id)||{};Store.set('simscore/'+me.id,{name:me.name,pts:(cur.pts||0)+pts,rm:(cur.rm||0)+rm,cases:(cur.cases||0)+1,at:now()}).catch(()=>{})}
+  toast(msg,pts>0?'ok':'err');Snd.play(pts>0?'ok':'err');drawMe()}
+ let myPts=0,myRm=0;
+ async function openJual(id,t){if(!(await SimNet.claim(id))){toast(L('Pelanggan ini sudah dilayan staff lain','Pembeli ini sudah dilayani staff lain'),'err');return}
+  const cat=L(...(PK_CAT[t.cat]||['Rakyat','Warga']));const free=pukatFree(t.cat,t.item,t.qty);const unit=t.item==='bandage'?150:t.cat==='polis'?450:500;const price=t.qty*unit;
+  const steps=[];let score=0,sold=true;
+  if(t.hist)steps.push({q:`${L('Saya dah beli 100 bandage','Saya sudah beli 100 bandage')} ${t.hist===1?L('semalam','kemarin'):L('2 hari lepas (lebih 48 jam)','2 hari lalu (lebih dari 48 jam)')}. ${L('Boleh jual?','Boleh dijual?')}`,o:[{t:L('Tolak · masih cooldown','Tolak · masih cooldown'),ok:t.hist===1,stop:true},{t:L('Jual','Jual'),ok:t.hist!==1}],why:L('Rakyat biasa: had 100 bandage setiap 2 hari (48 jam).','Warga biasa: batas 100 bandage per 2 hari (48 jam).')});
+  steps.push({q:`${L('Berapa free untuk','Berapa free untuk')} ${t.qty} ${t.item}?`,o:opts(free,[Math.floor(t.qty/10),free+5,Math.max(0,free-2),free*2,free+10,10]).map(o=>({...o,t:'+'+o.v})),why:t.item==='medkit'?L('Medkit: setiap 10 dapat 1, maks 50 (5 free).','Medkit: tiap 10 dapat 1, maks 50 (5 free).'):L('Bandage: 10 tiada free, 20–90 setiap 10 = 1, pakej 100=20 · 200=40 · 300=60 · 400=80 · 500=120.','Bandage: 10 tanpa free, 20–90 tiap 10 = 1, paket 100=20 · 200=40 · 300=60 · 400=80 · 500=120.')});
+  steps.push({q:L('Berapa jumlah bayaran?','Berapa total pembayaran?'),o:opts(price,[(t.qty+free)*unit,Math.round(price*.9/50)*50,t.qty*100,price+1500],v=>'RM'+v.toLocaleString('en-US')),why:`${t.item==='bandage'?'Bandage RM150':`Medkit RM${unit}`} × ${t.qty} = RM${price.toLocaleString('en-US')} (${L('free tidak dibayar','free tidak dibayar')})`});
+  let i=0;const shownTotal=steps.length;
+  const render=()=>{const s=steps[i];showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🛒</span><div class="grow"><b>${esc(t.name)}</b><div class="muted" style="font-size:12px">${esc(cat)} · ${L('mahu','mau beli')} <b>${t.qty} ${esc(t.item)}</b></div></div><span class="chip">${i+1}/${shownTotal}</span></div>
+   <p class="sim-q">${esc(s.q)}</p><div class="sim-opts">${s.o.map((o,k)=>`<button class="btn ghost" data-o="${k}">${esc(o.t)}</button>`).join('')}</div><div id="simWhy"></div>`,d=>{
+   $$('[data-o]',d).forEach(b=>b.onclick=()=>{const o=s.o[+b.dataset.o];$$('[data-o]',d).forEach(x=>{x.disabled=true;if(s.o[+x.dataset.o].ok)x.classList.add('mint')});if(!o.ok)b.classList.add('red');if(o.ok)score+=10;Snd.play(o.ok?'star':'err');
+    if(o.stop&&o.ok)sold=false;$('#simWhy',d).innerHTML=`<div class="chip ${o.ok?'mint':'butter'}" style="white-space:normal;margin-top:10px">${o.ok?'✓':'✗'} ${esc(s.why)}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="simNext">${L('Seterusnya','Lanjut')} →</button></div>`;
+    $('#simNext',d).onclick=()=>{if(!sold||i>=steps.length-1){closeDlg();reward(id,score,sold?price:0,sold?`🧾 ${L('Jualan selesai','Penjualan selesai')} · +${score} ${L('mata','poin')}`:`✋ ${L('Pembeli ditolak ikut SOP','Pembeli ditolak sesuai SOP')} · +${score} ${L('mata','poin')}`);return}i++;render()}})})};render()}
+ async function openWad(id,t){if(!(await SimNet.claim(id))){toast(L('Pesakit ini sudah dirawat staff lain','Pasien ini sudah dirawat staff lain'),'err');return}const n=SIM_NEED[t.need];
+  showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">${n.ico}</span><div class="grow"><b>${esc(t.name)}</b><div class="muted" style="font-size:12px">${L('Katil','Ranjang')} ${t.bed+1} · ${L('pesakit wad','pasien bangsal')}</div></div></div>
+  <p class="sim-q">${L('Simptom','Gejala')}: <b>${esc(L(...n.sym))}</b><br>${L('Rawatan apa yang sesuai?','Perawatan apa yang tepat?')}</p><div class="sim-opts">${Object.entries(SIM_NEED).map(([k,v])=>`<button class="btn ghost" data-n="${k}">${v.ico} ${esc(v.lbl)}</button>`).join('')}</div><div id="simWhy"></div>`,d=>{
+   $$('[data-n]',d).forEach(b=>b.onclick=()=>{const ok=b.dataset.n===t.need;$$('[data-n]',d).forEach(x=>{x.disabled=true;if(x.dataset.n===t.need)x.classList.add('mint')});if(!ok)b.classList.add('red');Snd.play(ok?'star':'err');
+    $('#simWhy',d).innerHTML=`<div class="chip ${ok?'mint':'butter'}" style="white-space:normal;margin-top:10px">${ok?`✓ ${L('Betul. Billing','Benar. Billing')} RM${n.rm} ${L('ke pesakit.','ke pasien.')}`:`✗ ${L('Rawatan yang betul','Perawatan yang benar')}: ${esc(n.lbl)}`}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="simNext">${L('Selesai','Selesai')}</button></div>`;
+    $('#simNext',d).onclick=()=>{closeDlg();reward(id,ok?15:3,ok?n.rm:0,ok?`🛏 ${L('Pesakit dirawat','Pasien dirawat')} · +15 ${L('mata','poin')}`:`🛏 ${L('Pesakit dirawat semula oleh doktor lain','Pasien ditangani ulang')} · +3`)}})})}
+ function openAmb(list){showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🚑</span><div class="grow"><b>${L('Panggilan kecemasan','Panggilan darurat')}</b><div class="muted" style="font-size:12px">${L('Pilih kes untuk diambil','Pilih kasus yang diambil')}</div></div><button class="iconbtn sm" id="simX">✕</button></div>
+  <div class="list">${list.map(([id,t])=>`<div class="li"><div class="grow"><b>📍 ${SIM_REG[t.reg][0]}</b><div class="muted" style="font-size:12px">${esc(t.name)} ${L('pengsan','pingsan')} · revive RM${SIM_REG[t.reg][1]}${t.by===me.id?' · '+L('kes anda','kasus kamu'):''}</div></div><button class="btn sm red" data-go="${id}">${L('Gerak','Berangkat')}</button></div>`).join('')}</div>`,d=>{
+  $('#simX',d).onclick=closeDlg;$$('[data-go]',d).forEach(b=>b.onclick=async()=>{const id=b.dataset.go;if(!(await SimNet.claim(id))){toast(L('Kes ini sudah diambil staff lain','Kasus ini sudah diambil staff lain'),'err');closeDlg();return}closeDlg();travel(tasks[id].reg)})})}
+ function travel(reg){busy=true;const f=$('#simFade',wrap);f.innerHTML=reg<0?`🏥 ${L('Balik ke hospital…','Kembali ke rumah sakit…')}`:`🚑 ${L('Menuju ke','Menuju ke')} ${SIM_REG[reg][0]}…`;f.classList.remove('hide');Snd.play('nav');
+  setTimeout(()=>{if(!alive)return;if(reg<0){P.x=SIM_AMB.x-2.2;P.z=SIM_AMB.z;P.scene=-1}else{const s=SIM_SCENE(reg);P.x=s.x+3.4;P.z=s.z+4;P.scene=reg}P.target=null;myG.position.set(P.x,0,P.z);SimNet.move(st());
+   setTimeout(()=>{f.classList.add('hide');busy=false},400)},1500)}
+ /* HUD */
+ function drawMe(){const e=$('#simMe',wrap);if(e)e.innerHTML=`<div class="sim-pill">⭐ ${myPts} ${L('mata','poin')} · RM${myRm.toLocaleString('en-US')}</div>`}drawMe();
+ let hudKey='';function drawHud(){const n=shiftN();const tl=Object.values(tasks);const key=n+'|'+JSON.stringify(tl.map(t=>[t.type,t.by,t.reg,t.qty,t.bed]))+online().map(x=>x[0]).join();if(key===hudKey)return;hudKey=key;
+  $('#simShift',wrap).innerHTML=`<div class="sim-pill ${n>=4?'mint':''}">👥 Shift: <b>${n}</b> ${L('orang','orang')}${SimNet.mode==='off'?(training?' · '+L('latihan','latihan'):' · offline'):''}</div><div class="sim-sub">${n>=4?'🏥 '+L('Shift penuh: kes luar, jualan & pesakit wad','Shift penuh: kasus luar, penjualan & pasien bangsal'):`🚑 ${L('Kes luar + jualan farmasi','Kasus luar + penjualan farmasi')} · ${4-n} ${L('lagi untuk buka wad','lagi untuk buka bangsal')}`}</div>
+   <div class="sim-sub">${online().map(([id,p])=>`<span class="sim-dot"></span>${esc(p.name||'')}`).join(' ')}</div>`;
+  const nm=k=>tl.filter(t=>t.type===k);
+  $('#simTasks',wrap).innerHTML=`<b>${L('Tugasan','Tugas')}</b>${tl.length?tl.map(t=>`<div class="sim-task ${t.by===me.id?'mine':''}">${t.type==='jual'?`🛒 ${L('Farmasi','Farmasi')}: ${t.qty} ${t.item}`:t.type==='wad'?`${SIM_NEED[t.need].ico} ${L('Wad katil','Bangsal ranjang')} ${t.bed+1}`:`🚑 ${SIM_REG[t.reg][0]}`}<span>${t.by?esc(t.byName||''):L('menunggu','menunggu')}</span></div>`).join(''):`<div class="muted" style="font-size:12px">${L('Tiada tugasan. Tunggu sekejap…','Belum ada tugas. Tunggu sebentar…')}</div>`}`;
+  if(roomL.farmasi)roomL.farmasi.d.innerHTML=`${L('FARMASI · JUALAN','FARMASI · PENJUALAN')}${nm('jual').length?` <i>${nm('jual').length} ${L('pelanggan','pembeli')}</i>`:''}`;
+  if(roomL.wad)roomL.wad.d.innerHTML=`${L('WAD PESAKIT','BANGSAL PASIEN')} ${n>=4?(nm('wad').length?`<i>${nm('wad').length} ${L('pesakit','pasien')}</i>`:''):`<i class="off">🔒 ${L('perlu 4 staff','butuh 4 staff')}</i>`}`;
+  if(roomL.garaj)roomL.garaj.d.innerHTML=`${L('GARAJ AMBULANS','GARASI AMBULANS')}${nm('luar').length?` <i>🚨 ${nm('luar').length} ${L('panggilan','panggilan')}</i>`:''}`}
+ /* loop */
+ const v3=new THREE.Vector3();
+ function resize(){const w=wrap.clientWidth,h=wrap.clientHeight;renderer.setSize(w,h,false);cam.aspect=w/h;cam.updateProjectionMatrix()}
+ const ro=new ResizeObserver(resize);ro.observe(wrap);resize();
+ $('#simLoad',wrap).remove();
+ function frame(t){if(!alive)return;if(!wrap.isConnected){api.destroy();return}raf=requestAnimationFrame(frame);const rdt=Math.min(.25,(t-last)/1000),dt=Math.min(.05,rdt);last=t;
+  /* gerak */
+  let mx=0,mz=0;if(!busy){if(keys.w||keys.arrowup)mz-=1;if(keys.s||keys.arrowdown)mz+=1;if(keys.a||keys.arrowleft)mx-=1;if(keys.d||keys.arrowright)mx+=1;mx+=joy.x;mz+=joy.z}
+  if(mx||mz){P.target=null;const c=Math.cos(yaw),s=Math.sin(yaw);const wx=mx*c+mz*s,wz=-mx*s+mz*c;mx=wx;mz=wz}
+  else if(P.target&&!busy){const dx=P.target.x-P.x,dz=P.target.z-P.z,dd=Math.hypot(dx,dz);if(dd<.15)P.target=null;else{mx=dx/dd;mz=dz/dd}}
+  const m=Math.hypot(mx,mz);P.moving=m>.05;
+  if(P.moving){const sp=5.2*dt*Math.min(1,m);const nx=P.x+mx/m*sp,nz=P.z+mz/m*sp;const ox=P.x,oz=P.z;
+   if(!simCollide(nx,P.z,.32,obs))P.x=nx;if(!simCollide(P.x,nz,.32,obs))P.z=nz;
+   if(P.target&&Math.hypot(P.x-ox,P.z-oz)<sp*.2){P.stuck+=dt;if(P.stuck>.4)P.target=null}
+   let tr=Math.atan2(mx,mz),dr=tr-P.ry;dr=Math.atan2(Math.sin(dr),Math.cos(dr));P.ry+=dr*Math.min(1,dt*14)}
+  myG.position.set(P.x,0,P.z);myG.rotation.y=P.ry;animAvatar(myG,P.moving,dt);
+  if(holdKey&&act&&act.hold&&!busy){holdT+=rdt;if(holdT>=act.hold){holdT=0;holdKey=false;const a=act;reward(a.id,20,SIM_REG[a.tk.reg][1],`💓 ${L('Pesakit berjaya di-revive','Pasien berhasil di-revive')} · +20 ${L('mata','poin')} · RM${SIM_REG[a.tk.reg][1]}`);setTimeout(()=>alive&&travel(-1),1400)}}else holdT=Math.max(0,holdT-dt*2);
+  /* bot */
+  for(const b of bots){if(b.wait>0){b.wait-=dt}else{const dx=b.tx-b.x,dz=b.tz-b.z,dd=Math.hypot(dx,dz);if(dd<.3){b.wait=1+Math.random()*3;const r=SIM_ROOMS[Math.floor(Math.random()*7)];b.tx=r.x0+1.5+Math.random()*(r.x1-r.x0-3);b.tz=r.z0+1.5+Math.random()*(r.z1-r.z0-3)}else{const sp=3*dt;const nx=b.x+dx/dd*sp,nz=b.z+dz/dd*sp;let ok=false;if(!simCollide(nx,b.z,.3,obs)){b.x=nx;ok=true}if(!simCollide(b.x,nz,.3,obs)){b.z=nz;ok=true}if(!ok)b.wait=.5,b.tx=b.x,b.tz=b.z;b.ry=Math.atan2(dx,dz)}}
+   b.st=(b.st||0)+dt;if(b.st>.25){b.st=0;SimNet.setBot(b.id,{name:b.name,role:'BOT',av:b.av,x:b.x,z:b.z,ry:b.ry||0,m:b.wait>0?0:1})}}
+  /* hantar posisi */
+  sendT+=dt;hbT+=dt;if((P.moving&&sendT>.2)||hbT>8){sendT=0;hbT=0;SimNet.move(st())}
+  hostT+=dt;if(hostT>2){hostT=0;hostTick()}
+  syncNpcs();syncRemotes(dt);
+  /* ambulans lampu */
+  const bl=Math.sin(t/120)>0;[world.amb,...world.scenes].forEach(a=>{a.userData.l1.material=smat(bl?'#FF3B3B':'#7A2020');a.userData.l2.material=smat(bl?'#2A3D7A':'#3B7BFF')});
+  for(const n of Object.values(npcs)){if(n.lbl)n.lbl.d.classList.toggle('pulse',Math.sin(t/300)>0)}
+  if(pingT>0){pingT-=dt;pingM.material.opacity=pingT/.6;pingM.scale.setScalar(1+(.6-pingT));if(pingT<=0)pingM.visible=false}
+  /* kamera */
+  const D=17*zoom;const tx=P.x+Math.sin(yaw)*D*.72,tz=P.z+Math.cos(yaw)*D*.72;cam.position.x+=(tx-cam.position.x)*Math.min(1,dt*6);cam.position.z+=(tz-cam.position.z)*Math.min(1,dt*6);cam.position.y=D*1.12;cam.lookAt(P.x,.8,P.z);
+  sun.position.set(P.x+10,22,P.z+8);sun.target.position.set(P.x,0,P.z);
+  /* aksi */
+  act=busy?null:findAct();const ae=$('#simAct',wrap);if(act){ae.classList.remove('hide');ae.innerHTML=`${act.txt}${act.hold?`<div class="sim-bar"><span style="width:${Math.min(100,holdT/act.hold*100)}%"></span></div>`:''}`;ab.classList.toggle('on',act.k!=='none')}else{ae.classList.add('hide');ab.classList.remove('on')}
+  drawHud();
+  renderer.render(scene,cam);
+  /* label */
+  const W=wrap.clientWidth,H=wrap.clientHeight;
+  for(const l of labels){if(l.obj){v3.copy(l.obj.position);v3.y+=(l.obj.rotation.x||l.obj.rotation.z)?1.1:2.55}else v3.copy(l.pos);
+   const dist=v3.distanceTo(cam.position);v3.project(cam);const vis=v3.z<1&&Math.abs(v3.x)<1.15&&Math.abs(v3.y)<1.15&&dist<45;l.d.style.display=vis?'':'none';if(!vis)continue;
+   l.d.style.transform=`translate(-50%,-100%) translate(${(v3.x+1)/2*W}px,${(1-v3.y)/2*H}px)`;
+   if(l.bubbleT>0){l.bubbleT-=dt;if(!l.d.querySelector('.sim-bub')){const b=document.createElement('div');b.className='sim-bub';l.d.prepend(b)}l.d.querySelector('.sim-bub').textContent=l.bubble}else{const b=l.d.querySelector('.sim-bub');b&&b.remove()}}}
+ raf=requestAnimationFrame(frame);
+ const api={_P:P,destroy(){if(!alive)return;alive=false;document.body.classList.remove('sim-playing');cancelAnimationFrame(raf);window.removeEventListener('keydown',kd);window.removeEventListener('keyup',ku);ro.disconnect();
+  for(const b of bots)SimNet.setBot(b.id,null);SimNet.leave();disposeTree(scene);renderer.dispose();if(document.fullscreenElement)document.exitFullscreen().catch(()=>{})}};
+ Snd.play('ok');toast(L('Selamat bertugas! Jalan ke farmasi atau garaj ambulans.','Selamat bertugas! Jalan ke farmasi atau garasi ambulans.'),'ok');
+ return api}
 
 /* ---------------- Tutorial ---------------- */
 function tourSteps(){const r=role();const dev=isDev()&&!S.viewAs;const st=[];const A=(i,t1,t2,d1,d2,pg)=>st.push({i,t:L(t1,t2),d:L(d1,d2),pg});
@@ -1642,7 +2096,7 @@ function bugModal(){modal(`<h3>Lapor bug 🐞</h3><p class="muted" style="margin
 
 setInterval(()=>{const c=document.getElementById('myClock');if(c)c.textContent='🕒 '+hm(new Date())+' MYT'},15000);
 /* Halaman hanya dilukis semula bila data yang ia guna berubah, supaya form yang sedang diisi tidak hilang */
-const DEPS={game:[],rekap:['shifts','kawalan','staff'],dashboard:['kawalan','cuti','announce','suara','staff'],kawalan:['kawalan','kawalanLog','staff','webhooks'],pukat:['pukat','staff','webhooks'],storage:['storage','pukat','staff','webhooks'],chat:['staff'],diskusi:['staff'],suara:['suara'],
+const DEPS={game:[],sim:[],rekap:['shifts','kawalan','staff'],dashboard:['kawalan','cuti','announce','suara','staff'],kawalan:['kawalan','kawalanLog','staff','webhooks'],pukat:['pukat','staff','webhooks'],storage:['storage','pukat','staff','webhooks'],chat:['staff'],diskusi:['staff'],suara:['suara'],
  sop:[],uniform:['uniform'],kos:[],chart:['staff'],akkb:[],cuti:['cuti','webhooks'],resign:['resign','webhooks'],iban:['iban','staff'],profil:['staff','cuti','kawalanLog','evals'],
  bimbingan:['bimbingan','staff'],evaluasi:['evals','staff'],permohonan:['cuti','resign','staff'],staff:['staff'],pantau:['log','pimpinan','staff'],dev:['bugs','log','webhooks','staff']};
 function onData(col){if(!S.loaded||!S.me)return;const d=DEPS[current()];if(!d||d.includes(col))rerender();else{const nb=$('.nav');if(nb&&['cuti','resign','bugs'].includes(col)){$$('.nav a').forEach(a=>{const id=a.getAttribute('href').slice(1);const n=badgeFor(id);let b=$('.badge',a);if(n){if(!b){b=document.createElement('span');b.className='badge';a.append(b)}b.textContent=n}else if(b)b.remove()})}}}
@@ -1669,6 +2123,7 @@ function onData(col){if(!S.loaded||!S.me)return;const d=DEPS[current()];if(!d||d
  Store.watchCol('log',{orderBy:'at',dir:'desc',limit:300},d=>{S.log=d;onData('log')});
  Store.watchCol('leadchat',{orderBy:'at',dir:'desc',limit:150},d=>{const newer=d.filter(m=>m.at>(S.leadchat[0]?.at||0)&&m.by!==S.me?.id).length;const had=S.leadchat.length;S.leadchat=d;if(had&&newer&&isLeadGroup(S.me?.role))Snd.play('msg');if(current()==='diskusi')renderChatList()});
  Store.watchCol('shifts',{orderBy:'start',dir:'desc',limit:1000},d=>{S.shifts=d;onData('shifts')});
+ Store.watchCol('avatar',{},d=>{S.avatars=Object.fromEntries(d.map(x=>[x.id,x]))});Store.watchCol('simscore',{},d=>{S.simscore=d});Store.watchDoc('content/game',d=>{S.simCfg=d||{}});
  Store.watchCol('snake',{},d=>{S.snake=d;if(current()==='game'&&typeof renderSnakeBoard==='function')renderSnakeBoard()});
  Store.watchCol('suara',{orderBy:'at',dir:'desc',limit:120},d=>{S.suara=d;onData('suara')});
  Store.watchCol('announce',{orderBy:'at',dir:'desc',limit:50},d=>{S.announce=d;onData('announce')});
