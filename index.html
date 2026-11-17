@@ -402,6 +402,12 @@ table{border-collapse:separate;border-spacing:0;width:100%}
 .sim-dlg-h{display:flex;gap:10px;align-items:center;margin-bottom:6px}.sim-q{font-size:16px;font-weight:600;margin:10px 0}
 .sim-opts{display:grid;grid-template-columns:1fr 1fr;gap:8px}.sim-opts .btn.mint{background:#CFF3E3;border-color:#2E9D7E}.sim-opts .btn.red{background:#FCE3E1;color:#8E2433}
 .sim-load{position:absolute;inset:0;display:grid;place-items:center;font-weight:700;background:#F3D9CF;z-index:7}
+.sim-lbl.chair{background:#E9B949;color:#2A1418;padding:1px 7px;border-radius:6px;font-size:11px}
+.sim-ic{background:linear-gradient(135deg,#DDEBFF,#F4F8FF);border:2px solid #7FA6E8;border-radius:14px;padding:10px 14px;display:grid;gap:2px;font-size:13px}.sim-ic b{font-size:11px;letter-spacing:.1em;color:#3D7BD9}.sim-ic span{font-weight:800;font-size:16px}.sim-ic code{font-size:15px;letter-spacing:.06em}
+.sim-gauge{position:relative;height:34px;border-radius:12px;background:linear-gradient(90deg,#FCE3E1,#FFF4D6,#FCE3E1);overflow:hidden;box-shadow:inset 0 0 0 2px #F0D9D2}.sim-gauge i{position:absolute;top:0;bottom:0;background:#9BE3C3;border-left:2px solid #2E9D7E;border-right:2px solid #2E9D7E}.sim-gauge b{position:absolute;top:-2px;bottom:-2px;width:4px;margin-left:-2px;background:#8E2433;border-radius:2px}
+.sim-seq{display:flex;align-items:center;justify-content:center;gap:6px;flex-wrap:wrap;min-height:48px;margin:6px 0}.sim-seq span{font-size:28px;background:#fff;border-radius:12px;padding:4px 8px;box-shadow:0 2px 6px rgba(0,0,0,.1)}.sim-seq i{font-style:normal;opacity:.5}
+.sim-jbtn{display:none}
+@media (pointer:coarse){.sim-jbtn{display:block;position:absolute;right:104px;bottom:30px;width:56px;height:56px;border-radius:50%;border:0;background:#3D7BD9;color:#fff;font-weight:800;font-size:22px;z-index:3;touch-action:none}}
 </style>
 </head>
 <body>
@@ -424,7 +430,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.17-8';
+const APP_VERSION = '2026.11.17-9';
 /* contoh:
 const FIREBASE_CONFIG = {
   apiKey: "...", authDomain: "...", projectId: "...",
@@ -940,7 +946,7 @@ const AV_HAIRC=['#2B1D16','#5A3825','#A0522D','#D8B26A','#ECE6D6','#B83A3A','#3B
 const AV_HAIR=[['botak','Botak','Botak','l'],['cepak','Cepak','Cepak','l'],['pendek','Pendek','Pendek','l'],['belah','Belah tepi','Belah samping','l'],['spiky','Spiky','Spiky','l'],['undercut','Undercut','Undercut','l'],['mohawk','Mohawk','Mohawk','l'],['keriting','Keriting','Keriting','l'],['afro','Afro','Afro','l'],
  ['pixie','Pixie','Pixie','p'],['bob','Bob','Bob','p'],['panjang','Panjang','Panjang','p'],['poni','Panjang berponi','Panjang berponi','p'],['ikal','Panjang ikal','Panjang ikal','p'],['ekor','Ekor kuda','Kuncir kuda','p'],['tocang','Tocang dua','Kuncir dua','p'],['sanggul','Sanggul','Cepol','p'],['tudung','Tudung','Kerudung','p']];
 const AV_EYE=['#1B1B1F','#5A3825','#8B5A2B','#2E6FD8','#30C5D2','#2E9D7E','#7E5BC2','#C0392B','#E9B949','#E88AA8','#7A8A99'];
-const SIMGLASS=new THREE.MeshLambertMaterial({color:'#DFF4FF',transparent:true,opacity:.28});
+const SIMGLASS=window.THREE&&new THREE.MeshLambertMaterial({color:'#DFF4FF',transparent:true,opacity:.28});
 /* outfit: top, bottom, coat (warna kot atau ''), trim, lead=hanya atasan */
 const AV_OUT=[
  {id:'scrub_biru',n:['Scrubs Biru','Scrubs Biru'],top:'#3D7BD9',bot:'#3569BD'},
@@ -1021,30 +1027,48 @@ function buildHair(head,h,c){if(!h||h==='botak')return;const b=(w,hh,d,x,y,z)=>s
   default:back(.4);sides(.22);fringe(.08)}}
 function animAvatar(g,moving,dt){const u=g.userData;u.walk=moving?u.walk+dt*9:u.walk*.85;const s=Math.sin(u.walk)*(moving?.6:Math.min(.6,Math.abs(Math.sin(u.walk))*.6));
  u.legL.rotation.x=s;u.legR.rotation.x=-s;u.armL.rotation.x=-s*.8;u.armR.rotation.x=s*.8}
+function setSit(g,on){const u=g.userData;if(!!u.sit===on)return;u.sit=on;u.legL.rotation.x=on?-Math.PI/2:0;u.legR.rotation.x=on?-Math.PI/2:0;u.armL.rotation.x=on?-.5:0;u.armR.rotation.x=on?-.5:0;if(on)g.position.y=-.17}
 function disposeTree(o){o.traverse(m=>{if(m.geometry)m.geometry.dispose()})}
 
 /* ---------- peta ---------- */
 const SIM_ROOMS=[
- {k:'wad',x0:-16,z0:-12,x1:-4,z1:-2,c:'#E3ECFA',ms:'WAD PESAKIT',id:'BANGSAL PASIEN'},
- {k:'rawatan',x0:-4,z0:-12,x1:4,z1:-2,c:'#FBE3E6',ms:'BILIK RAWATAN',id:'RUANG RAWAT'},
+ {k:'diagnose',x0:-16,z0:-12,x1:-6,z1:-2,c:'#E3ECFA',ms:'BILIK DIAGNOSE',id:'RUANG DIAGNOSE'},
+ {k:'treatment',x0:-6,z0:-12,x1:4,z1:-2,c:'#FBE3E6',ms:'BILIK TREATMENT',id:'RUANG TREATMENT'},
  {k:'kawalan',x0:4,z0:-12,x1:12,z1:-2,c:'#FFF1C9',ms:'BILIK KAWALAN',id:'RUANG KENDALI'},
  {k:'koridor',x0:-16,z0:-2,x1:12,z1:2,c:'#EFE7DA',ms:'',id:''},
- {k:'pejabat',x0:-16,z0:2,x1:-6,z1:12,c:'#EDE3F6',ms:'PEJABAT PENGURUSAN',id:'KANTOR MANAJEMEN'},
- {k:'lobi',x0:-6,z0:2,x1:6,z1:12,c:'#F6EEE3',ms:'LOBI & KAUNTER',id:'LOBI & RESEPSIONIS'},
- {k:'farmasi',x0:6,z0:2,x1:12,z1:12,c:'#DDF1E8',ms:'FARMASI · JUALAN',id:'FARMASI · PENJUALAN'},
+ {k:'meeting',x0:-16,z0:2,x1:-6,z1:12,c:'#EDE3F6',ms:'BILIK MEETING',id:'RUANG MEETING'},
+ {k:'lobi',x0:-6,z0:2,x1:6,z1:12,c:'#F6EEE3',ms:'LOBI · REGISTRASI',id:'LOBI · REGISTRASI'},
+ {k:'farmasi',x0:6,z0:2,x1:12,z1:12,c:'#DDF1E8',ms:'FARMASI',id:'FARMASI'},
  {k:'garaj',x0:12,z0:-4,x1:22,z1:12,c:'#5D6470',ms:'GARAJ AMBULANS',id:'GARASI AMBULANS'}];
 /* dinding: [x0,z0,x1,z1] (segmen paksi), pintu = jurang */
-const SIM_WALLS=[[-16,-12,12,-12],[-16,-12,-16,12],[-16,12,-2,12],[2,12,12,12],[12,-12,12,-2],[12,2,12,12],
- [-16,-2,-11,-2],[-9,-2,-1,-2],[1,-2,7,-2],[9,-2,12,-2],
+const SIM_WALLS=[[-16,-12,12,-12],[-16,-12,-16,-2],[-16,2,-16,12],[-16,12,-2,12],[2,12,12,12],[12,-12,12,-2],[12,2,12,12],
+ [-16,-2,-12,-2],[-10,-2,-2,-2],[0,-2,7,-2],[9,-2,12,-2],
  [-16,2,-12,2],[-10,2,-6,2],[6,2,8,2],[10,2,12,2],
- [-4,-12,-4,-2],[4,-12,4,-2],[-6,2,-6,5],[-6,8,-6,12],[6,2,6,4.5],[6,9.5,6,12]];
-const SIM_BEDS=[[-14.4,-10],[-11.6,-10],[-8.8,-10],[-6,-10],[-14.4,-5],[-6,-5]];
-const SIM_COUNTER={x:6,z:7,cust:[[4.4,6],[4.4,8]]};
+ [-6,-12,-6,-2],[4,-12,4,-2],[-6,2,-6,5],[-6,8,-6,12],[6,2,6,4.5],[6,9.5,6,12]];
+const SIM_TBEDS=[[-4.2,-9.6],[-1,-9.6],[2.2,-9.6]];
+const SIM_COUNTER={x:6,z:7,cust:[[4.4,5.4],[4.4,7],[4.4,8.6]]};
+const SIM_REGDESK={x:0,z:5,pat:[0,6.5],staff:[0,3.7]};
+const SIM_DIAG={desk:[-11,-8.6],pat:[-11,-7.2],doc:[-11,-10]};
 const SIM_AMB={x:17,z:4};
 const SIM_SCENE=i=>({x:90+i*40,z:0});
 const SIM_SPAWN={x:0,z:9};
-
-function simCollide(px,pz,r,obs){for(const o of obs){if(px>o[0]-r&&px<o[2]+r&&pz>o[1]-r&&pz<o[3]+r)return true}return false}
+/* kerusi meeting: [x,z,ry,label] ; KP & TP di kepala meja */
+const SIM_CHAIRS=[[-11.6,10.4,Math.PI,'KP'],[-10.4,10.4,Math.PI,'TP'],[-12.4,5.2,Math.PI/2,''],[-12.4,6.6,Math.PI/2,''],[-12.4,8,Math.PI/2,''],[-9.6,5.2,-Math.PI/2,''],[-9.6,6.6,-Math.PI/2,''],[-9.6,8,-Math.PI/2,'']];
+const SIM_SICK=[
+ {k:'demam',ico:'🤒',n:['Demam panas','Demam tinggi'],med:'💊 Paracetamol',steps:['🌡️','💧','💊','🛌']},
+ {k:'luka',ico:'🩸',n:['Luka terbuka','Luka terbuka'],med:'🧴 Antiseptik',steps:['🧼','🧴','🩹','💉']},
+ {k:'batuk',ico:'😷',n:['Batuk & selesema','Batuk & pilek'],med:'🍯 Ubat batuk',steps:['🩺','💨','🍯','💧']},
+ {k:'patah',ico:'🦴',n:['Tulang retak','Tulang retak'],med:'💉 Painkiller',steps:['📷','🦴','🩼','💉']},
+ {k:'alahan',ico:'🤧',n:['Alahan / ruam','Alergi / ruam'],med:'💊 Antihistamin',steps:['🔍','🧊','🧴','💊']},
+ {k:'pening',ico:'😵',n:['Pening & lemah','Pusing & lemas'],med:'🧃 Air + vitamin',steps:['🩺','🩸','🧃','🛌']}];
+const SIM_MEDS=['💊 Paracetamol','🧴 Antiseptik','🍯 Ubat batuk','💉 Painkiller','💊 Antihistamin','🧃 Air + vitamin'];
+const SIM_STAGE=[['Registrasi','Registrasi'],['Diagnose','Diagnose'],['Treatment','Treatment'],['Farmasi','Farmasi']];
+/* taman: kolam elips dengan jambatan */
+const SIM_POND={x:-29,z:3,rx:6,rz:3.6,bx:[-29.9,-28.1],bz:[-1.6,7.6]};
+const SIM_BRIDGE={x:-29,z0:-1.4,z1:7.4,h:1.0};
+function simGround(x,z){if(x>SIM_BRIDGE.x-.9&&x<SIM_BRIDGE.x+.9&&z>SIM_BRIDGE.z0&&z<SIM_BRIDGE.z1)return Math.sin(Math.PI*(z-SIM_BRIDGE.z0)/(SIM_BRIDGE.z1-SIM_BRIDGE.z0))*SIM_BRIDGE.h;return 0}
+function simCollide(px,pz,r,obs){for(const o of obs){if(Array.isArray(o)){if(px>o[0]-r&&px<o[2]+r&&pz>o[1]-r&&pz<o[3]+r)return true;continue}
+ const dx=(px-o.x)/(o.rx+r),dz=(pz-o.z)/(o.rz+r);if(dx*dx+dz*dz<1&&!(px>o.bx[0]&&px<o.bx[1]&&pz>o.bz[0]&&pz<o.bz[1]))return true}return false}
 
 function buildWorld(scene,obs){
  const add=m=>{scene.add(m);return m};
@@ -1059,25 +1083,36 @@ function buildWorld(scene,obs){
   sbox(m.geometry.parameters.width+.02,.12,m.geometry.parameters.depth+.02,'#8E2433',(x0+x1)/2,hh,(z0+z1)/2,scene);
   obs.push([Math.min(x0,x1)-t/2,Math.min(z0,z1)-t/2,Math.max(x0,x1)+t/2,Math.max(z0,z1)+t/2])}
  const block=(w,h,d,c,x,z,y=h/2)=>{sbox(w,h,d,c,x,y,z,scene);obs.push([x-w/2,z-d/2,x+w/2,z+d/2])};
- /* katil wad */
- for(const [x,z] of SIM_BEDS){block(1.3,.55,2.3,'#E7EDF3',x,z);sbox(1.3,.12,2.3,'#9BC3E6',x,.6,z+.05,scene);sbox(1.1,.18,.5,'#FFFFFF',x,.68,z-.85,scene);sbox(1.3,.9,.12,'#C9D2DC',x,.45,z-1.15,scene);sbox(.08,1.6,.08,'#B5BDC6',x+.85,.8,z-1,scene);sbox(.3,.4,.12,'#D3343A',x+.85,1.45,z-1,scene)}
- /* bilik rawatan */
- block(1.4,.7,2.4,'#E7EDF3',0,-8);sbox(1.4,.1,2.4,'#FFFFFF',0,.75,-8,scene);sbox(.9,.9,.2,'#2F3A4A',1.6,1.6,-9.5,scene);sbox(.8,.6,.05,'#5FD1B5',1.6,1.6,-9.39,scene);block(1.2,1.6,.6,'#F4F7FA',-2.8,-11.4);sbox(.5,.5,.06,'#D3343A',-2.8,1.1,-11.08,scene);
+ const plant=(x,z)=>{block(.6,.6,.6,'#B07A55',x,z);const p=new THREE.Mesh(new THREE.ConeGeometry(.45,1.2,5),smat('#3E9B5B'));p.position.set(x,1.2,z);scene.add(p)};
+ /* bilik diagnose */
+ block(2.6,.8,1,'#F4F7FA',SIM_DIAG.desk[0],SIM_DIAG.desk[1]);sbox(2.7,.06,1.1,'#3D9FA8',SIM_DIAG.desk[0],.82,SIM_DIAG.desk[1],scene);
+ sbox(.7,.5,.06,'#20242C',SIM_DIAG.desk[0]+.7,1.1,SIM_DIAG.desk[1]-.25,scene);sbox(.6,.4,.02,'#7FA6E8',SIM_DIAG.desk[0]+.7,1.1,SIM_DIAG.desk[1]-.21,scene);
+ chairMesh(scene,SIM_DIAG.doc[0],SIM_DIAG.doc[1],0,'#3D7BD9');chairMesh(scene,SIM_DIAG.pat[0],SIM_DIAG.pat[1],Math.PI,'#E9B949');
+ block(1.2,.6,2.3,'#E7EDF3',-14.6,-6);sbox(1.2,.1,2.3,'#BFE3EE',-14.6,.65,-6,scene);sbox(1,.15,.45,'#FFFFFF',-14.6,.75,-6.85,scene);
+ block(.9,1.8,.5,'#F4F7FA',-7,-11.5);sbox(.5,.5,.06,'#D3343A',-7,1.2,-11.22,scene);sbox(1.6,1.1,.06,'#FFFFFF',-13.2,1.3,-11.82,scene);sbox(1.4,.9,.02,'#DDE7F5',-13.2,1.3,-11.78,scene);
+ /* bilik treatment */
+ for(const [x,z] of SIM_TBEDS){block(1.3,.55,2.3,'#E7EDF3',x,z);sbox(1.3,.12,2.3,'#F2A7C3',x,.6,z+.05,scene);sbox(1.1,.18,.5,'#FFFFFF',x,.68,z-.85,scene);sbox(1.3,.9,.12,'#C9D2DC',x,.45,z-1.15,scene);sbox(.08,1.6,.08,'#B5BDC6',x+.85,.8,z-1,scene);sbox(.3,.4,.12,'#D3343A',x+.85,1.45,z-1,scene)}
+ block(1.2,1.6,.6,'#F4F7FA',2.9,-4);sbox(.5,.5,.06,'#2E9D7E',2.9,1.1,-3.68,scene);
  /* bilik kawalan */
  block(3.6,.8,1,'#6B4A3A',8,-9);for(let i=0;i<3;i++){sbox(.8,.55,.06,'#20242C',6.9+i*1.1,1.15,-9.3,scene);sbox(.7,.45,.02,['#5FD1B5','#E9B949','#7FA6E8'][i],6.9+i*1.1,1.15,-9.26,scene)}sbox(.3,.5,.3,'#30343C',9.6,1.05,-8.8,scene);
- /* pejabat */
- block(3,.8,1.2,'#5A3A2E',-11,8.5);sbox(1.4,.3,.05,'#E9B949',-11,.55,7.88,scene);block(.8,1.6,.8,'#3A2A22',-11,10.6);block(2.2,2,.5,'#7A5A46',-15.4,6);for(let i=0;i<4;i++)sbox(.3,.4,.3,['#D3343A','#3D7BD9','#2E9D7E','#E9B949'][i],-15.3,1.5-(i%2)*.6,5.3+i*.4,scene);
+ /* bilik meeting */
+ block(1.8,.75,5.2,'#6B4A3A',-11,6.6);sbox(1.9,.06,5.3,'#8B6B4F',-11,.78,6.6,scene);
+ for(const [x,z,ry,lbl] of SIM_CHAIRS)chairMesh(scene,x,z,ry,lbl==='KP'?'#8E2433':lbl==='TP'?'#B8862E':'#7E5BC2',!!lbl);
+ sbox(3.2,1.6,.08,'#20242C',-11,1.3,2.25,scene);sbox(3,1.4,.02,'#F7F2EA',-11,1.3,2.3,scene);sbox(1.4,.18,.02,'#D3343A',-11,1.65,2.32,scene);
+ plant(-15.2,11.2);plant(-6.8,11.2);
  /* lobi */
- block(4,1,1,'#8E2433',0,5);sbox(4.1,.08,1.1,'#F7F2EA',0,1.02,5,scene);sbox(.9,.9,.12,'#FFFFFF',0,1.7,4.6,scene);sbox(.7,.22,.13,'#D3343A',0,1.7,4.6,scene);sbox(.22,.7,.13,'#D3343A',0,1.7,4.6,scene);
+ block(4,1,1,'#8E2433',SIM_REGDESK.x,SIM_REGDESK.z);sbox(4.1,.08,1.1,'#F7F2EA',0,1.02,5,scene);sbox(.9,.9,.12,'#FFFFFF',0,1.7,4.6,scene);sbox(.7,.22,.13,'#D3343A',0,1.7,4.6,scene);sbox(.22,.7,.13,'#D3343A',0,1.7,4.6,scene);
  for(const x of [-4,4]){block(2.4,.45,.8,'#3D9FA8',x,10.2)}
- for(const [x,z] of [[-5.3,3],[5.3,11.3],[-15.2,11.2],[11.2,-11.2],[-15.2,-1.3]]){block(.6,.6,.6,'#B07A55',x,z);const p=new THREE.Mesh(new THREE.ConeGeometry(.45,1.2,5),smat('#3E9B5B'));p.position.set(x,1.2,z);scene.add(p)}
+ for(const [x,z] of [[-5.3,3],[5.3,11.3],[11.2,-11.2],[-15.2,-1.3]])plant(x,z);
  /* farmasi */
  block(.8,1,5,'#2E9D7E',SIM_COUNTER.x,SIM_COUNTER.z);sbox(.9,.08,5.1,'#F7F2EA',SIM_COUNTER.x,1.02,SIM_COUNTER.z,scene);
  block(.6,2,4,'#F4F7FA',11.5,7);for(let i=0;i<8;i++)sbox(.3,.25,.3,i%2?'#D3343A':'#F2F2F2',11.25,.6+(i%3)*.55,5.4+Math.floor(i/2)*.9,scene);
  /* ambulans */
  const amb=buildAmb();amb.position.set(SIM_AMB.x,0,SIM_AMB.z);scene.add(amb);obs.push([SIM_AMB.x-1.15,SIM_AMB.z-2.4,SIM_AMB.x+1.15,SIM_AMB.z+2.4]);
+ /* taman */
+ const garden=buildGarden(scene,obs);
  /* sempadan luar */
- obs.push([-30,-30,-16.4,30],[22.5,-30,40,30],[-30,-30,40,-12.4],[-30,16,40,30]);
+ obs.push([-60,-30,-41.4,30],[22.5,-30,40,30],[-60,-30,40,-12.4],[-60,16,40,30]);
  /* lokasi kes luar */
  const scenes=[];SIM_REG.forEach(([n,,c],i)=>{const s=SIM_SCENE(i);const f=new THREE.Mesh(new THREE.PlaneGeometry(26,26),smat(c));f.rotation.x=-Math.PI/2;f.position.set(s.x,.01,s.z);scene.add(f);
   const rd=new THREE.Mesh(new THREE.PlaneGeometry(26,5),smat('#4A505B'));rd.rotation.x=-Math.PI/2;rd.position.set(s.x,.02,s.z+6);scene.add(rd);
@@ -1087,7 +1122,66 @@ function buildWorld(scene,obs){
    else if(i===2){const m=new THREE.Mesh(new THREE.ConeGeometry(rnd(1,2),rnd(2,4),6),smat('#2F6B45'));m.position.set(px,1.5,pz);scene.add(m)}
    else{const d=new THREE.Mesh(new THREE.SphereGeometry(rnd(1.5,2.5),10,8,0,Math.PI*2,0,Math.PI/2),smat('#C9D2E8'));d.position.set(px,0,pz);scene.add(d)}}
   const a=buildAmb();a.position.set(s.x+6,0,s.z+6);a.rotation.y=Math.PI/2;scene.add(a);scenes.push(a)});
- return {amb,scenes}}
+ return {amb,scenes,garden}}
+function chairMesh(scene,x,z,ry,c,big){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;
+ sbox(.62,.1,.6,c,0,.45,0,g);sbox(.62,big?.95:.7,.1,c,0,big?.92:.8,-.28,g);if(big)sbox(.66,.08,.14,'#E9B949',0,1.42,-.28,g);
+ for(const [a,b] of [[-.26,-.24],[.26,-.24],[-.26,.24],[.26,.24]])sbox(.06,.42,.06,'#2A2A2E',a,.21,b,g);scene.add(g);return g}
+/* Taman Sakura: kolam, jambatan merah, gazebo, laluan batu, kelopak jatuh */
+function buildGarden(scene,obs){const add=m=>{scene.add(m);return m};const R=(a,b)=>a+Math.random()*(b-a);
+ const lawn=add(new THREE.Mesh(new THREE.PlaneGeometry(25,28.4),smat('#A3DB8C')));lawn.rotation.x=-Math.PI/2;lawn.position.set(-28.9,.004,1.8);lawn.receiveShadow=true;
+ /* pagar putih comel */
+ for(let z=-12;z<=16;z+=1.2){sbox(.12,.7,.12,'#FFFFFF',-41.2,.35,z,scene)}sbox(.08,.1,28.4,'#FFFFFF',-41.2,.55,1.8,scene);
+ for(let x=-41;x<=-16.6;x+=1.2){sbox(.12,.7,.12,'#FFFFFF',x,.35,-12.2,scene)}sbox(24.6,.1,.08,'#FFFFFF',-28.9,.55,-12.2,scene);
+ /* laluan batu dari pintu koridor */
+ const path=[];const seg=(x0,z0,x1,z1)=>{const n=Math.max(2,Math.round(Math.hypot(x1-x0,z1-z0)/.85));for(let i=0;i<=n;i++){const t=i/n;path.push([x0+(x1-x0)*t,z0+(z1-z0)*t+Math.sin(t*Math.PI)*.4])}};
+ seg(-16.6,0,-22,-.6);seg(-22,-.6,-29,-2.4);seg(-29,-2.4,-29,-4.9);seg(-29,-2.4,-34.2,-5.4);seg(-29,8.2,-24,12);seg(-24,12,-18,14.6);seg(-22,-.6,-22.4,3);
+ for(const [x,z] of path){const s=new THREE.Mesh(new THREE.CylinderGeometry(R(.38,.5),R(.38,.5),.05,10),smat(Math.random()<.5?'#F2E6D8':'#E8D9C7'));s.position.set(x+R(-.12,.12),.03,z+R(-.12,.12));s.receiveShadow=true;scene.add(s)}
+ /* kolam */
+ const P=SIM_POND;const rim=add(new THREE.Mesh(new THREE.CylinderGeometry(1,1,.18,40),smat('#D9D2C6')));rim.scale.set(P.rx+.35,1,P.rz+.35);rim.position.set(P.x,.06,P.z);
+ const water=add(new THREE.Mesh(new THREE.CylinderGeometry(1,1,.2,40),new THREE.MeshLambertMaterial({color:'#6CC4CF',transparent:true,opacity:.92})));water.scale.set(P.rx,1,P.rz);water.position.set(P.x,.08,P.z);
+ obs.push({...P});
+ for(let i=0;i<4;i++){const a=i/4*Math.PI*2+.5;const pad=new THREE.Mesh(new THREE.CylinderGeometry(.3,.3,.02,8),smat('#5FAE5A'));pad.position.set(P.x+Math.cos(a)*P.rx*.6,.2,P.z+Math.sin(a)*P.rz*.6);scene.add(pad);sbox(.12,.08,.12,'#F7B6CF',pad.position.x,.24,pad.position.z,scene)}
+ const boats=[];for(const [bx,bz] of [[-32.5,1.5],[-25.8,5]]){const b=new THREE.Group();sbox(1.8,.3,.7,'#A9713F',0,.15,0,b);sbox(1.6,.08,.5,'#7A4E2A',0,.3,0,b);sbox(.4,.32,.72,'#A9713F',.9,.2,0,b).rotation.z=.4;b.position.set(bx,.15,bz);b.rotation.y=R(0,3);scene.add(b);boats.push(b)}
+ /* jambatan merah melengkung */
+ const B=SIM_BRIDGE;const N=14;for(let i=0;i<N;i++){const z=B.z0+(B.z1-B.z0)*(i+.5)/N,y=simGround(B.x,z);const d=(B.z1-B.z0)/N+.05;sbox(1.8,.12,d,'#C8383C',B.x,y,z,scene);
+  if(i%2===0){sbox(.1,.6,.1,'#C8383C',B.x-.9,y+.3,z,scene);sbox(.1,.6,.1,'#C8383C',B.x+.9,y+.3,z,scene)}sbox(.06,.06,d,'#E85A5A',B.x-.9,y+.58,z,scene);sbox(.06,.06,d,'#E85A5A',B.x+.9,y+.58,z,scene)}
+ /* gazebo merah (pagoda) */
+ const gz=new THREE.Group();gz.position.set(-29,0,-7.2);sbox(4.2,.25,4.2,'#D9D2C6',0,.12,0,gz);
+ for(const [a,b] of [[-1.6,-1.6],[1.6,-1.6],[-1.6,1.6],[1.6,1.6]]){sbox(.24,2.4,.24,'#C8383C',a,1.45,b,gz);obs.push([-29+a-.15,-7.2+b-.15,-29+a+.15,-7.2+b+.15])}
+ sbox(3.8,.18,.18,'#C8383C',0,2.2,1.6,gz);const r1=new THREE.Mesh(new THREE.ConeGeometry(3.4,1.2,4),smat('#2F5D5A'));r1.rotation.y=Math.PI/4;r1.position.y=3.1;gz.add(r1);
+ sbox(1.6,.6,1.6,'#C8383C',0,3.75,0,gz);const r2=new THREE.Mesh(new THREE.ConeGeometry(1.9,.9,4),smat('#2F5D5A'));r2.rotation.y=Math.PI/4;r2.position.y=4.45;gz.add(r2);
+ const sp=new THREE.Mesh(new THREE.ConeGeometry(.12,.7,6),smat('#E9B949'));sp.position.y=5.2;gz.add(sp);
+ for(const [a,b] of [[-1.6,1.6],[1.6,1.6]]){sbox(.24,.32,.24,'#FFF4D6',a,2.0,b+.2,gz)}
+ scene.add(gz);
+ /* pokok sakura */
+ const pinks=['#F7B6CF','#F29BBE','#FFC9DD','#E58BB5','#FAD3E2'];
+ const sakura=(x,z,s=1)=>{const t=new THREE.Mesh(new THREE.CylinderGeometry(.16*s,.24*s,2.2*s,6),smat('#7A5236'));t.position.set(x,1.1*s,z);t.castShadow=true;scene.add(t);
+  const br=new THREE.Mesh(new THREE.CylinderGeometry(.07*s,.1*s,1.1*s,5),smat('#7A5236'));br.position.set(x+.35*s,2.1*s,z);br.rotation.z=-.7;scene.add(br);
+  for(let k=0;k<7;k++){const m=new THREE.Mesh(new THREE.IcosahedronGeometry(R(.6,1)*s,0),smat(pinks[k%pinks.length]));m.position.set(x+R(-1.1,1.1)*s,R(2.3,3.3)*s,z+R(-1.1,1.1)*s);m.castShadow=true;scene.add(m)}
+  obs.push([x-.3,z-.3,x+.3,z+.3])};
+ for(const [x,z,s] of [[-19.5,-8.5,1],[-23,-10.3,.9],[-34.5,-9.5,1.1],[-38.8,-4.2,1],[-38.6,3.6,1.15],[-38.4,11.6,1],[-33.6,13.8,.95],[-20.4,13.8,1],[-19.2,8.2,.85],[-36.5,8.6,.8],[-21.6,-4.6,.8],[-25.6,11.6,.9]])sakura(x,z,s);
+ /* pokok pine bulat (bonsai) */
+ for(const [x,z] of [[-24.2,-.5],[-34.6,-1],[-31.2,9.3]]){const t=new THREE.Mesh(new THREE.CylinderGeometry(.1,.14,.9,5),smat('#6B4A3A'));t.position.set(x,.45,z);scene.add(t);for(let k=0;k<3;k++){const b=new THREE.Mesh(new THREE.SphereGeometry(R(.45,.6),8,6),smat(k%2?'#4E9B4E':'#5DAA57'));b.position.set(x+R(-.4,.4),R(.9,1.4),z+R(-.3,.3));b.scale.y=.7;scene.add(b)}obs.push([x-.25,z-.25,x+.25,z+.25])}
+ /* bunga */
+ const fc=['#B48CE6','#F2C14E','#F28CB1','#FFFFFF','#E85A5A','#7FA6E8'];
+ for(let i=0;i<220;i++){const a=Math.random();let x,z;if(a<.35){x=R(-40.6,-36.8);z=R(-11.6,15.4)}else if(a<.6){x=R(-40,-17);z=R(-11.8,-10.6)}else if(a<.8){x=R(-40,-17);z=R(14.6,15.6)}else{const q=R(0,Math.PI*2);x=P.x+Math.cos(q)*(P.rx+R(.6,1.2));z=P.z+Math.sin(q)*(P.rz+R(.6,1.2));if(x>-30.2&&x<-27.8)continue}
+  sbox(.14,.14,.14,fc[i%fc.length],x,R(.1,.3),z,scene);if(i%3===0)sbox(.06,.2,.06,'#3E9B5B',x,.05,z,scene)}
+ /* bangku & lampu taman */
+ for(const [x,z,ry] of [[-22.5,3.8,Math.PI/2],[-35.6,6.2,-Math.PI/2],[-29,-3.8,0]]){const g=new THREE.Group();g.position.set(x,0,z);g.rotation.y=ry;sbox(1.8,.1,.55,'#B07A55',0,.45,0,g);sbox(1.8,.45,.08,'#B07A55',0,.75,-.25,g);sbox(.08,.45,.5,'#2A2A2E',-.8,.22,0,g);sbox(.08,.45,.5,'#2A2A2E',.8,.22,0,g);scene.add(g);obs.push([x-.6,z-.6,x+.6,z+.6])}
+ for(const [x,z] of [[-18.2,-1.6],[-24.8,-4.2],[-22.5,9.6],[-36,-.2]]){sbox(.12,1.6,.12,'#2A2A2E',x,.8,z,scene);sbox(.36,.36,.36,'#FFF4D6',x,1.75,z,scene)}
+ /* spot foto: bingkai hati */
+ const ph=new THREE.Group();ph.position.set(-35.4,0,-6.4);ph.rotation.y=Math.PI/4;sbox(.18,2.2,.18,'#F29BBE',-1,1.1,0,ph);sbox(.18,2.2,.18,'#F29BBE',1,1.1,0,ph);
+ const ring=new THREE.Mesh(new THREE.TorusGeometry(1.05,.12,8,24,Math.PI),smat('#F29BBE'));ring.position.y=2.2;ph.add(ring);
+ for(let k=0;k<9;k++){const q=k/8*Math.PI;sbox(.18,.18,.18,pinks[k%5],Math.cos(q)*1.05,2.2+Math.sin(q)*1.05,.14,ph)}
+ sbox(2.4,.1,1.4,'#FAD3E2',0,.05,.9,ph);scene.add(ph);obs.push([-36.5,-6.6,-36.2,-6.3],[-34.6,-6.5,-34.3,-6.2]);
+ /* kelopak jatuh (InstancedMesh) */
+ const NP=260;const pm=new THREE.MeshLambertMaterial({color:'#F7B6CF',side:THREE.DoubleSide});const petals=new THREE.InstancedMesh(new THREE.PlaneGeometry(.14,.1),pm,NP);scene.add(petals);
+ const pd=[];const d=new THREE.Object3D();const spawnP=(p,top)=>{p.x=R(-40.5,-17);p.z=R(-11.5,15.5);p.y=top?R(3,5.5):R(0,5.5);p.vy=R(.35,.7);p.ph=R(0,6.28);p.rs=R(1,3)};
+ for(let i=0;i<NP;i++){const p={};spawnP(p,false);pd.push(p)}
+ const upd=(dt,t)=>{for(let i=0;i<NP;i++){const p=pd[i];p.y-=p.vy*dt;p.x+=Math.sin(t*.8+p.ph)*dt*.5+dt*.25;p.z+=Math.cos(t*.6+p.ph)*dt*.3;if(p.y<.02){p.y=.02;p.land=(p.land||0)+dt;if(p.land>3){p.land=0;spawnP(p,true)}}
+   d.position.set(p.x,p.y,p.z);d.rotation.set(t*p.rs+p.ph,t*p.rs*.7,p.ph);d.updateMatrix();petals.setMatrixAt(i,d.matrix)}petals.instanceMatrix.needsUpdate=true;
+  boats.forEach((b,i)=>{b.position.y=.15+Math.sin(t*1.5+i)*.04;b.rotation.y+=dt*.05})};
+ return {upd}}
 function buildAmb(){const g=new THREE.Group();sbox(2.2,1.9,3.4,'#FFFFFF',0,1.25,-.6,g);sbox(2.1,1.3,1.4,'#FFFFFF',0,1,1.75,g);sbox(1.9,.6,.05,'#9FD3F0',0,1.3,2.46,g);
  sbox(2.22,.3,3.42,'#D3343A',0,1.0,-.6,g);sbox(.2,.7,.05,'#D3343A',0,1.6,-2.31,g);sbox(.7,.2,.05,'#D3343A',0,1.6,-2.31,g);sbox(.05,.6,.6,'#D3343A',1.11,1.5,-.6,g);sbox(.05,.6,.6,'#D3343A',-1.11,1.5,-.6,g);
  g.userData.l1=sbox(.4,.18,.3,'#FF3B3B',-.5,2.28,.3,g);g.userData.l2=sbox(.4,.18,.3,'#3B7BFF',.5,2.28,.3,g);
@@ -1110,7 +1204,7 @@ const SimNet={mode:'off',db:null,me:null,off:0,subs:[],cbs:{},local:{players:{},
  join(me){this.me=me;if(this.mode==='rtdb'){const ref=this.db.ref('sim/players/'+me.id);ref.onDisconnect().remove();ref.set({...me.st,t:firebase.database.ServerValue.TIMESTAMP})}else{this.local.players[me.id]={...me.st,t:this.now()};this.emitLocal('players')}},
  move(st){if(!this.me)return;if(this.mode==='rtdb')this.db.ref('sim/players/'+this.me.id).update({...st,t:firebase.database.ServerValue.TIMESTAMP});else{Object.assign(this.local.players[this.me.id]||(this.local.players[this.me.id]={}),st,{t:this.now()});this.emitLocal('players')}},
  setBot(id,st){if(this.mode!=='rtdb'){if(st)this.local.players[id]={...st,t:this.now()};else delete this.local.players[id];this.emitLocal('players')}},
- chat(text){const m={by:this.me.id,name:this.me.st.name,text:text.slice(0,140),t:this.now()};if(this.mode==='rtdb'){m.t=firebase.database.ServerValue.TIMESTAMP;this.db.ref('sim/chat').push(m);
+ chat(text){const m={by:this.me.id,name:this.me.st.name,text:text.slice(0,140),t:this.now()};if(this.mode==='rtdb'){m.t=firebase.database.ServerValue.TIMESTAMP;const ref=this.db.ref('sim/chat').push(m);ref.onDisconnect().remove();(this.myMsgs=this.myMsgs||[]).push(ref.key);
    if(Math.random()<.15)this.db.ref('sim/chat').orderByChild('t').once('value',s=>{const ks=[];s.forEach(c=>{ks.push(c.key)});const extra=ks.length-60;if(extra>0){const u={};ks.slice(0,extra).forEach(k=>u[k]=null);this.db.ref('sim/chat').update(u)}})}
   else{this.local.chat.push({id:uid(),...m});this.emitLocal('chat')}},
  setTask(id,v){if(this.mode==='rtdb')return this.db.ref('sim/tasks/'+id).set(v);if(v)this.local.tasks[id]=v;else delete this.local.tasks[id];this.emitLocal('tasks')},
@@ -1119,14 +1213,14 @@ const SimNet={mode:'off',db:null,me:null,off:0,subs:[],cbs:{},local:{players:{},
   const t=this.local.tasks[id];if(!t||(t.by&&t.by!==me))return false;t.by=me;t.byName=this.me.st.name;this.emitLocal('tasks');return true},
  score(day,id,patch){if(this.mode==='rtdb'){const ref=this.db.ref(`sim/scores/${day}/${id}`);return ref.transaction(v=>{v=v||{pts:0,rm:0,cases:0};v.name=patch.name;v.pts+=patch.pts;v.rm+=patch.rm;v.cases+=1;return v})}
   const k='kkb_simscore_'+day;const all=LS.get(k,{});const v=all[id]||{pts:0,rm:0,cases:0};v.name=patch.name;v.pts+=patch.pts;v.rm+=patch.rm;v.cases++;all[id]=v;LS.set(k,all);this.emitLocal('scores')},
- leave(){if(this.mode==='rtdb'&&this.me){const ref=this.db.ref('sim/players/'+this.me.id);ref.remove();ref.onDisconnect().cancel()}
+ leave(){if(this.mode==='rtdb'&&this.me){const ref=this.db.ref('sim/players/'+this.me.id);ref.remove();ref.onDisconnect().cancel();const u={};for(const k of this.myMsgs||[])u[k]=null;if(this.myMsgs&&this.myMsgs.length)this.db.ref('sim/chat').update(u)}this.myMsgs=[];if(this.mode!=='rtdb')this.local.chat=[];
   for(const u of this.subs)try{u()}catch(e){};this.subs=[];this.cbs={};this.me=null}};
 
 /* ---------- halaman ---------- */
 let SIMG=null;
 R.sim=el=>{if(SIMG){SIMG.destroy();SIMG=null}
  const tab=S.ui.simTab||'main';
- el.innerHTML=`<div class="page-h"><div class="grow"><h2>🏥 KKB Sim</h2><p class="muted">${L('Simulasi hospital KKB. Masuk shift, layan pelanggan farmasi, bawa ambulans ke kes luar, dan rawat pesakit wad bila shift 4 orang ke atas.','Simulasi rumah sakit KKB. Masuk shift, layani pembeli di farmasi, bawa ambulans ke kasus luar, dan rawat pasien bangsal saat shift 4 orang ke atas.')}</p></div>
+ el.innerHTML=`<div class="page-h"><div class="grow"><h2>🏥 KKB Sim</h2><p class="muted">${L('Simulasi hospital KKB. Masuk shift, layan pelanggan farmasi, bawa ambulans ke kes luar, dan uruskan pesakit dalam (registrasi → diagnose → treatment → farmasi) bila shift 4 orang ke atas.','Simulasi rumah sakit KKB. Masuk shift, layani pembeli di farmasi, bawa ambulans ke kasus luar, dan tangani pasien dalam (registrasi → diagnose → treatment → farmasi) saat shift 4 orang ke atas.')}</p></div>
  <div class="tabs" role="tablist">${[['main','🎮 '+L('Main','Main')],['char','👕 '+L('Karakter','Karakter')],['board','🏆 '+L('Papan skor','Papan skor')]].map(([k,l])=>`<button role="tab" class="${tab===k?'on':''}" data-st="${k}">${l}</button>`).join('')}</div></div><div id="simBody"></div>`;
  $$('[data-st]').forEach(b=>b.onclick=()=>{S.ui.simTab=b.dataset.st;Snd.play('nav');rerender(true)});
  const body=$('#simBody');if(tab==='char')simChar(body);else if(tab==='board')simBoard(body);else simLobby(body)};
@@ -1134,10 +1228,10 @@ R.sim=el=>{if(SIMG){SIMG.destroy();SIMG=null}
 function simLobby(body){const net=Store.mode==='firebase'&&SimNet.rtdbURL();
  body.innerHTML=`<div class="card sim-gate"><div class="sim-gate-in"><canvas id="simPrev" width="260" height="300"></canvas><div class="stack" style="max-width:520px">
  <h3 style="font-size:26px">${L('Sedia untuk shift?','Siap untuk shift?')}</h3>
- <ul class="sim-rules"><li>👥 <b>1–3 ${L('orang','orang')}</b>: ${L('kes luar dengan ambulans + jualan bandage/medkit di farmasi.','kasus luar dengan ambulans + penjualan bandage/medkit di farmasi.')}</li><li>🏥 <b>4+ ${L('orang','orang')}</b>: ${L('pesakit mula masuk wad, perlu dirawat.','pasien mulai masuk bangsal dan perlu dirawat.')}</li><li>🎯 ${L('Jawapan ikut SOP KKB (free, harga, cooldown). Betul = mata + RM.','Jawaban sesuai SOP KKB (free, harga, cooldown). Benar = poin + RM.')}</li></ul>
+ <ul class="sim-rules"><li>👥 <b>1–3 ${L('orang','orang')}</b>: ${L('kes luar dengan ambulans (revive + teka billing ikut map) + jualan bandage/medkit di farmasi.','kasus luar dengan ambulans (revive + tebak billing sesuai map) + penjualan bandage/medkit di farmasi.')}</li><li>🏥 <b>4+ ${L('orang','orang')}</b>: ${L('pesakit dalam: Registrasi → Diagnose → Treatment → Farmasi (RM300), setiap bahagian ada minigame.','pasien dalam: Registrasi → Diagnose → Treatment → Farmasi (RM300), tiap bagian ada minigame.')}</li><li>🎯 ${L('Jawapan ikut SOP KKB (free, harga, cooldown). Betul = mata + RM.','Jawaban sesuai SOP KKB (free, harga, cooldown). Benar = poin + RM.')}</li></ul>
  <div class="row" style="flex-wrap:wrap"><button class="btn red" id="simGo">▶ ${L('Masuk shift','Masuk shift')}${net?'':' (offline)'}</button><button class="btn ghost" id="simTrain">🤖 ${L('Mod latihan (4 orang + bot)','Mode latihan (4 orang + bot)')}</button></div>
  <div class="muted" style="font-size:13px">${net?'🟢 '+L('Multiplayer aktif: staff lain yang masuk shift akan nampak di lobby.','Multiplayer aktif: staff lain yang masuk shift akan terlihat di lobby.'):'🟡 '+(Store.mode!=='firebase'?L('Versi ini tiada server, game berjalan offline.','Versi ini tanpa server, game berjalan offline.'):L('Realtime Database belum disambung, game berjalan offline.','Realtime Database belum terhubung, game berjalan offline.'))}</div>
- <div class="muted" style="font-size:12px">⌨ WASD/${L('anak panah','panah')} ${L('gerak','gerak')} · ${L('klik lantai untuk jalan','klik lantai untuk jalan')} · E ${L('tindakan','aksi')} · Enter chat · ${L('tahan klik kanan + geser untuk putar kamera','tahan klik kanan + geser untuk memutar kamera')}</div></div></div></div>
+ <div class="muted" style="font-size:12px">⌨ WASD/${L('anak panah','panah')} ${L('gerak','gerak')} · ${L('klik lantai untuk jalan','klik lantai untuk jalan')} · E ${L('tindakan','aksi')} · Space ${L('lompat','lompat')} · Scroll zoom · Enter chat · ${L('tahan klik kanan + geser untuk putar kamera','tahan klik kanan + geser untuk memutar kamera')}</div></div></div></div>
  ${isDev()?`<div class="card" style="margin-top:14px"><h3>⚙ ${L('Server game (developer)','Server game (developer)')}</h3><p class="muted" style="margin:6px 0 10px;font-size:13px">${L('Tampal URL Realtime Database dari Firebase (cth: https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app).','Tempel URL Realtime Database dari Firebase (cth: https://kkb-hub-default-rtdb.asia-southeast1.firebasedatabase.app).')}</p><div class="row"><input type="url" id="simUrl" style="flex:1" value="${esc((S.simCfg&&S.simCfg.rtdb)||'')}" placeholder="https://...firebasedatabase.app"><button class="btn" id="simUrlSave">${L('Simpan','Simpan')}</button></div></div>`:''}`;
  previewSpin($('#simPrev'),avOf(S.me));
  $('#simGo').onclick=()=>simStart(body,false);$('#simTrain').onclick=()=>simStart(body,true);
@@ -1198,10 +1292,10 @@ function sopPriceDist(t,free,unit,price){const d=[(t.qty+free)*unit];
  return d.filter(v=>v!==price)}
 async function simStart(body,training){if(!window.THREE){toast('Three.js gagal dimuat','err');return}if(simPrevStop)simPrevStop();
  body.innerHTML=`<div class="sim-wrap" id="simWrap"><canvas id="simCv"></canvas><div class="sim-labels" id="simLbl"></div>
- <div class="sim-hud tl" id="simShift"></div><div class="sim-hud tr"><div id="simMe"></div><div class="row" style="gap:6px;margin-top:6px;justify-content:flex-end"><button class="iconbtn sm" id="simRotL" title="Q">⟲</button><button class="iconbtn sm" id="simRotR" title="R">⟳</button><button class="iconbtn sm" id="simFull" title="Skrin penuh">⛶</button><button class="btn sm ghost" id="simQuit">🚪 ${L('Keluar shift','Keluar shift')}</button></div></div>
+ <div class="sim-hud tl" id="simShift"></div><div class="sim-hud tr"><div id="simMe"></div><div class="row" style="gap:6px;margin-top:6px;justify-content:flex-end"><button class="iconbtn sm" id="simZin" title="Zoom in">＋</button><button class="iconbtn sm" id="simZout" title="Zoom out">－</button><button class="iconbtn sm" id="simRotL" title="Q">⟲</button><button class="iconbtn sm" id="simRotR" title="R">⟳</button><button class="iconbtn sm" id="simFull" title="Skrin penuh">⛶</button><button class="btn sm ghost" id="simQuit">🚪 ${L('Keluar shift','Keluar shift')}</button></div></div>
  <div class="sim-tasks" id="simTasks"></div>
  <div class="sim-chat"><div id="simChatLog" class="sim-chatlog"></div><form id="simChatF" class="row" style="gap:6px;flex-wrap:nowrap"><input id="simChatIn" maxlength="140" placeholder="${L('Enter untuk chat…','Enter untuk chat…')}" autocomplete="off"><button class="btn sm">➤</button></form></div>
- <div class="sim-act hide" id="simAct"></div><div class="sim-joy" id="simJoy"><div></div></div><button class="sim-abtn" id="simABtn">E</button>
+ <div class="sim-act hide" id="simAct"></div><div class="sim-joy" id="simJoy"><div></div></div><button class="sim-abtn" id="simABtn">E</button><button class="sim-jbtn" id="simJBtn" aria-label="Lompat">⤒</button>
  <div class="sim-fade hide" id="simFade"></div><div class="sim-dlg hide" id="simDlg"></div><div class="sim-load" id="simLoad">${L('Menyambung ke hospital…','Menghubungkan ke rumah sakit…')}</div></div>`;
  const mode=await SimNet.connect(training);if(!$('#simWrap'))return;
  if(mode==='err')toast(L('Server game tidak dapat dicapai. Main offline dulu.','Server game tidak bisa dihubungi. Main offline dulu.'),'err');
@@ -1214,11 +1308,11 @@ function simEngine(wrap,training){
  scene.add(new THREE.HemisphereLight('#FFF6EE','#9C8F86',.85));const sun=new THREE.DirectionalLight('#FFFFFF',.7);sun.castShadow=true;sun.shadow.mapSize.set(1024,1024);const sc=sun.shadow.camera;sc.left=-22;sc.right=22;sc.top=22;sc.bottom=-22;sc.far=80;scene.add(sun);scene.add(sun.target);
  const cam=new THREE.PerspectiveCamera(42,1,.1,200);let yaw=0,zoom=1,pitch=1.0;
  const obs=[];const world=buildWorld(scene,obs);
- const P={x:SIM_SPAWN.x+(Math.random()-.5)*3,z:SIM_SPAWN.z,ry:Math.PI,moving:false,target:null,stuck:0,scene:-1};
+ const P={x:SIM_SPAWN.x+(Math.random()-.5)*3,z:SIM_SPAWN.z,ry:Math.PI,moving:false,target:null,stuck:0,scene:-1,y:0,vy:0,sit:-1};
  const myG=buildAvatar(myAv);scene.add(myG);
  const remotes={};const npcs={};let tasks={},players={},chat=[],lastChatSeen=0;let busy=false,holdT=0,holdKey=false;
  const keys={};let joy={x:0,z:0};let alive=true,raf=0,last=performance.now(),sendT=0,hbT=0,hostT=0;
- const st=()=>({name:me.name,role:SHORT[me.role]||me.role,av:myAv,x:+P.x.toFixed(2),z:+P.z.toFixed(2),ry:+P.ry.toFixed(2),m:P.moving?1:0});
+ const st=()=>({name:me.name,role:SHORT[me.role]||me.role,av:myAv,x:+P.x.toFixed(2),z:+P.z.toFixed(2),ry:+P.ry.toFixed(2),y:+P.y.toFixed(2),sit:P.sit,m:P.moving?1:0});
  SimNet.join({id:me.id,st:st()});
  /* bot latihan */
  const bots=[];if(training){for(let i=0;i<3;i++){const id='bot'+i;const b={id,x:-3+i*3,z:-0,ry:0,tx:0,tz:0,wait:0,name:['BOT ALYA','BOT HAKIM','BOT SURI'][i],av:{skin:i+1,hair:['panjang','spiky','tudung'][i],hairC:i*2,out:['scrub_pink','kot_doktor','nurse'][i],acc:['steto']}};bots.push(b);SimNet.setBot(id,{name:b.name,role:'BOT',av:b.av,x:b.x,z:b.z,ry:0,m:0})}}
@@ -1227,13 +1321,15 @@ function simEngine(wrap,training){
  const rmLbl=l=>{if(!l)return;l.d.remove();const i=labels.indexOf(l);if(i>=0)labels.splice(i,1)};
  const roomL={};for(const r of SIM_ROOMS)if(r.ms)roomL[r.k]=mkLbl('room',L(r.ms,r.id),new THREE.Vector3((r.x0+r.x1)/2,2.2,r.k==='garaj'?-2:(r.z0+r.z1)/2-((r.z1-r.z0)/2)+.8));
  SIM_REG.forEach(([n],i)=>{const s=SIM_SCENE(i);mkLbl('room','📍 '+n.toUpperCase(),new THREE.Vector3(s.x,3,s.z-10))});
+ mkLbl('room','🌸 '+L('TAMAN SAKURA','TAMAN SAKURA'),new THREE.Vector3(-22,3,13.5));mkLbl('room','📸 SPOT FOTO',new THREE.Vector3(-35.4,3.6,-6.4));mkLbl('room','⛩️ GAZEBO',new THREE.Vector3(-29,5.8,-7.2));
+ SIM_CHAIRS.forEach(c=>{if(c[3])mkLbl('chair',c[3],new THREE.Vector3(c[0],1.9,c[1]))});
  const myL=mkLbl('name me',`${esc(me.name)}`,null,myG);
  /* input */
  const kd=e=>{if(!alive)return;const t=e.target;if(t&&/INPUT|TEXTAREA/.test(t.tagName)){if(e.key==='Escape')t.blur();return}
   const k=e.key.toLowerCase();if(['arrowup','arrowdown','arrowleft','arrowright',' '].includes(k)&&wrap.isConnected)e.preventDefault();
   if(k==='enter'){$('#simChatIn',wrap).focus();e.preventDefault();return}if(busy)return;
-  if(k==='e'||k===' '){if(!holdKey){holdKey=true;doAct(true)}return}if(k==='q'){yaw+=Math.PI/4;return}if(k==='r'){yaw-=Math.PI/4;return}keys[k]=true};
- const ku=e=>{const k=e.key.toLowerCase();keys[k]=false;if(k==='e'||k===' ')holdKey=false};
+  if(k===' '){jump();return}if(k==='e'){if(!holdKey){holdKey=true;doAct(true)}return}if(k==='q'){yaw+=Math.PI/4;return}if(k==='r'){yaw-=Math.PI/4;return}keys[k]=true};
+ const ku=e=>{const k=e.key.toLowerCase();keys[k]=false;if(k==='e')holdKey=false};
  window.addEventListener('keydown',kd);window.addEventListener('keyup',ku);
  const ray=new THREE.Raycaster(),plane=new THREE.Plane(new THREE.Vector3(0,1,0),0),hit=new THREE.Vector3();
  let camDrag=null;wrap.addEventListener('contextmenu',e=>e.preventDefault());
@@ -1242,7 +1338,9 @@ function simEngine(wrap,training){
  const camEnd=()=>{camDrag=null;cv.style.cursor=''};cv.addEventListener('pointerup',camEnd);cv.addEventListener('pointercancel',camEnd);
  const clearKeys=()=>{for(const k in keys)keys[k]=false;holdKey=false;joy={x:0,z:0}};window.addEventListener('blur',clearKeys);document.addEventListener('visibilitychange',clearKeys);
  cv.addEventListener('pointerdown',e=>{if(e.button!==0||busy)return;const r=cv.getBoundingClientRect();ray.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-(e.clientY-r.top)/r.height*2+1},cam);if(ray.ray.intersectPlane(plane,hit)){P.target={x:hit.x,z:hit.z};P.stuck=0;spawnPing(hit.x,hit.z)}});
- cv.addEventListener('wheel',e=>{e.preventDefault();zoom=Math.max(.6,Math.min(1.6,zoom+Math.sign(e.deltaY)*.08))},{passive:false});
+ const setZoom=f=>{zoom=Math.max(.4,Math.min(2.4,zoom*f))};wrap.addEventListener('wheel',e=>{if(e.target.closest('.sim-chatlog,.sim-tasks,.sim-dlg'))return;e.preventDefault();setZoom(e.deltaY>0?1.1:1/1.1)},{passive:false});
+ $('#simZin',wrap).onclick=()=>setZoom(1/1.2);$('#simZout',wrap).onclick=()=>setZoom(1.2);
+ $('#simJBtn',wrap).addEventListener('pointerdown',e=>{e.preventDefault();jump()});
  const pingM=new THREE.Mesh(new THREE.RingGeometry(.25,.4,20),new THREE.MeshBasicMaterial({color:'#D3343A',transparent:true}));pingM.rotation.x=-Math.PI/2;pingM.visible=false;scene.add(pingM);let pingT=0;
  const spawnPing=(x,z)=>{pingM.position.set(x,.03,z);pingM.visible=true;pingT=.6};
  /* joystick */
@@ -1258,20 +1356,20 @@ function simEngine(wrap,training){
  /* data */
  SimNet.on('players',v=>{players=v||{}});SimNet.on('tasks',v=>{tasks=v||{}});
  SimNet.on('chat',l=>{chat=l;drawChat()});
- const nowS=()=>SimNet.now();
+ const nowS=()=>SimNet.now();const joinT=nowS();
  const online=()=>Object.entries(players).filter(([id,p])=>id===me.id||nowS()-(p.t||0)<25000);
  const shiftN=()=>online().length;
- function drawChat(){const box=$('#simChatLog',wrap);if(!box)return;box.innerHTML=chat.slice(-8).map(m=>`<div><b>${esc(m.name)}:</b> ${esc(m.text)}</div>`).join('');box.scrollTop=1e9;
+ function drawChat(){const box=$('#simChatLog',wrap);if(!box)return;chat=chat.filter(m=>(m.t||0)>=joinT-1500);box.innerHTML=chat.slice(-8).map(m=>`<div><b>${esc(m.name)}:</b> ${esc(m.text)}</div>`).join('');box.scrollTop=1e9;
   for(const m of chat){if(m.t>lastChatSeen&&nowS()-m.t<8000){const tgt=m.by===me.id?myL:remotes[m.by]&&remotes[m.by].lbl;if(tgt){tgt.bubble=m.text;tgt.bubbleT=5}if(m.by!==me.id)Snd.play('msg')}}
   lastChatSeen=Math.max(lastChatSeen,...chat.map(m=>m.t||0),0)}
  /* host spawn misi */
  const rnd=a=>a[Math.floor(Math.random()*a.length)];
  const nextAt={};function hostTick(){const ids=online().map(([id])=>id).filter(id=>!id.startsWith('bot')).sort();if(ids[0]!==me.id)return;const n=shiftN();const t=nowS();const list=Object.entries(tasks);
-  for(const [id,tk] of list){if(t-tk.t>(tk.type==='luar'?240000:180000)&&!tk.by)SimNet.setTask(id,null);else if(tk.by&&!players[tk.by])SimNet.updTask(id,{by:'',byName:''});else if(tk.type==='wad'&&n<4&&!tk.by)SimNet.setTask(id,null)}
+  for(const [id,tk] of list){if(t-tk.t>(tk.type==='luar'?240000:tk.type==='pasien'?300000:180000)&&!tk.by)SimNet.setTask(id,null);else if(tk.by&&!players[tk.by])SimNet.updTask(id,{by:'',byName:''});else if(tk.type==='pasien'&&n<4&&!tk.by&&!tk.stage)SimNet.setTask(id,null)}
   const cnt=k=>list.filter(([,x])=>x.type===k).length;const roll=p=>Math.random()<p;
   /* jadual rawak: setiap jenis ada masa ketibaan sendiri */
   const rs=(a,b)=>(a+Math.random()*(b-a))*1000;
-  if(!nextAt.jual){nextAt.jual=t+rs(8,25);nextAt.luar=t+rs(20,60)}if(n<4)nextAt.wad=0;else if(!nextAt.wad)nextAt.wad=t+rs(15,40);
+  if(!nextAt.jual){nextAt.jual=t+rs(8,25);nextAt.luar=t+rs(20,60)}if(n<4)nextAt.pasien=0;else if(!nextAt.pasien)nextAt.pasien=t+rs(15,40);
   const due=(k,cap,a,b)=>{if(!nextAt[k]||t<nextAt[k])return false;if(cnt(k)>=cap){nextAt[k]=t+rs(15,45);return false}nextAt[k]=t+rs(a,b);return true};
   if(due('jual',2,35,110)){const used=list.filter(([,x])=>x.type==='jual').map(([,x])=>x.slot);const slot=[0,1].find(s=>!used.includes(s));if(slot!==undefined){
    const cat=roll(.7)?'rakyat':rnd(['ht_bs','ht_gs','polis']);const item=roll(.75)?'bandage':'medkit';
@@ -1279,22 +1377,27 @@ function simEngine(wrap,training){
    const hist=item==='bandage'&&cat==='rakyat'&&roll(.25)?rnd([1,1,2]):0;
    SimNet.setTask(uid(),{type:'jual',t,slot,name:rnd(SIM_NAMES),cat,item,qty,hist,by:'',civ:civRand()})}}
   if(due('luar',Math.min(2,Math.max(1,n)),50,150))SimNet.setTask(uid(),{type:'luar',t,reg:Math.floor(Math.random()*4),name:rnd(SIM_NAMES),by:'',civ:civRand()});
-  if(n>=4&&due('wad',Math.min(4,n),30,90)){const used=list.filter(([,x])=>x.type==='wad').map(([,x])=>x.bed);const free=SIM_BEDS.map((_,i)=>i).filter(i=>!used.includes(i));if(free.length)SimNet.setTask(uid(),{type:'wad',t,bed:rnd(free),need:rnd(['bandage','medkit','darah']),name:rnd(SIM_NAMES),by:'',civ:civRand()})}}
+  if(n>=4&&due('pasien',3,40,110)&&!list.some(([,x])=>x.type==='pasien'&&!x.stage)){const used=list.filter(([,x])=>x.type==='pasien').map(([,x])=>x.bed);const bed=[0,1,2].find(i=>!used.includes(i));
+   if(bed!==undefined)SimNet.setTask(uid(),{type:'pasien',t,stage:0,bed,sick:Math.floor(Math.random()*SIM_SICK.length),diag:'',ic:icGen(),name:rnd(SIM_NAMES),by:'',civ:civRand()})}}
+ function icGen(){const r=(a,b)=>String(Math.floor(a+Math.random()*(b-a))).padStart(2,'0');return `${r(70,99)}${r(1,12)}${r(1,28)}-${r(1,14)}-${r(1000,9999)}`}
  function civRand(){return {top:rnd(['#E2725B','#5B8DEF','#F2C14E','#7BC67E','#9B6BD6','#EDEDED','#333A45']),bot:rnd(['#2F3A4A','#5A4632','#3B5BA8','#6B6B6B']),hair:rnd(AV_HAIR.map(h=>h[0])),hc:rnd(AV_HAIRC.slice(0,10))}}
  /* NPC sync dari tasks */
- function syncNpcs(){for(const [id,tk] of Object.entries(tasks)){if(npcs[id])continue;const g=buildAvatar({skin:Math.floor(Math.random()*5)},tk.civ||civRand());let pos;
+ function syncNpcs(){for(const [id,tk] of Object.entries(tasks)){const sk=tk.type+(tk.stage||0);if(npcs[id]&&npcs[id].sk!==sk){scene.remove(npcs[id].g);disposeTree(npcs[id].g);rmLbl(npcs[id].lbl);delete npcs[id]}if(npcs[id])continue;const g=buildAvatar({skin:(tk.name||'').length%5},tk.civ||civRand());let pos;
    if(tk.type==='jual'){const c=SIM_COUNTER.cust[tk.slot||0];g.position.set(c[0],0,c[1]);g.rotation.y=Math.PI/2}
-   else if(tk.type==='wad'){const b=SIM_BEDS[tk.bed];g.rotation.x=-Math.PI/2;g.position.set(b[0],.86,b[1]+.85)}
+   else if(tk.type==='pasien'){const st=tk.stage||0;if(st===0){g.position.set(SIM_REGDESK.pat[0],0,SIM_REGDESK.pat[1]);g.rotation.y=Math.PI}
+    else if(st===1){g.position.set(SIM_DIAG.pat[0],0,SIM_DIAG.pat[1]);g.rotation.y=Math.PI;setSit(g,true)}
+    else if(st===2){const b=SIM_TBEDS[tk.bed||0];g.rotation.x=-Math.PI/2;g.position.set(b[0],.86,b[1]+.85)}
+    else{const c=SIM_COUNTER.cust[2];g.position.set(c[0],0,c[1]);g.rotation.y=Math.PI/2}}
    else{const s=SIM_SCENE(tk.reg);g.rotation.z=Math.PI/2;g.rotation.y=Math.random()*3;g.position.set(s.x,.3,s.z)}
-   scene.add(g);const ico=tk.type==='jual'?'🛒':tk.type==='wad'?SIM_NEED[tk.need].ico:'🆘';
-   npcs[id]={g,lbl:mkLbl('npc',ico,null,g)}}
+   scene.add(g);const ico=tk.type==='jual'?'🛒':tk.type==='pasien'?['📝','🩺','🛏️','💊'][tk.stage||0]:'🆘';
+   npcs[id]={g,sk,lbl:mkLbl('npc',ico,null,g)}}
   for(const id of Object.keys(npcs))if(!tasks[id]){scene.remove(npcs[id].g);disposeTree(npcs[id].g);rmLbl(npcs[id].lbl);delete npcs[id]}}
  /* pemain lain */
  function syncRemotes(dt){const live=new Set();for(const [id,p] of online()){if(id===me.id)continue;live.add(id);let r=remotes[id];const avk=JSON.stringify(p.av||{});
    if(!r||r.avk!==avk){if(r){scene.remove(r.g);disposeTree(r.g)}const g=buildAvatar(p.av||avDefault({}));g.position.set(p.x||0,0,p.z||0);scene.add(g);r=remotes[id]={...(r||{}),g,avk};if(!r.lbl)r.lbl=mkLbl('name',esc(p.name||'?'),null,g);r.lbl.obj=g}
    const g=r.g;const dx=(p.x||0)-g.position.x,dz=(p.z||0)-g.position.z;const far=Math.hypot(dx,dz)>12;
-   g.position.x+=far?dx:dx*Math.min(1,dt*10);g.position.z+=far?dz:dz*Math.min(1,dt*10);let dr=(p.ry||0)-g.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));g.rotation.y+=dr*Math.min(1,dt*10);
-   animAvatar(g,p.m||Math.hypot(dx,dz)>.05,dt)}
+   g.position.x+=far?dx:dx*Math.min(1,dt*10);g.position.z+=far?dz:dz*Math.min(1,dt*10);g.position.y+=((p.y||0)+(p.sit>=0?-.17:0)-g.position.y)*Math.min(1,dt*12);setSit(g,p.sit>=0);let dr=(p.ry||0)-g.rotation.y;dr=Math.atan2(Math.sin(dr),Math.cos(dr));g.rotation.y+=dr*Math.min(1,dt*10);
+   if(!(p.sit>=0))animAvatar(g,p.m||Math.hypot(dx,dz)>.05,dt)}
   for(const id of Object.keys(remotes))if(!live.has(id)){scene.remove(remotes[id].g);disposeTree(remotes[id].g);rmLbl(remotes[id].lbl);delete remotes[id]}}
  /* tindakan */
  let act=null;
@@ -1304,10 +1407,14 @@ function simEngine(wrap,training){
    if(!tk&&d(s.x+6,s.z+6)<4)return {k:'back',txt:L('E · Balik ke hospital','E · Kembali ke rumah sakit')};
    if(tk&&d(s.x+6,s.z+6)<4)return {k:'none',txt:L('Pergi ke pesakit 🆘','Pergi ke pasien 🆘')};return null}
   for(const [id,t] of Object.entries(tasks)){if(t.type==='jual'){const c=SIM_COUNTER.cust[t.slot||0];if(d(c[0],c[1])<2.4||d(SIM_COUNTER.x+.9,c[1])<1.6){if(t.by&&t.by!==me.id)return {k:'none',txt:`${esc(t.byName)} ${L('sedang layan','sedang melayani')}`};return {k:'jual',id,tk:t,txt:L('E · Layan pelanggan','E · Layani pembeli')}}}
-   if(t.type==='wad'){const b=SIM_BEDS[t.bed];if(d(b[0],b[1])<2.1){if(t.by&&t.by!==me.id)return {k:'none',txt:`${esc(t.byName)} ${L('sedang rawat','sedang merawat')}`};return {k:'wad',id,tk:t,txt:L('E · Periksa pesakit','E · Periksa pasien')}}}}
+   if(t.type==='pasien'){const st=t.stage||0;const spot=st===0?[SIM_REGDESK.x,SIM_REGDESK.z,2.6]:st===1?[SIM_DIAG.desk[0],SIM_DIAG.desk[1],2.4]:st===2?[...SIM_TBEDS[t.bed||0],2.1]:[SIM_COUNTER.x,SIM_COUNTER.cust[2][1],2.3];
+    if(d(spot[0],spot[1])<spot[2]){if(t.by&&t.by!==me.id)return {k:'none',txt:`${esc(t.byName)} ${L('sedang uruskan','sedang menangani')}`};return {k:'pasien',id,tk:t,txt:`E · ${['📝','🩺','🛏️','💊'][st]} ${L(...SIM_STAGE[st])}: ${esc(t.name)}`}}}}
+  if(P.sit>=0)return {k:'stand',txt:L('E · Bangun','E · Berdiri')};
+  for(let i=0;i<SIM_CHAIRS.length;i++){const c=SIM_CHAIRS[i];if(d(c[0],c[1])<1.15){const taken=online().some(([id,p])=>id!==me.id&&p.sit===i);if(taken)return {k:'none',txt:L('Kerusi ada orang','Kursi sudah terisi')};
+    if(c[3]&&!(isDev()||SHORT[me.role]===c[3]))return {k:'none',txt:`🔒 ${L('Kerusi khas','Kursi khusus')} ${c[3]}`};return {k:'sit',i,txt:`E · ${L('Duduk','Duduk')}${c[3]?' ('+c[3]+')':''}`}}}
   if(d(SIM_AMB.x,SIM_AMB.z)<3.4){const open=Object.entries(tasks).filter(([,t])=>t.type==='luar'&&(!t.by||t.by===me.id));if(open.length)return {k:'amb',list:open,txt:L('E · Naik ambulans','E · Naik ambulans')};return {k:'none',txt:L('Tiada panggilan kecemasan','Tidak ada panggilan darurat')}}
   return null}
- async function doAct(press){if(busy||!act)return;if(act.k==='jual')openJual(act.id,act.tk);else if(act.k==='wad')openWad(act.id,act.tk);else if(act.k==='amb')openAmb(act.list);else if(act.k==='back')travel(-1)}
+ async function doAct(press){if(busy||!act)return;if(act.k==='jual')openJual(act.id,act.tk);else if(act.k==='pasien')openPasien(act.id,act.tk);else if(act.k==='sit')sitDown(act.i);else if(act.k==='stand')standUp();else if(act.k==='amb')openAmb(act.list);else if(act.k==='back')travel(-1)}
  const dlg=$('#simDlg',wrap);
  function showDlg(html,bind){busy=true;dlg.innerHTML=html;dlg.classList.remove('hide');Snd.play('pop');bind&&bind(dlg)}
  function closeDlg(){dlg.classList.add('hide');dlg.innerHTML='';busy=false}
@@ -1317,6 +1424,7 @@ function simEngine(wrap,training){
   if(pts>0){const cur=(S.simscore||[]).find(x=>x.id===me.id)||{};Store.set('simscore/'+me.id,{name:me.name,pts:(cur.pts||0)+pts,rm:(cur.rm||0)+rm,cases:(cur.cases||0)+1,at:now()}).catch(()=>{})}
   toast(msg,pts>0?'ok':'err');Snd.play(pts>0?'ok':'err');drawMe()}
  let myPts=0,myRm=0;
+ function addScore(pts,rm){if(pts<=0)return;SimNet.score(myToday(),me.id,{name:me.name,pts,rm});myPts+=pts;myRm+=rm;const cur=(S.simscore||[]).find(x=>x.id===me.id)||{};Store.set('simscore/'+me.id,{name:me.name,pts:(cur.pts||0)+pts,rm:(cur.rm||0)+rm,cases:(cur.cases||0)+1,at:now()}).catch(()=>{});drawMe()}
  async function openJual(id,t){if(!(await SimNet.claim(id))){toast(L('Pelanggan ini sudah dilayan staff lain','Pembeli ini sudah dilayani staff lain'),'err');return}
   const cat=L(...(PK_CAT[t.cat]||['Rakyat','Warga']));const free=pukatFree(t.cat,t.item,t.qty);const unit=t.item==='bandage'?150:t.cat==='polis'?450:500;const price=t.qty*unit;
   const steps=[];let score=0,sold=true;
@@ -1329,12 +1437,50 @@ function simEngine(wrap,training){
    $$('[data-o]',d).forEach(b=>b.onclick=()=>{const o=s.o[+b.dataset.o];$$('[data-o]',d).forEach(x=>{x.disabled=true;if(s.o[+x.dataset.o].ok)x.classList.add('mint')});if(!o.ok)b.classList.add('red');if(o.ok)score+=10;Snd.play(o.ok?'star':'err');
     if(o.stop&&o.ok)sold=false;$('#simWhy',d).innerHTML=`<div class="chip ${o.ok?'mint':'butter'}" style="white-space:normal;margin-top:10px">${o.ok?'✓':'✗'} ${esc(s.why)}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="simNext">${L('Seterusnya','Lanjut')} →</button></div>`;
     $('#simNext',d).onclick=()=>{if(!sold||i>=steps.length-1){closeDlg();reward(id,score,sold?price:0,sold?`🧾 ${L('Jualan selesai','Penjualan selesai')} · +${score} ${L('mata','poin')}`:`✋ ${L('Pembeli ditolak ikut SOP','Pembeli ditolak sesuai SOP')} · +${score} ${L('mata','poin')}`);return}i++;render()}})})};render()}
- async function openWad(id,t){if(!(await SimNet.claim(id))){toast(L('Pesakit ini sudah dirawat staff lain','Pasien ini sudah dirawat staff lain'),'err');return}const n=SIM_NEED[t.need];
-  showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">${n.ico}</span><div class="grow"><b>${esc(t.name)}</b><div class="muted" style="font-size:12px">${L('Katil','Ranjang')} ${t.bed+1} · ${L('pesakit wad','pasien bangsal')}</div></div></div>
-  <p class="sim-q">${L('Simptom','Gejala')}: <b>${esc(L(...n.sym))}</b><br>${L('Rawatan apa yang sesuai?','Perawatan apa yang tepat?')}</p><div class="sim-opts">${Object.entries(SIM_NEED).map(([k,v])=>`<button class="btn ghost" data-n="${k}">${v.ico} ${esc(v.lbl)}</button>`).join('')}</div><div id="simWhy"></div>`,d=>{
-   $$('[data-n]',d).forEach(b=>b.onclick=()=>{const ok=b.dataset.n===t.need;$$('[data-n]',d).forEach(x=>{x.disabled=true;if(x.dataset.n===t.need)x.classList.add('mint')});if(!ok)b.classList.add('red');Snd.play(ok?'star':'err');
-    $('#simWhy',d).innerHTML=`<div class="chip ${ok?'mint':'butter'}" style="white-space:normal;margin-top:10px">${ok?`✓ ${L('Betul. Billing','Benar. Billing')} RM${n.rm} ${L('ke pesakit.','ke pasien.')}`:`✗ ${L('Rawatan yang betul','Perawatan yang benar')}: ${esc(n.lbl)}`}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="simNext">${L('Selesai','Selesai')}</button></div>`;
-    $('#simNext',d).onclick=()=>{closeDlg();reward(id,ok?15:3,ok?n.rm:0,ok?`🛏 ${L('Pesakit dirawat','Pasien dirawat')} · +15 ${L('mata','poin')}`:`🛏 ${L('Pesakit dirawat semula oleh doktor lain','Pasien ditangani ulang')} · +3`)}})})}
+ /* ---------- pesakit dalam: 4 minigame ---------- */
+ async function openPasien(id,t){if(!(await SimNet.claim(id))){toast(L('Pesakit ini sedang diuruskan staff lain','Pasien ini sedang ditangani staff lain'),'err');return}
+  const st=t.stage||0;const sick=SIM_SICK[t.sick||0];const head=(ico,sub)=>`<div class="sim-dlg-h"><span style="font-size:30px">${ico}</span><div class="grow"><b>${esc(t.name)}</b><div class="muted" style="font-size:12px">${sub}</div></div><span class="chip">${st+1}/4 · ${L(...SIM_STAGE[st])}</span><button class="iconbtn sm" id="mgX" aria-label="Tutup">✕</button></div>`;
+  const quit=()=>{closeDlg();SimNet.updTask(id,{by:'',byName:''})};
+  const fail=msg=>{$('#mgBody',dlg).innerHTML=`<div class="chip butter" style="white-space:normal;margin-top:10px">✗ ${msg}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn ghost" id="mgRetry">${L('Cuba lagi','Coba lagi')}</button></div>`;Snd.play('err');$('#mgRetry',dlg).onclick=()=>{closeDlg();openPasien(id,{...t,by:me.id})};SimNet.updTask(id,{by:me.id})};
+  const pass=(msg,patch,pts,rm)=>{$('#mgBody',dlg).innerHTML=`<div class="chip mint" style="white-space:normal;margin-top:10px">✓ ${msg}</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="mgOk">${st<3?L('Hantar ke','Kirim ke')+' '+L(...SIM_STAGE[st+1])+' →':L('Selesai','Selesai')}</button></div>`;Snd.play('ok');
+   $('#mgOk',dlg).onclick=async()=>{closeDlg();if(st<3)await SimNet.updTask(id,{...patch,stage:st+1,by:'',byName:'',t:nowS()});else await SimNet.setTask(id,null);addScore(pts,rm);toast(`${['📝','🩺','🛏️','💊'][st]} ${L(...SIM_STAGE[st])} ${L('selesai','selesai')} · +${pts} ${L('mata','poin')}${rm?' · RM'+rm:''}`,'ok')}};
+  if(st===0){/* Registrasi: taip nama & no IC */
+   showDlg(head('📝',L('Pesakit baru di kaunter registrasi','Pasien baru di meja registrasi'))+`<p class="sim-q">${L('Daftar pesakit: taip nama dan no. IC ikut kad.','Daftarkan pasien: ketik nama dan no. IC sesuai kartu.')}</p>
+    <div class="sim-ic"><b>KAD PENGENALAN</b><span>${esc(t.name.toUpperCase())}</span><code>${esc(t.ic)}</code></div>
+    <div id="mgBody"><div class="grid g2" style="margin-top:10px"><input id="mgN" placeholder="${L('Nama','Nama')}" autocomplete="off"><input id="mgI" placeholder="No. IC" autocomplete="off" inputmode="numeric"></div><div class="row" style="justify-content:space-between;margin-top:10px"><span class="chip" id="mgT">⏱ 25s</span><button class="btn red" id="mgGo">${L('Daftar','Daftar')}</button></div></div>`,d=>{
+    $('#mgX',d).onclick=quit;$('#mgN',d).focus();let left=25;const tm=setInterval(()=>{if(!d.isConnected||!$('#mgT',d)){clearInterval(tm);return}left--;$('#mgT',d).textContent=`⏱ ${left}s`;if(left<=0){clearInterval(tm);fail(L('Masa tamat. Pesakit lama menunggu!','Waktu habis. Pasien kelamaan menunggu!'))}},1000);
+    const go=()=>{clearInterval(tm);const n=$('#mgN',d).value.trim().toLowerCase().replace(/\s+/g,' '),ic=$('#mgI',d).value.replace(/\D/g,'');if(n===t.name.toLowerCase()&&ic===t.ic.replace(/\D/g,''))pass(L('Pesakit berjaya didaftar.','Pasien berhasil didaftarkan.'),{},10,0);else fail(L('Nama atau no. IC salah.','Nama atau no. IC salah.'))};
+    $('#mgGo',d).onclick=go;$$('input',d).forEach(i=>i.onkeydown=e=>{if(e.key==='Enter'){e.preventDefault();go()}})});return}
+  if(st===1){/* Diagnose: tekan bila jarum dalam zon hijau, 3 kali */
+   showDlg(head('🩺',L('Pesakit menunggu di bilik diagnose','Pasien menunggu di ruang diagnose'))+`<p class="sim-q">${L('Ukur tekanan darah: tekan bila jarum dalam zon hijau (perlu 2 daripada 3).','Ukur tekanan darah: tekan saat jarum di zona hijau (butuh 2 dari 3).')}</p>
+    <div id="mgBody"><div class="sim-gauge"><i id="mgZone"></i><b id="mgNeedle"></b></div><div class="row" style="justify-content:space-between;margin-top:12px"><span class="chip" id="mgS">🎯 0/3</span><button class="btn red" id="mgTap">${L('Tekan!','Tekan!')}</button></div></div>`,d=>{
+    $('#mgX',d).onclick=()=>{cancelAnimationFrame(raf2);quit()};let hits=0,tries=0,pos=0,dir=1,raf2,spd=.9;const zone=$('#mgZone',d),nd=$('#mgNeedle',d);
+    const newZone=()=>{const zs=.36+Math.random()*.4;zone.style.left=(zs*100)+'%';zone.dataset.a=zs;zone.dataset.b=zs+.16;zone.style.width='16%'};newZone();let lt=performance.now();
+    const loop=tt=>{if(!d.isConnected||!nd.isConnected)return;const dtt=(tt-lt)/1000;lt=tt;pos+=dir*spd*dtt;if(pos>1){pos=1;dir=-1}if(pos<0){pos=0;dir=1}nd.style.left=(pos*100)+'%';raf2=requestAnimationFrame(loop)};raf2=requestAnimationFrame(loop);
+    $('#mgTap',d).onclick=()=>{tries++;const ok=pos>=+zone.dataset.a&&pos<=+zone.dataset.b;if(ok)hits++;Snd.play(ok?'star':'err');$('#mgS',d).textContent=`🎯 ${hits}/${tries}`;spd+=.25;newZone();
+     if(tries>=3){cancelAnimationFrame(raf2);if(hits>=2)pass(`${L('Diagnosis','Diagnosis')}: <b>${sick.ico} ${esc(L(...sick.n))}</b>. ${L('Hantar ke treatment.','Kirim ke treatment.')}`,{diag:sick.k},10,0);else fail(L('Bacaan tidak tepat, ukur semula.','Bacaan tidak tepat, ukur ulang.'))}}});return}
+  if(st===2){/* Treatment: ingat urutan rawatan */
+   const seq=sick.steps;showDlg(head('🛏️',`${sick.ico} ${esc(L(...sick.n))}`)+`<p class="sim-q">${L('Ingat urutan rawatan ini!','Ingat urutan perawatan ini!')}</p><div id="mgBody"><div class="sim-seq" id="mgSeq">${seq.map(x=>`<span>${x}</span>`).join('<i>→</i>')}</div><div class="muted" style="font-size:12px;text-align:center" id="mgHint">${L('Hilang dalam 3 saat…','Hilang dalam 3 detik…')}</div></div>`,d=>{
+    $('#mgX',d).onclick=quit;setTimeout(()=>{const b=$('#mgBody',d);if(!b)return;let k=0;const opts=shuffle([...seq]);
+     b.innerHTML=`<p class="muted" style="margin:0 0 8px">${L('Tekan ikut urutan yang betul:','Tekan sesuai urutan yang benar:')}</p><div class="sim-seq" id="mgDone"></div><div class="sim-opts" style="grid-template-columns:repeat(4,1fr)">${opts.map((x,i)=>`<button class="btn ghost" style="font-size:24px" data-q="${i}">${x}</button>`).join('')}</div>`;
+     $$('[data-q]',b).forEach(btn=>btn.onclick=()=>{const v=opts[+btn.dataset.q];if(v!==seq[k]){fail(L('Urutan salah. Cuba ingat semula.','Urutan salah. Coba ingat lagi.'));return}btn.disabled=true;btn.classList.add('mint');$('#mgDone',b).innerHTML+=`<span>${v}</span>`;k++;Snd.play('star');
+      if(k===seq.length)pass(L('Rawatan selesai. Pesakit ke farmasi untuk ambil ubat.','Perawatan selesai. Pasien ke farmasi ambil obat.'),{},10,0)})},3000)});return}
+  /* Farmasi: pilih ubat ikut diagnosis + billing RM300 */
+  const meds=shuffle([...SIM_MEDS]);let medOk=false;
+  showDlg(head('💊',`${L('Diagnosis','Diagnosis')}: ${sick.ico} ${esc(L(...sick.n))}`)+`<div id="mgBody"><p class="sim-q">${L('Ambil ubat yang betul dari rak:','Ambil obat yang benar dari rak:')}</p><div class="sim-opts" style="grid-template-columns:repeat(3,1fr)">${meds.map((m,i)=>`<button class="btn ghost" data-m="${i}">${esc(m)}</button>`).join('')}</div></div>`,d=>{
+   $('#mgX',d).onclick=quit;$$('[data-m]',d).forEach(b=>b.onclick=()=>{if(meds[+b.dataset.m]!==sick.med){fail(L('Ubat salah! Semak diagnosis semula.','Obat salah! Cek diagnosis lagi.'));return}Snd.play('star');
+    const bo=opts(300,[150,450,500,600],v=>'RM'+v);$('#mgBody',d).innerHTML=`<p class="sim-q">${L('Berapa billing pesakit dalam?','Berapa billing pasien dalam?')}</p><div class="sim-opts">${bo.map((o,i)=>`<button class="btn ghost" data-b="${i}">${o.t}</button>`).join('')}</div>`;
+    $$('[data-b]',d).forEach(x=>x.onclick=()=>{const o=bo[+x.dataset.b];if(!o.ok){fail(L('Billing salah. Pesakit dalam dikenakan RM300 di farmasi.','Billing salah. Pasien dalam dikenai RM300 di farmasi.'));return}pass(L('Ubat diserahkan & billing RM300. Pesakit pulang sihat! 🎉','Obat diserahkan & billing RM300. Pasien pulang sehat! 🎉'),{},15,300)})})})}
+ /* billing kes luar: teka harga ikut kawasan */
+ function openBilling(id,t){busy=true;const reg=SIM_REG[t.reg];const bo=opts(reg[1],SIM_REG.map(r=>r[1]).filter(v=>v!==reg[1]),v=>'RM'+v);
+  showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🧾</span><div class="grow"><b>${esc(t.name)} ${L('sudah sedar!','sudah sadar!')}</b><div class="muted" style="font-size:12px">📍 ${reg[0]}</div></div></div><p class="sim-q">${L('Billing revive untuk kawasan ini?','Billing revive untuk wilayah ini?')}</p><div class="sim-opts">${bo.map((o,i)=>`<button class="btn ghost" data-b="${i}">${o.t}</button>`).join('')}</div><div id="simWhy"></div>`,d=>{
+   $$('[data-b]',d).forEach(b=>b.onclick=()=>{const o=bo[+b.dataset.b];$$('[data-b]',d).forEach(x=>{x.disabled=true;if(bo[+x.dataset.b].ok)x.classList.add('mint')});if(!o.ok)b.classList.add('red');Snd.play(o.ok?'star':'err');
+    $('#simWhy',d).innerHTML=`<div class="chip ${o.ok?'mint':'butter'}" style="white-space:normal;margin-top:10px">${o.ok?'✓':'✗'} ${L('Harga revive','Harga revive')}: City RM500 · Sandy Shore RM600 · Paleto RM700 · Genting RM800</div><div class="row" style="justify-content:flex-end;margin-top:10px"><button class="btn red" id="simNext">${L('Balik ke hospital','Kembali ke rumah sakit')} 🚑</button></div>`;
+    $('#simNext',d).onclick=()=>{closeDlg();reward(id,o.ok?25:15,o.ok?reg[1]:0,o.ok?`💓 ${L('Revive & billing betul','Revive & billing benar')} · +25 · RM${reg[1]}`:`💓 ${L('Pesakit selamat, tapi billing salah','Pasien selamat, tapi billing salah')} · +15`);setTimeout(()=>alive&&travel(-1),300)}})})}
+ /* duduk */
+ function sitDown(i){const c=SIM_CHAIRS[i];P.sit=i;P.target=null;P.x=c[0];P.z=c[1];P.ry=c[2];setSit(myG,true);SimNet.move(st());Snd.play('pop')}
+ function standUp(){if(P.sit<0)return;const c=SIM_CHAIRS[P.sit];P.sit=-1;setSit(myG,false);P.x=c[0]-Math.sin(c[2])*.95;P.z=c[1]-Math.cos(c[2])*.95;SimNet.move(st())}
+ function jump(){if(busy)return;if(P.sit>=0){standUp();return}if(P.y<=simGround(P.x,P.z)+.01){P.vy=6.2;Snd.play('star')}}
  function openAmb(list){showDlg(`<div class="sim-dlg-h"><span style="font-size:30px">🚑</span><div class="grow"><b>${L('Panggilan kecemasan','Panggilan darurat')}</b><div class="muted" style="font-size:12px">${L('Pilih kes untuk diambil','Pilih kasus yang diambil')}</div></div><button class="iconbtn sm" id="simX">✕</button></div>
   <div class="list">${list.map(([id,t])=>`<div class="li"><div class="grow"><b>📍 ${SIM_REG[t.reg][0]}</b><div class="muted" style="font-size:12px">${esc(t.name)} ${L('pengsan','pingsan')} · revive RM${SIM_REG[t.reg][1]}${t.by===me.id?' · '+L('kes anda','kasus kamu'):''}</div></div><button class="btn sm red" data-go="${id}">${L('Gerak','Berangkat')}</button></div>`).join('')}</div>`,d=>{
   $('#simX',d).onclick=closeDlg;$$('[data-go]',d).forEach(b=>b.onclick=async()=>{const id=b.dataset.go;if(!(await SimNet.claim(id))){toast(L('Kes ini sudah diambil staff lain','Kasus ini sudah diambil staff lain'),'err');closeDlg();return}closeDlg();travel(tasks[id].reg)})})}
@@ -1344,12 +1490,15 @@ function simEngine(wrap,training){
  /* HUD */
  function drawMe(){const e=$('#simMe',wrap);if(e)e.innerHTML=`<div class="sim-pill">⭐ ${myPts} ${L('mata','poin')} · RM${myRm.toLocaleString('en-US')}</div>`}drawMe();
  let hudKey='';function drawHud(){const n=shiftN();const tl=Object.values(tasks);const key=n+'|'+JSON.stringify(tl.map(t=>[t.type,t.by,t.reg,t.qty,t.bed]))+online().map(x=>x[0]).join();if(key===hudKey)return;hudKey=key;
-  $('#simShift',wrap).innerHTML=`<div class="sim-pill ${n>=4?'mint':''}">👥 Shift: <b>${n}</b> ${L('orang','orang')}${SimNet.mode==='off'?(training?' · '+L('latihan','latihan'):' · offline'):''}</div><div class="sim-sub">${n>=4?'🏥 '+L('Shift penuh: kes luar, jualan & pesakit wad','Shift penuh: kasus luar, penjualan & pasien bangsal'):`🚑 ${L('Kes luar + jualan farmasi','Kasus luar + penjualan farmasi')} · ${4-n} ${L('lagi untuk buka wad','lagi untuk buka bangsal')}`}</div>
+  $('#simShift',wrap).innerHTML=`<div class="sim-pill ${n>=4?'mint':''}">👥 Shift: <b>${n}</b> ${L('orang','orang')}${SimNet.mode==='off'?(training?' · '+L('latihan','latihan'):' · offline'):''}</div><div class="sim-sub">${n>=4?'🏥 '+L('Shift penuh: kes luar, jualan & pesakit dalam','Shift penuh: kasus luar, penjualan & pasien dalam'):`🚑 ${L('Kes luar + jualan farmasi','Kasus luar + penjualan farmasi')} · ${4-n} ${L('lagi untuk pesakit dalam','lagi untuk pasien dalam')}`}</div>
    <div class="sim-sub">${online().map(([id,p])=>`<span class="sim-dot"></span>${esc(p.name||'')}`).join(' ')}</div>`;
   const nm=k=>tl.filter(t=>t.type===k);
-  $('#simTasks',wrap).innerHTML=`<b>${L('Tugasan','Tugas')}</b>${tl.length?tl.map(t=>`<div class="sim-task ${t.by===me.id?'mine':''}">${t.type==='jual'?`🛒 ${L('Farmasi','Farmasi')}: ${t.qty} ${t.item}`:t.type==='wad'?`${SIM_NEED[t.need].ico} ${L('Wad katil','Bangsal ranjang')} ${t.bed+1}`:`🚑 ${SIM_REG[t.reg][0]}`}<span>${t.by?esc(t.byName||''):L('menunggu','menunggu')}</span></div>`).join(''):`<div class="muted" style="font-size:12px">${L('Tiada tugasan. Tunggu sekejap…','Belum ada tugas. Tunggu sebentar…')}</div>`}`;
-  if(roomL.farmasi)roomL.farmasi.d.innerHTML=`${L('FARMASI · JUALAN','FARMASI · PENJUALAN')}${nm('jual').length?` <i>${nm('jual').length} ${L('pelanggan','pembeli')}</i>`:''}`;
-  if(roomL.wad)roomL.wad.d.innerHTML=`${L('WAD PESAKIT','BANGSAL PASIEN')} ${n>=4?(nm('wad').length?`<i>${nm('wad').length} ${L('pesakit','pasien')}</i>`:''):`<i class="off">🔒 ${L('perlu 4 staff','butuh 4 staff')}</i>`}`;
+  const ps=k=>tl.filter(t=>t.type==='pasien'&&(t.stage||0)===k).length;const lockT=`<i class="off">🔒 ${L('perlu 4 staff','butuh 4 staff')}</i>`;
+  $('#simTasks',wrap).innerHTML=`<b>${L('Tugasan','Tugas')}</b>${tl.length?tl.map(t=>`<div class="sim-task ${t.by===me.id?'mine':''}">${t.type==='jual'?`🛒 ${L('Farmasi','Farmasi')}: ${t.qty} ${t.item}`:t.type==='pasien'?`${['📝','🩺','🛏️','💊'][t.stage||0]} ${esc(t.name)} · ${L(...SIM_STAGE[t.stage||0])}`:`🚑 ${SIM_REG[t.reg][0]}`}<span>${t.by?esc(t.byName||''):L('menunggu','menunggu')}</span></div>`).join(''):`<div class="muted" style="font-size:12px">${L('Tiada tugasan. Tunggu sekejap…','Belum ada tugas. Tunggu sebentar…')}</div>`}`;
+  if(roomL.farmasi)roomL.farmasi.d.innerHTML=`${L('FARMASI','FARMASI')}${nm('jual').length?` <i>🛒 ${nm('jual').length}</i>`:''}${ps(3)?` <i>💊 ${ps(3)}</i>`:''}`;
+  if(roomL.lobi)roomL.lobi.d.innerHTML=`${L('LOBI · REGISTRASI','LOBI · REGISTRASI')} ${n>=4?(ps(0)?`<i>📝 ${ps(0)}</i>`:''):lockT}`;
+  if(roomL.diagnose)roomL.diagnose.d.innerHTML=`${L('BILIK DIAGNOSE','RUANG DIAGNOSE')} ${n>=4?(ps(1)?`<i>🩺 ${ps(1)}</i>`:''):lockT}`;
+  if(roomL.treatment)roomL.treatment.d.innerHTML=`${L('BILIK TREATMENT','RUANG TREATMENT')} ${n>=4?(ps(2)?`<i>🛏️ ${ps(2)}</i>`:''):lockT}`;
   if(roomL.garaj)roomL.garaj.d.innerHTML=`${L('GARAJ AMBULANS','GARASI AMBULANS')}${nm('luar').length?` <i>🚨 ${nm('luar').length} ${L('panggilan','panggilan')}</i>`:''}`}
  /* loop */
  const v3=new THREE.Vector3();
@@ -1361,13 +1510,15 @@ function simEngine(wrap,training){
   let mx=0,mz=0;if(!busy){if(keys.w||keys.arrowup)mz-=1;if(keys.s||keys.arrowdown)mz+=1;if(keys.a||keys.arrowleft)mx-=1;if(keys.d||keys.arrowright)mx+=1;mx+=joy.x;mz+=joy.z}
   if(mx||mz){P.target=null;const c=Math.cos(yaw),s=Math.sin(yaw);const wx=mx*c+mz*s,wz=-mx*s+mz*c;mx=wx;mz=wz}
   else if(P.target&&!busy){const dx=P.target.x-P.x,dz=P.target.z-P.z,dd=Math.hypot(dx,dz);if(dd<.15)P.target=null;else{mx=dx/dd;mz=dz/dd}}
-  const m=Math.hypot(mx,mz);P.moving=m>.05;
-  if(P.moving){const sp=5.2*dt*Math.min(1,m);const nx=P.x+mx/m*sp,nz=P.z+mz/m*sp;const ox=P.x,oz=P.z;
+  if(P.sit>=0&&(Math.abs(mx)+Math.abs(mz)>.1)){standUp()}if(P.sit>=0){mx=0;mz=0}
+  const m=Math.hypot(mx,mz);P.moving=m>.05;const gnd=simGround(P.x,P.z);const air=P.y>gnd+.02||P.vy>0;
+  if(P.moving){const sp=5.2*(air?1.45:1)*dt*Math.min(1,m);const nx=P.x+mx/m*sp,nz=P.z+mz/m*sp;const ox=P.x,oz=P.z;
    if(!simCollide(nx,P.z,.32,obs))P.x=nx;if(!simCollide(P.x,nz,.32,obs))P.z=nz;
    if(P.target&&Math.hypot(P.x-ox,P.z-oz)<sp*.2){P.stuck+=dt;if(P.stuck>.4)P.target=null}
    let tr=Math.atan2(mx,mz),dr=tr-P.ry;dr=Math.atan2(Math.sin(dr),Math.cos(dr));P.ry+=dr*Math.min(1,dt*14)}
-  myG.position.set(P.x,0,P.z);myG.rotation.y=P.ry;animAvatar(myG,P.moving,dt);
-  if(holdKey&&act&&act.hold&&!busy){holdT+=rdt;if(holdT>=act.hold){holdT=0;holdKey=false;const a=act;reward(a.id,20,SIM_REG[a.tk.reg][1],`💓 ${L('Pesakit berjaya di-revive','Pasien berhasil di-revive')} · +20 ${L('mata','poin')} · RM${SIM_REG[a.tk.reg][1]}`);setTimeout(()=>alive&&travel(-1),1400)}}else holdT=Math.max(0,holdT-dt*2);
+  {const g2=simGround(P.x,P.z);if(P.vy||P.y>g2){P.vy-=20*dt;P.y+=P.vy*dt;if(P.y<=g2){P.y=g2;if(P.vy<-2)Snd.play('nav');P.vy=0}}else P.y=g2;if(P.vy&&sendT>.1){sendT=0;SimNet.move(st())}}
+  myG.position.set(P.x,P.y+(P.sit>=0?-.17:0),P.z);myG.rotation.y=P.ry;if(P.sit<0)animAvatar(myG,P.moving&&!air,dt);if(air&&P.sit<0){myG.userData.legL.rotation.x=.5;myG.userData.legR.rotation.x=-.3;myG.userData.armL.rotation.x=-2.4;myG.userData.armR.rotation.x=-2.4}else if(P.sit<0&&!P.moving){myG.userData.armL.rotation.x*=.8;myG.userData.armR.rotation.x*=.8}
+  if(holdKey&&act&&act.hold&&!busy){holdT+=rdt;if(holdT>=act.hold){holdT=0;holdKey=false;const a=act;Snd.play('ok');openBilling(a.id,a.tk)}}else holdT=Math.max(0,holdT-dt*2);
   /* bot */
   for(const b of bots){if(b.wait>0){b.wait-=dt}else{const dx=b.tx-b.x,dz=b.tz-b.z,dd=Math.hypot(dx,dz);if(dd<.3){b.wait=1+Math.random()*3;const r=SIM_ROOMS[Math.floor(Math.random()*7)];b.tx=r.x0+1.5+Math.random()*(r.x1-r.x0-3);b.tz=r.z0+1.5+Math.random()*(r.z1-r.z0-3)}else{const sp=3*dt;const nx=b.x+dx/dd*sp,nz=b.z+dz/dd*sp;let ok=false;if(!simCollide(nx,b.z,.3,obs)){b.x=nx;ok=true}if(!simCollide(b.x,nz,.3,obs)){b.z=nz;ok=true}if(!ok)b.wait=.5,b.tx=b.x,b.tz=b.z;b.ry=Math.atan2(dx,dz)}}
    b.st=(b.st||0)+dt;if(b.st>.25){b.st=0;SimNet.setBot(b.id,{name:b.name,role:'BOT',av:b.av,x:b.x,z:b.z,ry:b.ry||0,m:b.wait>0?0:1})}}
@@ -1377,6 +1528,7 @@ function simEngine(wrap,training){
   syncNpcs();syncRemotes(dt);
   /* ambulans lampu */
   const bl=Math.sin(t/120)>0;[world.amb,...world.scenes].forEach(a=>{a.userData.l1.material=smat(bl?'#FF3B3B':'#7A2020');a.userData.l2.material=smat(bl?'#2A3D7A':'#3B7BFF')});
+  world.garden.upd(dt,t/1000);
   for(const n of Object.values(npcs)){if(n.lbl)n.lbl.d.classList.toggle('pulse',Math.sin(t/300)>0)}
   if(pingT>0){pingT-=dt;pingM.material.opacity=pingT/.6;pingM.scale.setScalar(1+(.6-pingT));if(pingT<=0)pingM.visible=false}
   /* kamera */
