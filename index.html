@@ -481,7 +481,9 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.17-11';
+const APP_VERSION = '2026.11.18-1';
+/* banding versi ikut nombor (bukan teks): 2026.11.17-9 < 2026.11.17-12 */
+const verCmp=(a,b)=>{const x=String(a).match(/\d+/g)||[],y=String(b).match(/\d+/g)||[];for(let i=0;i<Math.max(x.length,y.length);i++){const d=(+x[i]||0)-(+y[i]||0);if(d)return d<0?-1:1}return 0};
 /* contoh:
 const FIREBASE_CONFIG = {
   apiKey: "...", authDomain: "...", projectId: "...",
@@ -2499,7 +2501,7 @@ function onData(col){if(!S.loaded||!S.me)return;const d=DEPS[current()];if(!d||d
  Store.watchCol('announce',{orderBy:'at',dir:'desc',limit:50},d=>{S.announce=d;onData('announce')});
  Store.watchCol('chat',{orderBy:'at',dir:'desc',limit:120},d=>{const newer=d.filter(m=>m.at>(S.chat[0]?.at||0)&&m.by!==S.me?.id).length;const had=S.chat.length;S.chat=d;if(had&&newer)Snd.play('msg');if(current()==='chat')renderChatList();});
  Store.watchDoc('kawalan/current',d=>{S.kawalan=d;reconcileDuty(d);onData('kawalan')});
- Store.watchDoc('content/app',d=>{const v=(d&&d.version)||'';if(v<APP_VERSION){Store.set('content/app',{version:APP_VERSION,at:now()}).catch(()=>{})}else if(v>APP_VERSION&&!$('#newVer')){const n=document.createElement('button');n.id='newVer';n.className='newver';n.textContent='🔄 '+L('Versi baru KKB-HUB tersedia. Tekan untuk muat semula','Versi baru KKB-HUB tersedia. Tekan untuk memuat ulang');n.onclick=()=>location.reload();document.body.append(n)}});
+ Store.watchDoc('content/app',d=>{const v=(d&&d.version)||'';const cmp=verCmp(v,APP_VERSION);if(cmp<0){Store.set('content/app',{version:APP_VERSION,at:now()}).catch(()=>{})}else if(cmp>0&&!$('#newVer')){const n=document.createElement('button');n.id='newVer';n.className='newver';n.textContent='🔄 '+L('Versi baru KKB-HUB tersedia. Tekan untuk muat semula','Versi baru KKB-HUB tersedia. Tekan untuk memuat ulang');n.onclick=()=>location.reload();document.body.append(n)}});
  Store.watchDoc('kawalan/duty',d=>{S.duty={map:(d&&d.map)||{},at:(d&&d.at)||0,loaded:true};reconcileDuty(S.kawalan);onData('kawalan')});
  Store.watchDoc('content/uniform',d=>{S.uniform=d;onData('uniform')});
  Store.watchCol('jamkerja',{},d=>{S.jamkerja=d;onData('jamkerja')});Store.watchDoc('content/gaji',d=>{S.gajiCfg=d||{};onData('gaji')});
