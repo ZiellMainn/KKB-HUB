@@ -493,6 +493,7 @@ html{scrollbar-color:#C79A97 transparent}
 .dv-kgrid{display:grid;grid-template-columns:repeat(3,30px);gap:4px}.dv-kgrid kbd{display:grid;place-items:center;height:28px;border-radius:7px;background:#fff;color:#2A1418;font:800 12px/1 inherit;box-shadow:0 3px 0 #C9B6B0;transition:.1s}.dv-kgrid kbd.on{background:#F2C14E;transform:translateY(2px);box-shadow:0 1px 0 #C9B6B0}
 @media (pointer:coarse){.dv-keys{display:none}}
 .jk-tbl.hidemoney .jk-money{display:none}
+.rs-type{display:grid;grid-template-columns:1fr 1fr;gap:10px}.rs-opt{display:grid;gap:2px;text-align:left;border:2px solid var(--line);background:var(--paper);border-radius:16px;padding:12px 14px;cursor:pointer;font:inherit;color:var(--ink);transition:.2s}.rs-opt span{font-size:24px}.rs-opt b{font-size:16px}.rs-opt small{font-size:12px;opacity:.7}.rs-opt:hover{transform:translateY(-2px)}.rs-opt.on{border-color:var(--red);background:#FFF0EE;box-shadow:0 6px 16px -10px rgba(200,56,60,.6)}
 </style>
 </head>
 <body>
@@ -515,7 +516,7 @@ const FIREBASE_CONFIG = {
   messagingSenderId: "277876570358",
   appId: "1:277876570358:web:58bebfa6df35c543c714d7"
 };
-const APP_VERSION = '2026.11.18-6';
+const APP_VERSION = '2026.11.23-1';
 /* banding versi ikut nombor (bukan teks): 2026.11.17-9 < 2026.11.17-12 */
 const verCmp=(a,b)=>{const x=String(a).match(/\d+/g)||[],y=String(b).match(/\d+/g)||[];for(let i=0;i<Math.max(x.length,y.length);i++){const d=(+x[i]||0)-(+y[i]||0);if(d)return d<0?-1:1}return 0};
 /* contoh:
@@ -539,7 +540,7 @@ const uid=()=>Math.random().toString(36).slice(2,10)+Date.now().toString(36).sli
 const TZ='Asia/Kuala_Lumpur';
 function myParts(d=new Date()){const p=Object.fromEntries(new Intl.DateTimeFormat('en-GB',{timeZone:TZ,year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit',hour12:false,weekday:'short'}).formatToParts(d).map(x=>[x.type,x.value]));return {y:+p.year,m:+p.month,d:+p.day,h:(+p.hour)%24,mi:+p.minute,wd:['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].indexOf(p.weekday)}}
 const p2=n=>String(n).padStart(2,'0');
-const myToday=()=>{const q=myParts();return `${q.y}-${p2(q.m)}-${p2(q.d)}`};
+const myToday=(ts)=>{const q=myParts(ts?new Date(ts):new Date());return `${q.y}-${p2(q.m)}-${p2(q.d)}`};
 const myNowLocal=()=>{const q=myParts();return `${q.y}-${p2(q.m)}-${p2(q.d)}T${p2(q.h)}:${p2(q.mi)}`};
 const hm12=(h,mi)=>`${h%12||12}:${p2(mi)} ${h<12?'AM':'PM'}`;
 const fmtDT=t=>t?new Date(t).toLocaleString(LOC(),{timeZone:TZ,day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'}):'-';
@@ -563,6 +564,7 @@ const cdChip=s=>s&&s.cd&&s.active!==false?`<span class="chip butter" title="Cool
 const isLead=r=>r==='KETUA PENGARAH'||r==='TIMBALAN KETUA PENGARAH';
 const isOver=r=>r==='BA BL'||r==='BA'||r==='BL'||r==='PENASIHAT';
 const isBABL=()=>role()==='BA BL'||(isDev()&&!S.viewAs);
+const canResign=()=>isBABL()||isLead(role());
 const roleClass=r=>isLead(r)?'r-lead':isOver(r)?'r-over':(r==='HEAD DOCTOR'||r==='SENIOR DOCTOR')?'r-hd':'';
 const COLORS=['#D3343A','#5E1A20','#23806F','#E9A23B','#8D74E6','#3B7DD8','#C2577E','#4E8F3A'];
 
@@ -684,13 +686,17 @@ const Store={
    const load=src=>new Promise((res,rej)=>{const s=document.createElement('script');s.src=src;s.onload=res;s.onerror=rej;document.head.append(s)});
    await load('https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js');await load('https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js');
    firebase.initializeApp(FIREBASE_CONFIG);this.fs=firebase.firestore();this.mode='firebase';
-   const snap=await this.fs.collection('staff').limit(1).get();if(snap.empty)await this.seedFirebase();
-   return}catch(e){console.error('Firebase gagal',e);toast('Firebase gagal disambung, guna mod demo','err')}}
+   let snap=null,err=null;for(let i=0;i<4&&!snap;i++){try{snap=await this.fs.collection('staff').limit(1).get({source:'server'})}catch(e2){err=e2;await new Promise(r=>setTimeout(r,1200*(i+1)))}}
+   if(!snap)throw err||new Error('offline');
+   if(snap.empty)await this.seedFirebase();
+   return}catch(e){console.error('Firebase gagal',e);this.offline(e);return new Promise(()=>{})}}
   this.data=LS.get(DEMO_KEY,null)||demoSeed();this.save();
  },
  save(){LS.set(DEMO_KEY,this.data)},
+ /* versi awam (Firebase): jangan tukar ke mod demo, nanti perubahan tersimpan di peranti sahaja lalu "hilang" */
+ offline(e){const msg=String((e&&e.code)||(e&&e.message)||'').replace(/[<>&]/g,'');document.body.innerHTML=`<div style="min-height:100vh;display:grid;place-items:center;padding:24px;font-family:system-ui,sans-serif;background:#FBF4EE;color:#2A1418"><div style="max-width:420px;text-align:center;background:#fff;border-radius:24px;padding:28px;box-shadow:0 10px 30px rgba(91,31,38,.15)"><div style="font-size:46px">📡</div><h2 style="margin:8px 0">Tidak dapat sambung ke server KKB</h2><p style="color:#7a6a66;line-height:1.5">Semak internet anda, kemudian cuba lagi. Web tidak dibuka dalam mod demo supaya perubahan anda tidak hilang.</p><p style="font-size:12px;color:#a09090">${msg}</p><button onclick="location.reload()" style="border:0;background:#C8383C;color:#fff;font-weight:800;padding:12px 22px;border-radius:999px;font-size:15px;cursor:pointer">🔄 Cuba lagi</button></div></div>`},
  _emit(){for(const s of this.subs)s.run()},
- async seedFirebase(){const seed=firstSeed();const b=this.fs.batch();for(const [k,v] of Object.entries(seed))b.set(this.fs.doc(k),v);await b.commit()},
+ async seedFirebase(){const seed=firstSeed();const b=this.fs.batch();let n=0;for(const [k,v] of Object.entries(seed)){const ex=await this.fs.doc(k).get({source:'server'});if(!ex.exists){b.set(this.fs.doc(k),v);n++}}if(n)await b.commit()},
  watchCol(col,opts,cb){
   if(this.mode==='firebase'){let q=this.fs.collection(col);if(opts.orderBy)q=q.orderBy(opts.orderBy,opts.dir||'asc');if(opts.limit)q=q.limit(opts.limit);
    return q.onSnapshot(s=>cb(s.docs.map(d=>({id:d.id,...d.data()}))),e=>{console.warn(col,e);toast('Data '+col+' tidak dapat dibaca ('+(e.code||'')+')','err')})}
@@ -827,7 +833,7 @@ const PAGES=[
  {id:'kawalan',label:'Bilik Kawalan',ico:'📡',g:'KKB Center'},{id:'pukat',label:'Pembelian Pukat',ico:'🧾',g:'KKB Center'},{id:'storage',label:'Storage',ico:'📦',g:'KKB Center'},
  {id:'sop',label:'SOP Kerja',ico:'📘',g:'Info KKB'},{id:'uniform',label:'Uniform Code',ico:'🥼',g:'Info KKB'},{id:'kos',label:'Kos Rawatan',ico:'💊',g:'Info KKB'},
  {id:'chart',label:'Chart Organisasi',ico:'🧬',g:'Info KKB'},{id:'akkb',label:'Command /akkb',ico:'📣',g:'Info KKB'},
- {id:'cuti',label:'Apply Cuti',ico:'🌴',g:'Saya'},{id:'resign',label:'Resign',ico:'📤',g:'Saya'},{id:'iban',label:'IBAN Staff',ico:'💳',g:'Saya'},{id:'profil',label:'Profil Saya',ico:'🙂',g:'Saya'},
+ {id:'cuti',label:'Apply Cuti',ico:'🌴',g:'Saya'},{id:'resign',label:'Resign / CD',ico:'📤',g:'Saya'},{id:'iban',label:'IBAN Staff',ico:'💳',g:'Saya'},{id:'profil',label:'Profil Saya',ico:'🙂',g:'Saya'},
  {id:'rekap',label:'Rekap Jam Kerja',ico:'⏱️',g:'Pengurusan'},{id:'bimbingan',label:'Bimbingan Staff',ico:'🩺',g:'Pengurusan'},{id:'diskusi',label:'Diskusi Pimpinan',ico:'🗣️',g:'Pengurusan'},{id:'evaluasi',label:'Evaluasi Staff',ico:'⭐',g:'Pengurusan'},
  {id:'permohonan',label:'Permohonan',ico:'📥',g:'Pengurusan'},{id:'staff',label:'Urus Staff',ico:'👥',g:'Pengurusan'},{id:'pantau',label:'Pantau KP & TKP',ico:'🔭',g:'Pengurusan'},
  {id:'dev',label:'Panel Developer',ico:'🛠️',g:'Developer'},
@@ -2018,6 +2024,9 @@ const PANGKAT={'DOCTOR':'DOKTOR','SENIOR DOCTOR':'SENIOR DOKTOR','HEAD DOCTOR':'
 const roleMention=k=>{const id=(S.webhooks||{})['role_'+k];return id&&/^\d+$/.test(id)?`<@&${id}>`:''};
 function resignLetter(name,role,date,reason){const pk=PANGKAT[role]||role;const tc=pk.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());const ments=['babl','kp','tp'].map(roleMention).filter(Boolean).join(' ');
  return `SURAT PELETAKAN JAWATAN\n\nNama: ${name}\nPangkat: ${pk}\nTarikh: ${ddmmyyyy(date)}\n\nAssalamualaikum dan salam sejahtera,\n\nDengan ini saya ingin memaklumkan peletakan jawatan sebagai ${tc} di KKB berkuat kuasa pada ${dLong(date)}.\n\nKeputusan ini dibuat atas sebab ${reason.replace(/[.\s]+$/,'')}. Terima kasih kepada seluruh warga KKB, khususnya Madam Azee, Miss Eve dan Puan Kyra, atas segala tunjuk ajar, sokongan dan kenangan sepanjang saya berkhidmat di sini.\n\nSaya memohon maaf atas segala salah dan silap sepanjang tempoh perkhidmatan saya.\n\nSemoga KKB terus maju jaya dan cemerlang.\n\nSekian, terima kasih.\n\nYang benar,\n${name}${ments?'\n'+ments:''}`}
+function cdLetter(name,role,date,back,reason){const pk=PANGKAT[role]||role;const tc=pk.toLowerCase().replace(/\b\w/g,c=>c.toUpperCase());const ments=['babl','kp','tp'].map(roleMention).filter(Boolean).join(' ');
+ const bk=back?dLong(back):'';
+ return `SURAT PERMOHONAN CD (REHAT SEMENTARA)\n\nNama: ${name}\nPangkat: ${pk}\nMula CD: ${ddmmyyyy(date)}\nAnggaran kembali: ${back?ddmmyyyy(back):'Belum pasti'}\n\nAssalamualaikum dan salam sejahtera,\n\nDengan ini saya ingin memohon CD (rehat sementara) daripada tugas sebagai ${tc} di KKB bermula pada ${dLong(date)}. ${back?`Saya menjangkakan untuk kembali bertugas pada ${bk}.`:'Tarikh saya kembali bertugas buat masa ini belum dapat dipastikan.'}\n\nPermohonan ini dibuat atas sebab ${reason.replace(/[.\s]+$/,'')}. Saya masih ingin kekal sebagai sebahagian daripada keluarga KKB dan akan memaklumkan kepada pihak atasan sebaik sahaja saya bersedia untuk kembali bertugas.\n\nTerima kasih kepada Madam Azee, Miss Eve dan Puan Kyra atas pertimbangan dan sokongan yang diberikan.\n\nSekian, terima kasih.\n\nYang benar,\n${name}${ments?'\n'+ments:''}`}
 function kawalanText(d){const t=new Date();const tt=`${dmy2(t)} ${hm(t)}`;
  const pl=[...(d.pairing||[])];while(pl.length<3)pl.push('');const bl=[...(d.backup||[]).filter(Boolean)];while(bl.length<2)bl.push('');
  return cb(`BILIK KAWALAN : ${d.kawalan}\n\nPAIRING\n${pl.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nBACKUP\n${bl.map((x,i)=>`${i+1}. ${x}`).join('\n')}\n\nREGISTER - ${d.register}\nDIAGNOSIS - ${d.diagnosis}\nTREATMENT - ${d.treatment}\nPHARMACY - ${d.pharmacy}\n\nTARIKH DAN MASA UPDATE : ${tt}`)+'\n@everyone'}
@@ -2453,9 +2462,10 @@ const stL=st=>({pending:L('menunggu','menunggu'),diluluskan:L('diluluskan','dise
 function requestCard(c,kind,reviewer){
  const s=staffById(c.staffId);const st=c.status||'pending';const cls=st==='diluluskan'?'mint':st==='ditolak'?'red':'butter';
  return `<div class="li" style="align-items:flex-start">${av(s,'sm')}<div class="grow"><div class="row"><b>${esc(nameOf(c.staffId))}</b>${s?roleChip(s.role,true):''}<span class="chip ${cls}">${esc(stL(st))}</span></div>
- <div style="font-size:13px;margin-top:4px">${kind==='cuti'?`📅 ${fmtD(c.from)} → ${fmtD(c.to)}`:`📅 ${L('Efektif','Berlaku')} ${fmtD(c.date)}`}</div><div class="muted" style="font-size:13px">${L('Sebab','Alasan')}: ${esc(c.reason)}</div>
+ ${kind==='resign'?`<div style="margin-top:4px"><span class="chip ${c.type==='cd'?'butter':'red'}">${c.type==='cd'?'⏸️ CD · '+L('rehat sementara','rehat sementara'):'📤 Resign · '+L('berhenti','berhenti')}</span></div>`:''}
+ <div style="font-size:13px;margin-top:4px">${kind==='cuti'?`📅 ${fmtD(c.from)} → ${fmtD(c.to)}`:c.type==='cd'?`📅 ${L('Mula','Mulai')} ${fmtD(c.date)} · 🔙 ${c.back?L('Anggaran kembali','Perkiraan kembali')+' '+fmtD(c.back):L('Kembali: belum pasti','Kembali: belum pasti')}${c.returnedAt?` · ✅ ${L('Sudah kembali','Sudah kembali')} ${fmtD(myToday(c.returnedAt))}`:''}`:`📅 ${L('Efektif','Berlaku')} ${fmtD(c.date)}`}</div><div class="muted" style="font-size:13px">${L('Sebab','Alasan')}: ${esc(c.reason)}</div>
  ${c.reviewedBy?`<div class="muted" style="font-size:12px;margin-top:4px">${esc(stL(st))} ${L('oleh','oleh')} ${esc(nameOf(c.reviewedBy))}${c.note?` · "${esc(c.note)}"`:''}</div>`:''}
- ${(()=>{const mgr=kind==='cuti'?can('permohonan'):isBABL();const own=c.staffId===S.me.id&&st==='pending';const btns=[];
+ ${(()=>{const mgr=kind==='cuti'?can('permohonan'):canResign();const own=c.staffId===S.me.id&&st==='pending';const btns=[];
   if(reviewer&&st==='pending')btns.push(`<button class="btn sm mint" data-ok="${kind}:${esc(c.id)}">Luluskan</button><button class="btn sm red" data-no="${kind}:${esc(c.id)}">Tolak</button>`);
   if(mgr&&st!=='pending')btns.push(`<button class="btn sm ghost" data-rreset="${kind}:${esc(c.id)}">↺ ${L('Set semula','Batalkan keputusan')}</button>`);
   if(mgr||own)btns.push(`<button class="btn sm ghost" data-rdel="${kind}:${esc(c.id)}">🗑 ${own&&!mgr?L('Batal permohonan','Batalkan permohonan'):L('Padam','Hapus')}</button>`);
@@ -2464,8 +2474,9 @@ function bindReview(el){
  $$('[data-rdel]',el).forEach(b=>b.onclick=()=>{const [kind,id]=b.dataset.rdel.split(':');delRecord({col:kind,id,whKey:kind,title:kind==='cuti'?L('Padam permohonan cuti ini?','Hapus permohonan cuti ini?'):L('Padam permohonan resign ini?','Hapus permohonan resign ini?'),desc:L('Gunakan ini jika permohonan tersalah isi atau tersalah lulus. Rekod akan hilang sepenuhnya.','Pakai ini kalau permohonan salah isi atau salah disetujui. Catatan akan hilang sepenuhnya.')})});
  $$('[data-rreset]',el).forEach(b=>b.onclick=()=>{const [kind,id]=b.dataset.rreset.split(':');const c=S[kind].find(x=>x.id===id);if(!c)return;
   modal(`<h3>${L('Set semula keputusan?','Batalkan keputusan?')}</h3><p class="muted" style="margin:8px 0 14px">${L('Status akan kembali ke "menunggu" supaya boleh diluluskan atau ditolak semula.','Status kembali ke "menunggu" supaya bisa disetujui atau ditolak ulang.')}</p><div class="row"><button class="btn red" id="yes">${L('Set semula','Batalkan keputusan')}</button><button class="btn ghost" data-close>${L('Batal','Batal')}</button></div>`,(m,close)=>{$('#yes',m).onclick=async()=>{
-   if(await safe(Store.update(kind+'/'+id,{status:'pending',reviewedBy:'',note:'',reviewedAt:0,decisionMsg:''}),L('Keputusan dibatalkan','Keputusan dibatalkan'))){logAct('set semula '+kind,nameOf(c.staffId));if(c.decisionMsg)delDiscord(kind,c.decisionMsg)}close()}})});
- const act=(v,st)=>{const [kind,id]=v.split(':');modal(`<h3>${st==='diluluskan'?'Luluskan':'Tolak'} permohonan</h3><form class="stack" style="margin-top:12px"><div class="field"><label for="rn">Catatan (pilihan)</label><textarea id="rn"></textarea></div><div class="row"><button class="btn ${st==='diluluskan'?'mint':'red'}">Sahkan</button><button type="button" class="btn ghost" data-close>Batal</button></div></form>`,(m,close)=>{$('form',m).onsubmit=async e=>{e.preventDefault();const c=S[kind].find(x=>x.id===id);if(await safe(Store.update(kind+'/'+id,{status:st,reviewedBy:S.me.id,note:$('#rn',m).value.trim(),reviewedAt:now()}),L('Permohonan ','Permohonan ')+stL(st))){logAct(st+' '+kind,nameOf(c?.staffId));const nt=$('#rn',m).value.trim();trackSend(kind,id,'decisionMsg',sendDiscord(kind,`${st==='diluluskan'?'✅':'❌'} ${kind==='cuti'?'Cuti':'Resign'} **${nameOf(c?.staffId)}**${kind==='cuti'&&c?` (${dm(c.from)}${c.to!==c.from?' - '+dm(c.to):''})`:''} ${st.toUpperCase()} oleh ${S.me.name}${nt?`\nCatatan: ${nt}`:''}`))}close()}})};
+   if(await safe(Store.update(kind+'/'+id,{status:'pending',reviewedBy:'',note:'',reviewedAt:0,decisionMsg:''}),L('Keputusan dibatalkan','Keputusan dibatalkan'))){logAct('set semula '+kind,nameOf(c.staffId));{const sf=staffById(c.staffId);if(kind==='resign'&&c.type==='cd'&&sf&&sf.cd&&sf.cdReq===id)Store.update('staff/'+sf.id,{cd:false,cdReq:''}).catch(()=>{})}if(c.decisionMsg)delDiscord(kind,c.decisionMsg)}close()}})});
+ const act=(v,st)=>{const [kind,id]=v.split(':');modal(`<h3>${st==='diluluskan'?'Luluskan':'Tolak'} permohonan</h3><form class="stack" style="margin-top:12px"><div class="field"><label for="rn">Catatan (pilihan)</label><textarea id="rn"></textarea></div><div class="row"><button class="btn ${st==='diluluskan'?'mint':'red'}">Sahkan</button><button type="button" class="btn ghost" data-close>Batal</button></div></form>`,(m,close)=>{$('form',m).onsubmit=async e=>{e.preventDefault();const c=S[kind].find(x=>x.id===id);if(await safe(Store.update(kind+'/'+id,{status:st,reviewedBy:S.me.id,note:$('#rn',m).value.trim(),reviewedAt:now()}),L('Permohonan ','Permohonan ')+stL(st))){logAct(st+' '+kind,nameOf(c?.staffId));const nt=$('#rn',m).value.trim();if(kind==='resign'&&c&&c.type==='cd'&&st==='diluluskan'){const sf=staffById(c.staffId);if(sf)await Store.update('staff/'+sf.id,{cd:true,cdSince:now(),cdReq:id}).catch(()=>{})}
+  trackSend(kind,id,'decisionMsg',sendDiscord(kind,`${st==='diluluskan'?'✅':'❌'} ${kind==='cuti'?'Cuti':c&&c.type==='cd'?'CD (rehat sementara)':'Resign'} **${nameOf(c?.staffId)}**${kind==='cuti'&&c?` (${dm(c.from)}${c.to!==c.from?' - '+dm(c.to):''})`:''} ${st.toUpperCase()} oleh ${S.me.name}${nt?`\nCatatan: ${nt}`:''}`))}close()}})};
  $$('[data-ok]',el).forEach(b=>b.onclick=()=>act(b.dataset.ok,'diluluskan'));$$('[data-no]',el).forEach(b=>b.onclick=()=>act(b.dataset.no,'ditolak'))}
 
 R.cuti=el=>{
@@ -2480,18 +2491,34 @@ R.cuti=el=>{
   const cid=uid();if(await safe(Store.set('cuti/'+cid,{staffId:S.me.id,from,to,reason:why,status:'pending',at:now()}),'Permohonan cuti dihantar')){logAct('apply cuti',`${from} → ${to}`);trackSend('cuti',cid,'discordMsg',sendDiscord('cuti',cb(` Nama   : ${S.me.name}\nTarikh : ${dm(from)}${to!==from?' - '+dm(to):''}\nSebab  : ${why}`)));rerender(true)}};
 };
 R.resign=el=>{
- const mine=S.resign.filter(c=>c.staffId===S.me.id).sort((a,b)=>b.at-a.at);
- el.innerHTML=`<div class="page-h"><div class="grow"><h2>Borang Resign ${whChip('resign')}</h2><p class="muted">Sedih tengok kamu pergi 🥲 Borang ini dihantar kepada BA BL yang mengurus resign.</p></div></div>
- <div class="grid g2" style="align-items:start"><form class="card stack" id="rsf"><div class="field"><label>Nama</label><input type="text" value="${esc(S.me.name)}" disabled></div>
- <div class="field"><label for="rs1">Tarikh efektif</label><input type="date" id="rs1" value="${myToday()}" required></div>
- <div class="field"><label for="rs2">Sebab meletak jawatan</label><textarea id="rs2" required></textarea></div>
- <label class="row" style="font-size:13px;align-items:flex-start"><input type="checkbox" id="rs3" required style="margin-top:3px"> <span>Saya faham atasan KKB berhak check bonet kereta dan storage saya, dan saya akan pulangkan semua barangan kerajaan.</span></label>
+ const mine=S.resign.filter(c=>c.staffId===S.me.id).sort((a,b)=>b.at-a.at);const ty=S.ui.rsType||'resign';const isCd=ty==='cd';const meCd=!!S.me.cd;
+ el.innerHTML=`<div class="page-h"><div class="grow"><h2>${L('Resign / CD','Resign / CD')} ${whChip('resign')}</h2><p class="muted">${L('Borang ini dihantar kepada BA BL, KP dan TKP yang mengurus resign dan CD.','Formulir ini dikirim ke BA BL, KP dan TKP yang mengurus resign dan CD.')}</p></div></div>
+ ${meCd?`<div class="card butter" style="margin-bottom:14px"><div class="card-h"><span style="font-size:30px">⏸️</span><div class="grow"><h3>${L('Kamu sedang CD','Kamu sedang CD')}</h3><div class="muted" style="font-size:13px">${S.me.cdSince?L('Sejak','Sejak')+' '+esc(fmtDT(S.me.cdSince)):''}</div></div><button class="btn red" id="cdBack">🔙 ${L('Saya dah balik bertugas','Saya sudah kembali bertugas')}</button></div></div>`:''}
+ <div class="grid g2" style="align-items:start"><form class="card stack" id="rsf">
+ <div class="rs-type" role="radiogroup" aria-label="${L('Jenis permohonan','Jenis permohonan')}">
+  <button type="button" role="radio" aria-checked="${!isCd}" class="rs-opt ${!isCd?'on':''}" data-rst="resign"><span>📤</span><b>Resign</b><small>${L('Berhenti terus dari KKB','Berhenti total dari KKB')}</small></button>
+  <button type="button" role="radio" aria-checked="${isCd}" class="rs-opt ${isCd?'on':''}" data-rst="cd"><span>⏸️</span><b>CD</b><small>${L('Rehat & letak jawatan sementara, balik bila sedia','Rehat & lepas jabatan sementara, kembali saat siap')}</small></button></div>
+ <div class="field"><label>Nama</label><input type="text" value="${esc(S.me.name)}" disabled></div>
+ <div class="grid g2"><div class="field"><label for="rs1">${isCd?L('Tarikh mula CD','Tanggal mulai CD'):L('Tarikh efektif','Tanggal efektif')}</label><input type="date" id="rs1" value="${myToday()}" required></div>
+ ${isCd?`<div class="field"><label for="rsB">${L('Anggaran kembali','Perkiraan kembali')}</label><select id="rsB"><option value="">${L('Belum pasti','Belum pasti')}</option><option value="date">${L('Pilih tarikh…','Pilih tanggal…')}</option></select><input type="date" id="rsBd" class="hide" style="margin-top:6px"></div>`:''}</div>
+ <div class="field"><label for="rs2">${isCd?L('Sebab CD','Alasan CD'):L('Sebab meletak jawatan','Alasan mengundurkan diri')}</label><textarea id="rs2" required placeholder="${isCd?L('cth: sibuk hal OOC, nak rehat sekejap…','cth: sibuk urusan OOC, mau istirahat sebentar…'):''}"></textarea></div>
+ ${isCd?'':`<label class="row" style="font-size:13px;align-items:flex-start"><input type="checkbox" id="rs3" required style="margin-top:3px"> <span>Saya faham atasan KKB berhak check bonet kereta dan storage saya, dan saya akan pulangkan semua barangan kerajaan.</span></label>`}
  <div class="field"><label>${L('Pratonton surat (dihantar ke #resign)','Pratinjau surat (dikirim ke #resign)')}</label><pre id="rsPrev" data-notr style="white-space:pre-wrap;background:var(--cream);border-radius:14px;padding:14px;font:13px/1.55 var(--body);margin:0;max-height:300px;overflow:auto"></pre></div>
- <button class="btn red">Hantar resign</button></form>
- <div class="card"><h3 style="margin-bottom:12px">Status</h3>${mine.length?`<div class="list">${mine.map(c=>requestCard(c,'resign')).join('')}</div>`:'<div class="empty">Tiada permohonan resign</div>'}</div></div>`;
+ <button class="btn red">${isCd?'⏸️ '+L('Hantar permohonan CD','Kirim permohonan CD'):L('Hantar resign','Kirim resign')}</button></form>
+ <div class="card"><h3 style="margin-bottom:12px">Status</h3>${mine.length?`<div class="list">${mine.map(c=>requestCard(c,'resign')).join('')}</div>`:`<div class="empty">${L('Tiada permohonan resign / CD','Belum ada permohonan resign / CD')}</div>`}</div></div>`;
  bindReview(el);
- const prev=()=>{$('#rsPrev').textContent=resignLetter(S.me.name,S.me.role,$('#rs1').value,$('#rs2').value.trim()||'...')};$('#rs1').oninput=prev;$('#rs2').oninput=prev;prev();
- $('#rsf').onsubmit=async e=>{e.preventDefault();const dt=$('#rs1').value,rs=$('#rs2').value.trim();const rid=uid();if(await safe(Store.set('resign/'+rid,{staffId:S.me.id,date:dt,reason:rs,status:'pending',at:now()}),'Borang resign dihantar')){logAct('hantar resign');trackSend('resign',rid,'discordMsg',sendDiscord('resign',resignLetter(S.me.name,S.me.role,dt,rs)));rerender(true)}};
+ $$('[data-rst]',el).forEach(b=>b.onclick=()=>{if(S.ui.rsType===b.dataset.rst)return;S.ui.rsType=b.dataset.rst;Snd.play('nav');rerender(true)});
+ const back=()=>isCd&&$('#rsB').value==='date'?($('#rsBd').value||''):'';
+ const prev=()=>{const r=$('#rs2').value.trim()||'...';$('#rsPrev').textContent=isCd?cdLetter(S.me.name,S.me.role,$('#rs1').value,back(),r):resignLetter(S.me.name,S.me.role,$('#rs1').value,r)};
+ $('#rs1').oninput=prev;$('#rs2').oninput=prev;
+ if(isCd){$('#rsB').onchange=()=>{const on=$('#rsB').value==='date';$('#rsBd').classList.toggle('hide',!on);$('#rsBd').required=on;if(on&&!$('#rsBd').value)$('#rsBd').value=$('#rs1').value;prev()};$('#rsBd').oninput=prev}
+ prev();
+ $('#rsf').onsubmit=async e=>{e.preventDefault();const dt=$('#rs1').value,rs=$('#rs2').value.trim(),bk=back();if(bk&&bk<dt){toast(L('Tarikh kembali sebelum tarikh mula.','Tanggal kembali sebelum tanggal mulai.'),'err');Snd.play('err');return}
+  const rid=uid();const doc={staffId:S.me.id,type:ty,date:dt,reason:rs,status:'pending',at:now()};if(isCd)doc.back=bk;
+  if(await safe(Store.set('resign/'+rid,doc),isCd?L('Permohonan CD dihantar','Permohonan CD dikirim'):'Borang resign dihantar')){logAct(isCd?'hantar permohonan CD':'hantar resign');trackSend('resign',rid,'discordMsg',sendDiscord('resign',isCd?cdLetter(S.me.name,S.me.role,dt,bk,rs):resignLetter(S.me.name,S.me.role,dt,rs)));rerender(true)}};
+ $('#cdBack')&&($('#cdBack').onclick=()=>modal(`<h3>🔙 ${L('Balik bertugas?','Kembali bertugas?')}</h3><p class="muted" style="margin:8px 0 14px">${L('Status CD akan dibuang dan pihak atasan dimaklumkan di #resign.','Status CD akan dihapus dan atasan diberi tahu di #resign.')}</p><div class="row"><button class="btn red" id="yes">${L('Ya, saya dah balik','Ya, saya sudah kembali')}</button><button class="btn ghost" data-close>${L('Batal','Batal')}</button></div>`,(m,close)=>{$('#yes',m).onclick=async()=>{
+  const rq=S.me.cdReq;if(await safe(Store.update('staff/'+S.me.id,{cd:false,cdReq:'',cdBackAt:now()}),L('Selamat kembali! 🎉','Selamat datang kembali! 🎉'))){if(rq&&S.resign.some(x=>x.id===rq))Store.update('resign/'+rq,{returnedAt:now()}).catch(()=>{});logAct('kembali dari CD');
+   sendDiscord('resign',`🔙 **${S.me.name}** ${L('telah kembali bertugas selepas CD','sudah kembali bertugas setelah CD')}${S.me.cdSince?` (${L('CD sejak','CD sejak')} ${ddmmyyyy(myToday(S.me.cdSince))})`:''}. ${L('Selamat kembali!','Selamat datang kembali!')} 🎉`);Snd.play('ok');close();rerender(true)}}}));
 };
 
 R.iban=el=>{
@@ -2586,8 +2613,8 @@ R.evaluasi=el=>{
 
 R.permohonan=el=>{
  const tab=S.ui.perm||'cuti';const list=[...S[tab]].sort((a,b)=>(a.status==='pending'?-1:1)-(b.status==='pending'?-1:1)||b.at-a.at);
- el.innerHTML=`<div class="page-h"><div class="grow"><h2>Permohonan Staff</h2><p class="muted">Permohonan cuti dan resign untuk KP, TKP, BA BL dan Penasihat.</p></div><div class="tabs"><button class="${tab==='cuti'?'on':''}" data-pt="cuti">Cuti (${S.cuti.filter(c=>c.status==='pending').length})</button><button class="${tab==='resign'?'on':''}" data-pt="resign">Resign (${S.resign.filter(c=>c.status==='pending').length})</button></div></div>
- ${tab==='resign'&&!isBABL()?`<div class="card flat" style="margin-bottom:12px"><p class="muted">${L('Resign diurus oleh BA BL. Anda boleh lihat status sahaja.','Resign diurus oleh BA BL. Kamu hanya bisa melihat status.')}</p></div>`:''}<div class="card">${list.length?`<div class="list">${list.map(c=>requestCard(c,tab,tab==='resign'?isBABL():true)).join('')}</div>`:'<div class="empty">Tiada permohonan</div>'}</div>`;
+ el.innerHTML=`<div class="page-h"><div class="grow"><h2>Permohonan Staff</h2><p class="muted">Permohonan cuti, resign dan CD untuk KP, TKP, BA BL dan Penasihat.</p></div><div class="tabs"><button class="${tab==='cuti'?'on':''}" data-pt="cuti">Cuti (${S.cuti.filter(c=>c.status==='pending').length})</button><button class="${tab==='resign'?'on':''}" data-pt="resign">Resign / CD (${S.resign.filter(c=>c.status==='pending').length})</button></div></div>
+ ${tab==='resign'&&!canResign()?`<div class="card flat" style="margin-bottom:12px"><p class="muted">${L('Resign & CD diurus oleh BA BL, KP dan TKP. Anda boleh lihat status sahaja.','Resign & CD diurus oleh BA BL, KP dan TKP. Kamu hanya bisa melihat status.')}</p></div>`:''}<div class="card">${list.length?`<div class="list">${list.map(c=>requestCard(c,tab,tab==='resign'?canResign():true)).join('')}</div>`:'<div class="empty">Tiada permohonan</div>'}</div>`;
  $$('[data-pt]').forEach(b=>b.onclick=()=>{S.ui.perm=b.dataset.pt;Snd.play('nav');rerender(true)});bindReview(el);
 };
 
